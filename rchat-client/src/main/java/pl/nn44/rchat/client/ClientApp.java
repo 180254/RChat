@@ -5,9 +5,9 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
-import pl.nn44.rchat.client.xmlrpc.XmlRpcChatService;
 import pl.nn44.rchat.protocol.ChatService;
 
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -41,7 +41,11 @@ public class ClientApp {
             XmlRpcClient xr = new XmlRpcClient();
             xr.setConfig(config);
 
-            return new XmlRpcChatService(xr);
+            return (ChatService) Proxy.newProxyInstance(
+                    getClass().getClassLoader(),
+                    new Class<?>[]{ChatService.class},
+                    (proxy, method, args) -> xr.execute("ChatService." + method.getName(), args)
+            );
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
