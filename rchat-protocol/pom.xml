@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>rchat</artifactId>
         <groupId>pl.nn44</groupId>
+        <artifactId>rchat</artifactId>
         <version>1.0</version>
     </parent>
 
@@ -13,4 +13,19 @@
     <name>rchat-protocol</name>
 
     <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0-rc1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>15.0</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>
