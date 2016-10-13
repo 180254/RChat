@@ -1,12 +1,20 @@
-package pl.nn44.rchat.server.impl;
+package pl.nn44.rchat.client.xmlrpc;
 
-import pl.nn44.rchat.protocol.*;
+import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import pl.nn44.rchat.protocol.ChannelUser;
+import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.rchat.protocol.Response;
+import pl.nn44.rchat.protocol.WhatsUp;
 
-public class ChatServiceImpl implements ChatService {
+@SuppressWarnings("serial")
+public class XmlRpcChatService implements ChatService {
 
-    private static final long serialVersionUID = -4849634603399107637L;
+    private final XmlRpcClient xr;
 
-    int x = 0;
+    public XmlRpcChatService(XmlRpcClient xr) {
+        this.xr = xr;
+    }
 
     @Override
     public Response login(String username, String password) {
@@ -65,18 +73,16 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public Response message(String channel, String message) {
-        x++;// ensure same instance
-        return new Response<>(Status.OK, "none/" + x);
+        try {
+            return (Response) xr.execute("ChatService.message", new Object[]{channel, message});
+        } catch (XmlRpcException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public Response<WhatsUp[]> whatsUp(int longPoolingTimeoutMs) {
-        try {
-            Thread.sleep(longPoolingTimeoutMs);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        return new Response<>(Status.OK, new WhatsUp[0]);
+        return null;
     }
 }
