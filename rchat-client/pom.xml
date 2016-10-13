@@ -13,4 +13,29 @@
     <name>rchat-client</name>
 
     <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>pl.nn44</groupId>
+            <artifactId>rchat-protocol</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+            <version>4.0.38</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>resin</artifactId>
+            <version>3.0.9</version>
+        </dependency>
+    </dependencies>
 </project>
