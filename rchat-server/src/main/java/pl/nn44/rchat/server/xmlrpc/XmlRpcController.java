@@ -26,6 +26,7 @@ public class XmlRpcController {
         config.setBasicEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
         config.setEnabledForExceptions(true);
         config.setEnabledForExtensions(true);
+        config.setKeepAliveEnabled(true);
 
         server = new XmlRpcServletServer();
         server.setConfig(config);
