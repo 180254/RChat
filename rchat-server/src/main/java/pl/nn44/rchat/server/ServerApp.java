@@ -3,6 +3,7 @@ package pl.nn44.rchat.server;
 import org.apache.xmlrpc.XmlRpcException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
@@ -43,5 +44,10 @@ public class ServerApp {
     @Bean
     public XmlRpcController xmlRpcController() throws XmlRpcException {
         return new XmlRpcController("ChatService", ChatService.class, chatService(), 5);
+    }
+
+    @Bean
+    public ErrorController errorController() throws XmlRpcException {
+        return new PlainErrorController();
     }
 }
