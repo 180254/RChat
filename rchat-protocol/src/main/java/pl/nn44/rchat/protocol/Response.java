@@ -9,22 +9,16 @@ public class Response<T extends Serializable> implements Serializable {
 
     private static final long serialVersionUID = -9109934797251792407L;
 
-    private final Status status;
     private final T payload;
 
-    public Response(Status status) {
-        this.status = status;
+    public Response() {
         this.payload = null;
     }
 
-    public Response(Status status, T payload) {
-        this.status = status;
+    public Response(T payload) {
         this.payload = payload;
     }
 
-    public Status getStatus() {
-        return status;
-    }
 
     public T getPayload() {
         return payload;
@@ -35,19 +29,17 @@ public class Response<T extends Serializable> implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Response<?> response = (Response<?>) o;
-        return status == response.status &&
-                Objects.equal(payload, response.payload);
+        return Objects.equal(payload, response.payload);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(status, payload);
+        return Objects.hashCode(payload);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("status", status)
                 .add("payload", payload)
                 .toString();
     }
