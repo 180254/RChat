@@ -8,69 +8,70 @@ public class ChatServiceImpl implements ChatService {
 
     int x = 0;
 
+
     @Override
-    public Response login(String username, String password) {
+    public Response<String> login(String username, String password) {
         return null;
     }
 
     @Override
-    public Response join(String channel, String password) {
+    public Response join(String session, String channel, String password) {
         return null;
     }
 
     @Override
-    public Response part(String channel) {
+    public Response part(String session, String channel) {
         return null;
     }
 
     @Override
-    public Response kick(String channel, String username) {
+    public Response kick(String session, String channel, String username) {
         return null;
     }
 
     @Override
-    public Response ban(String channel, String username, boolean state) {
+    public Response ban(String session, String channel, String username, boolean state) {
         return null;
     }
 
     @Override
-    public Response<ChannelUser[]> names(String channel) {
+    public Response<ChannelUser[]> names(String session, String channel) {
         return null;
     }
 
     @Override
-    public Response topic(String channel) {
+    public Response topic(String session, String channel) {
         return null;
     }
 
     @Override
-    public Response topic(String channel, String text) {
+    public Response topic(String session, String channel, String text) {
         return null;
     }
 
     @Override
-    public Response admin(String channel, String username, boolean state) {
+    public Response admin(String session, String channel, String username, boolean state) {
         return null;
     }
 
     @Override
-    public Response ignore(String channel, String username, boolean state) {
+    public Response ignore(String session, String channel, String username, boolean state) {
         return null;
     }
 
     @Override
-    public Response privy(String nickname, String text) {
+    public Response privy(String session, String nickname, String text) {
         return null;
     }
 
     @Override
-    public Response message(String channel, String message) {
+    public Response message(String session, String channel, String message) {
         x++;// ensure same instance
-        return new Response<>(Status.OK, "none/" + x);
+        return new Response<>(Status.OK, x + "/" + session + "/" + channel + "/" + message);
     }
 
     @Override
-    public Response<WhatsUp[]> whatsUp(int longPoolingTimeoutMs) {
+    public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) {
         try {
             Thread.sleep(longPoolingTimeoutMs);
         } catch (InterruptedException e) {

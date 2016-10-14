@@ -6,29 +6,29 @@ import java.io.Serializable;
 
 public interface ChatService extends Serializable {
 
-    Response login(String username, @Nullable String password);
+    Response<String> login(String username, @Nullable String password);
 
-    Response join(String channel, @Nullable String password);
+    Response join(String session, String channel, @Nullable String password);
 
-    Response part(String channel);
+    Response part(String session, String channel);
 
-    Response kick(String channel, String username);
+    Response kick(String session, String channel, String username);
 
-    Response ban(String channel, String username, boolean state);
+    Response ban(String session, String channel, String username, boolean state);
 
-    Response<ChannelUser[]> names(String channel);
+    Response<ChannelUser[]> names(String session, String channel);
 
-    Response topic(String channel);
+    Response topic(String session, String channel);
 
-    Response topic(String channel, String text);
+    Response topic(String session, String channel, String text);
 
-    Response admin(String channel, String username, boolean state);
+    Response admin(String session, String channel, String username, boolean state);
 
-    Response ignore(String channel, String username, boolean state);
+    Response ignore(String session, String channel, String username, boolean state);
 
-    Response privy(String nickname, String text);
+    Response privy(String session, String nickname, String text);
 
-    Response message(String channel, String message);
+    Response message(String session, String channel, String message);
 
-    Response<WhatsUp[]> whatsUp(int longPoolingTimeoutMs);
+    Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs);
 }
