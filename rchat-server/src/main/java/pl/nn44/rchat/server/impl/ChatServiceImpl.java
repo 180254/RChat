@@ -1,83 +1,72 @@
 package pl.nn44.rchat.server.impl;
 
+import org.jetbrains.annotations.Nullable;
 import pl.nn44.rchat.protocol.*;
 
 public class ChatServiceImpl implements ChatService {
 
-    private static final long serialVersionUID = -4849634603399107637L;
-
-    int x = 0;
-
-
     @Override
-    public Response<String> login(String username, String password) {
+    public Response<String> login(String username, @Nullable String password) throws RChatException {
         return null;
     }
 
     @Override
-    public Response join(String session, String channel, String password) {
+    public Response join(String session, String channel, @Nullable String password) throws RChatException {
         return null;
     }
 
     @Override
-    public Response part(String session, String channel) {
+    public Response part(String session, String channel) throws RChatException {
         return null;
     }
 
     @Override
-    public Response kick(String session, String channel, String username) {
+    public Response kick(String session, String channel, String username) throws RChatException {
         return null;
     }
 
     @Override
-    public Response ban(String session, String channel, String username, boolean state) {
+    public Response ban(String session, String channel, String username, boolean state) throws RChatException {
         return null;
     }
 
     @Override
-    public Response<ChannelUser[]> names(String session, String channel) {
+    public Response<ChannelUser[]> names(String session, String channel) throws RChatException {
         return null;
     }
 
     @Override
-    public Response topic(String session, String channel) {
+    public Response topic(String session, String channel) throws RChatException {
         return null;
     }
 
     @Override
-    public Response topic(String session, String channel, String text) {
+    public Response topic(String session, String channel, String text) throws RChatException {
         return null;
     }
 
     @Override
-    public Response admin(String session, String channel, String username, boolean state) {
+    public Response admin(String session, String channel, String username, boolean state) throws RChatException {
         return null;
     }
 
     @Override
-    public Response ignore(String session, String channel, String username, boolean state) {
+    public Response ignore(String session, String channel, String username, boolean state) throws RChatException {
         return null;
     }
 
     @Override
-    public Response privy(String session, String nickname, String text) {
+    public Response privy(String session, String nickname, String text) throws RChatException {
+        throw new RChatException(RChatException.Reason.BAD_PASSWORD);
+    }
+
+    @Override
+    public Response message(String session, String channel, String message) throws RChatException {
         return null;
     }
 
     @Override
-    public Response message(String session, String channel, String message) {
-        x++;// ensure same instance
-        return new Response<>(Status.OK, x + "/" + session + "/" + channel + "/" + message);
-    }
-
-    @Override
-    public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) {
-        try {
-            Thread.sleep(longPoolingTimeoutMs);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        return new Response<>(Status.OK, new WhatsUp[0]);
+    public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws RChatException {
+        return new Response<>(new WhatsUp[0]);
     }
 }

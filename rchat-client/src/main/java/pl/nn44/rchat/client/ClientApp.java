@@ -3,12 +3,15 @@ package pl.nn44.rchat.client;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import org.apache.xmlrpc.common.XmlRpcInvocationException;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.rchat.protocol.RChatException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,19 +20,19 @@ import java.util.Properties;
 
 public class ClientApp {
 
-    private final Properties appProp;
+    private final Properties prop;
 
     public ClientApp() throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream stream = loader.getResourceAsStream("app.properties");
 
-        this.appProp = new Properties();
-        this.appProp.load(stream);
+        this.prop = new Properties();
+        this.prop.load(stream);
     }
 
     public ChatService hessianClient() {
         HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-        factory.setServiceUrl(appProp.getProperty("url.app") + appProp.getProperty("url.hessian"));
+        factory.setServiceUrl(prop.getProperty("url.app") + prop.getProperty("url.hessian"));
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
         return (ChatService) factory.getObject();
@@ -37,7 +40,7 @@ public class ClientApp {
 
     public ChatService burlapClient() {
         BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
-        factory.setServiceUrl(appProp.getProperty("url.app") + appProp.getProperty("url.burlap"));
+        factory.setServiceUrl(prop.getProperty("url.app") + prop.getProperty("url.burlap"));
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
         return (ChatService) factory.getObject();
@@ -46,7 +49,7 @@ public class ClientApp {
     public ChatService xmlRpcClient() {
         try {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-            config.setServerURL(new URL(appProp.getProperty("url.app") + appProp.getProperty("url.xml-rpc")));
+            config.setServerURL(new URL(prop.getProperty("url.app") + prop.getProperty("url.xml-rpc")));
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
             config.setEnabledForExceptions(true);
             config.setEnabledForExtensions(true);
@@ -54,11 +57,19 @@ public class ClientApp {
             XmlRpcClient xr = new XmlRpcClient();
             xr.setConfig(config);
 
+            InvocationHandler invHandler = (proxy, method, args) -> {
+                try {
+                    return xr.execute("ChatService." + method.getName(), args);
+                } catch (XmlRpcInvocationException e) {
+                    throw e.getCause();
+                }
+            };
+
             return (ChatService)
                     Proxy.newProxyInstance(
                             getClass().getClassLoader(),
                             new Class<?>[]{ChatService.class},
-                            (proxy, method, args) -> xr.execute("ChatService." + method.getName(), args)
+                            invHandler
                     );
 
         } catch (MalformedURLException e) {
@@ -66,7 +77,7 @@ public class ClientApp {
         }
     }
 
-    public static void main(String[] args) throws IOException, XmlRpcException {
+    public static void main(String[] args) throws IOException, XmlRpcException, RChatException {
         ClientApp clientApp = new ClientApp();
 
         ChatService hessianClient = clientApp.hessianClient();
@@ -86,6 +97,28 @@ public class ClientApp {
 
         System.out.println(burlapClient.whatsUp("any4", 2000));
         System.out.println(LocalDateTime.now());
+
+        try {
+            hessianClient.privy("any1", "x1", "y1");
+        } catch (RChatException e) {
+            System.out.println("EXCEPTION EXPECTED <0>");
+            System.out.println(LocalDateTime.now());
+        }
+
+        try {
+            burlapClient.privy("any2", "x2", "y2");
+        } catch (RChatException e) {
+            System.out.println("EXCEPTION EXPECTED <1>");
+            System.out.println(LocalDateTime.now());
+        }
+
+        try {
+            xmlRpcClient.privy("any3", "x3", "y3");
+        } catch (RChatException e) {
+            System.out.println("EXCEPTION EXPECTED <2>");
+            System.out.println(LocalDateTime.now());
+        }
+
 
         // org.springframework.remoting.RemoteAccessException
         // org.apache.xmlrpc.XmlRpcException

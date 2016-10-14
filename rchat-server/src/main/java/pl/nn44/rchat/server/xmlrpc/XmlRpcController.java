@@ -23,7 +23,7 @@ public class XmlRpcController {
             throws XmlRpcException {
 
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
-        config.setBasicEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
+        config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
         config.setEnabledForExceptions(true);
         config.setEnabledForExtensions(true);
         config.setKeepAliveEnabled(true);
