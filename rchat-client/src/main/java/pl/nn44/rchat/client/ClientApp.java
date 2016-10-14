@@ -14,9 +14,11 @@ import java.time.LocalDateTime;
 
 public class ClientApp {
 
+    public static String APP_URL = "http://localhost:8080";
+
     public ChatService hessianClient() {
         HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-        factory.setServiceUrl("http://localhost:8080/hessian");
+        factory.setServiceUrl(APP_URL + "/hessian");
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
         return (ChatService) factory.getObject();
@@ -24,7 +26,7 @@ public class ClientApp {
 
     public ChatService burlapClient() {
         BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
-        factory.setServiceUrl("http://localhost:8080/burlap");
+        factory.setServiceUrl(APP_URL + "/burlap");
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
         return (ChatService) factory.getObject();
@@ -33,7 +35,7 @@ public class ClientApp {
     public ChatService xmlRpcClient() {
         try {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-            config.setServerURL(new URL("http://localhost:8080/xml-rpc"));
+            config.setServerURL(new URL(APP_URL + "/xml-rpc"));
             config.setEnabledForExceptions(true);
             config.setEnabledForExtensions(true);
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
@@ -41,11 +43,13 @@ public class ClientApp {
             XmlRpcClient xr = new XmlRpcClient();
             xr.setConfig(config);
 
-            return (ChatService) Proxy.newProxyInstance(
-                    getClass().getClassLoader(),
-                    new Class<?>[]{ChatService.class},
-                    (proxy, method, args) -> xr.execute("ChatService." + method.getName(), args)
-            );
+            return (ChatService)
+                    Proxy.newProxyInstance(
+                            getClass().getClassLoader(),
+                            new Class<?>[]{ChatService.class},
+                            (proxy, method, args) -> xr.execute("ChatService." + method.getName(), args)
+                    );
+
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -57,18 +61,19 @@ public class ClientApp {
         ChatService hessianClient = clientApp.hessianClient();
         ChatService burlapClient = clientApp.burlapClient();
         ChatService xmlRpcClient = clientApp.xmlRpcClient();
+
         System.out.println(LocalDateTime.now());
 
-        System.out.println(hessianClient.message("x", "y"));
+        System.out.println(hessianClient.message("any1", "x1", "y1"));
         System.out.println(LocalDateTime.now());
 
-        System.out.println(burlapClient.message("x", "y"));
+        System.out.println(burlapClient.message("any2", "x2", "y2"));
         System.out.println(LocalDateTime.now());
 
-        System.out.println(xmlRpcClient.message("x", "y"));
+        System.out.println(xmlRpcClient.message("any3", "x3", "y3"));
         System.out.println(LocalDateTime.now());
 
-        System.out.println(burlapClient.whatsUp(2000));
+        System.out.println(burlapClient.whatsUp("any4", 2000));
         System.out.println(LocalDateTime.now());
     }
 }
