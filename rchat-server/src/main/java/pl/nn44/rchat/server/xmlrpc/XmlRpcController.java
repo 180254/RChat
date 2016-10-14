@@ -28,15 +28,14 @@ public class XmlRpcController {
         config.setEnabledForExtensions(true);
         config.setKeepAliveEnabled(true);
 
-        server = new XmlRpcServletServer();
-        server.setConfig(config);
-        server.setErrorLogger(new XmlRpcErrorLogger());
-        server.setMaxThreads(maxThreads);
-
         PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
         handlerMapping.setRequestProcessorFactoryFactory(pClass -> pRequest -> instance);
         handlerMapping.addHandler(handlerName, clazz);
 
+        server = new XmlRpcServletServer();
+        server.setConfig(config);
+        server.setErrorLogger(new XmlRpcErrorLogger());
+        server.setMaxThreads(maxThreads);
         server.setHandlerMapping(handlerMapping);
     }
 

@@ -24,7 +24,9 @@ public class PlainErrorController extends AbstractErrorController {
     }
 
     @RequestMapping(produces = {"text/plain"})
-    public ResponseEntity<String> errorPlain(HttpServletRequest request) {
+    public ResponseEntity<String> plainError(
+            HttpServletRequest request
+    ) {
         HttpStatus status = getStatus(request);
         Map<String, Object> errorAttributes = getErrorAttributes(request, false);
 
