@@ -24,7 +24,7 @@ public interface ChatService {
 
     Response ignore(String session, String channel, String username, boolean state) throws RChatException;
 
-    Response privy(String session, String nickname, String text) throws RChatException;
+    Response privy(String session, String username, String message) throws RChatException;
 
     Response message(String session, String channel, String message) throws RChatException;
 
