@@ -1,5 +1,6 @@
 package pl.nn44.rchat.server.util;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.math.IntMath;
 
@@ -49,5 +50,13 @@ public class BigIdGenerator implements Iterator<String> {
     public String next() {
         String nextId = new BigInteger(bits, random).toString(NUMBER_BASE);
         return Strings.padStart(nextId, chars, '0');
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("chars", chars)
+                .add("bits", bits)
+                .toString();
     }
 }

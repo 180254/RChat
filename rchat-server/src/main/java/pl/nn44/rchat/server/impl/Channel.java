@@ -12,8 +12,8 @@ public class Channel {
     private String topic;
 
     private final CopyOnWriteArrayList<User> users = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<String> admins = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<String> banned = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<User> admins = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<User> banned = new CopyOnWriteArrayList<>();
 
     public Channel(String name, String password) {
         this.name = name;
@@ -37,11 +37,11 @@ public class Channel {
         return users;
     }
 
-    public CopyOnWriteArrayList<String> getAdmins() {
+    public CopyOnWriteArrayList<User> getAdmins() {
         return admins;
     }
 
-    public CopyOnWriteArrayList<String> getBanned() {
+    public CopyOnWriteArrayList<User> getBanned() {
         return banned;
     }
 

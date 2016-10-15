@@ -16,7 +16,7 @@ public class User {
     private LocalDateTime lastSync;
 
     private final CopyOnWriteArrayList<Channel> channels = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<String> ignored = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<User> ignored = new CopyOnWriteArrayList<>();
     private final BlockingQueue<WhatsUp> news = new LinkedBlockingQueue<>(); // offer(e), poll(), peek()
 
     public User(String session, String username) {
@@ -45,7 +45,7 @@ public class User {
         return channels;
     }
 
-    public CopyOnWriteArrayList<String> getIgnored() {
+    public CopyOnWriteArrayList<User> getIgnored() {
         return ignored;
     }
 
@@ -73,7 +73,7 @@ public class User {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("session", session)
+                .add("caller", session)
                 .add("username", username)
                 .add("lastSync", lastSync)
                 .add("channels", channels)
