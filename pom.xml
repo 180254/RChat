@@ -37,6 +37,11 @@
 
     <profiles>
         <profile>
+            <id>bintray</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
             <repositories>
                 <repository>
                     <snapshots>
@@ -47,6 +52,7 @@
                     <url>http://jcenter.bintray.com</url>
                 </repository>
             </repositories>
+
             <pluginRepositories>
                 <pluginRepository>
                     <snapshots>
@@ -57,7 +63,6 @@
                     <url>http://jcenter.bintray.com</url>
                 </pluginRepository>
             </pluginRepositories>
-            <id>bintray</id>
         </profile>
     </profiles>
 </project>
