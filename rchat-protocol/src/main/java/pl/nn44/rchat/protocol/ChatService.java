@@ -8,7 +8,7 @@ public interface ChatService {
 
     Response logout(String session) throws RChatException;
 
-    Response join(String session, String channel, @Nullable String password) throws RChatException;
+    Response<String> join(String session, String channel, @Nullable String password) throws RChatException;
 
     Response part(String session, String channel) throws RChatException;
 
@@ -17,8 +17,6 @@ public interface ChatService {
     Response ban(String session, String channel, String username, boolean state) throws RChatException;
 
     Response<ChannelUser[]> names(String session, String channel) throws RChatException;
-
-    Response topic(String session, String channel) throws RChatException;
 
     Response topic(String session, String channel, String text) throws RChatException;
 

@@ -74,6 +74,8 @@ public class WhatsUp implements Serializable {
         JOIN, // JOIN $channel $username(who-join)
         PART, // PART $channel $username(who-part)
         KICK, // KICK $channel $username(who-kicked) username-kicked-by
-        BAN // BAN $channel $username(who-banned) username-banned-by
+        BAN, // BAN $channel $username(who-banned) username-banned-by ON/OFF
+
+        ADMIN // ADMIN $channel $username(who-admin) username-admin-by ON/OFF
     }
 }
