@@ -43,11 +43,21 @@ public class ServerApp {
 
     @Bean
     public XmlRpcController xmlRpcController() throws XmlRpcException {
-        return new XmlRpcController("ChatService", ChatService.class, chatService(), 5);
+        return new XmlRpcController(
+                "ChatService",
+                ChatService.class,
+                chatService(),
+                5
+        );
     }
 
     @Bean
-    public ErrorController errorController() throws XmlRpcException {
+    public ErrorController errorController() {
         return new PlainErrorController();
+    }
+
+    @Bean
+    public MainPageController mainPageController() {
+        return new MainPageController();
     }
 }
