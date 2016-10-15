@@ -1,6 +1,7 @@
 package pl.nn44.rchat.server.xmlrpc;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.metadata.XmlRpcSystemImpl;
 import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcErrorLogger;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
@@ -31,6 +32,7 @@ public class XmlRpcController {
         PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
         handlerMapping.setRequestProcessorFactoryFactory(pClass -> pRequest -> instance);
         handlerMapping.addHandler(handlerName, clazz);
+        XmlRpcSystemImpl.addSystemHandler(handlerMapping);
 
         server = new XmlRpcServletServer();
         server.setConfig(config);
