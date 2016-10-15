@@ -44,8 +44,8 @@ public class BestChatService implements ChatService {
             }
 
             String session = idGenerator.next();
-            User user = new User(session, username);
-            sessionToUser.put(username, user);
+            User exUser = new User(session, username);
+            sessionToUser.put(username, exUser);
             return Response.Ok(session);
 
         } finally {
@@ -60,18 +60,18 @@ public class BestChatService implements ChatService {
         lock$u.lock();
 
         try {
-            User user = sessionToUser.get(session);
-            if (user == null) {
+            User exUser = sessionToUser.get(session);
+            if (exUser == null) {
                 throw new RChatException(Reason.GIVEN_BAD_SESSION);
             }
 
-            for (Channel chan : user.getChannels()) {
-                boolean remove = chan.getUsers().remove(user);
+            for (Channel chan : exUser.getChannels()) {
+                boolean remove = chan.getUsers().remove(exUser);
 
                 if (remove) {
                     for (User cu : chan.getUsers()) {
                         cu.getNews().offer(
-                                new WhatsUp(What.PART, chan.getName(), user.getUsername())
+                                new WhatsUp(What.PART, chan.getName(), exUser.getUsername())
                         );
                     }
                 }
@@ -87,15 +87,15 @@ public class BestChatService implements ChatService {
 
     @Override
     @Blocking(user = true, chan = true)
-    public Response join(String session, String channel, @Nullable String password) throws RChatException {
+    public Response<String> join(String session, String channel, @Nullable String password) throws RChatException {
         Lock lock$u = locks.get("U$" + sessionToUsername(session));
         Lock lock$c = locks.get("C$" + channel);
         lock$u.lock();
         lock$c.lock();
 
         try {
-            User user = sessionToUser.get(session);
-            if (user == null) {
+            User exUser = sessionToUser.get(session);
+            if (exUser == null) {
                 throw new RChatException(Reason.GIVEN_BAD_SESSION);
             }
 
@@ -108,18 +108,22 @@ public class BestChatService implements ChatService {
                 throw new RChatException(Reason.GIVEN_BAD_PASSWORD);
             }
 
-            boolean add = user.getChannels().addIfAbsent(chan);
-            chan.getUsers().addIfAbsent(user);
+            if (chan.getBanned().contains(exUser.getUsername())) {
+                throw new RChatException(Reason.UNWELCOME_BANNED);
+            }
+
+            boolean add = exUser.getChannels().addIfAbsent(chan);
+            chan.getUsers().addIfAbsent(exUser);
 
             if (add) {
                 for (User cu : chan.getUsers()) {
                     cu.getNews().offer(
-                            new WhatsUp(What.JOIN, chan.getName(), user.getUsername())
+                            new WhatsUp(What.JOIN, chan.getName(), exUser.getUsername())
                     );
                 }
             }
 
-            return Response.Ok();
+            return Response.Ok(chan.getTopic());
 
         } finally {
             lock$c.unlock();
@@ -136,8 +140,8 @@ public class BestChatService implements ChatService {
         lock$c.lock();
 
         try {
-            User user = sessionToUser.get(session);
-            if (user == null) {
+            User exUser = sessionToUser.get(session);
+            if (exUser == null) {
                 throw new RChatException(Reason.GIVEN_BAD_SESSION);
             }
 
@@ -146,13 +150,13 @@ public class BestChatService implements ChatService {
                 throw new RChatException(Reason.GIVEN_BAD_CHANNEL);
             }
 
-            boolean remove = user.getChannels().remove(chan);
-            chan.getUsers().remove(user);
+            boolean remove = exUser.getChannels().remove(chan);
+            chan.getUsers().remove(exUser);
 
             if (remove) {
                 for (User cu : chan.getUsers()) {
                     cu.getNews().offer(
-                            new WhatsUp(What.PART, chan.getName(), user.getUsername())
+                            new WhatsUp(What.PART, chan.getName(), exUser.getUsername())
                     );
                 }
             }
@@ -169,15 +173,15 @@ public class BestChatService implements ChatService {
     @Blocking(user = true, chan = true)
     public Response kick(String session, String channel, String username) throws RChatException {
         Lock lock$u = locks.get("U$" + sessionToUsername(session));
-        Lock lock$k = locks.get("U$" + username);
+        Lock lock$p = locks.get("U$" + username);
         Lock lock$c = locks.get("C$" + channel);
         lock$u.lock();
-        lock$k.lock();
+        lock$p.lock();
         lock$c.lock();
 
         try {
-            User user = sessionToUser.get(session);
-            if (user == null) {
+            User exUser = sessionToUser.get(session);
+            if (exUser == null) {
                 throw new RChatException(Reason.GIVEN_BAD_SESSION);
             }
 
@@ -187,32 +191,32 @@ public class BestChatService implements ChatService {
             }
 
             CopyOnWriteArrayList<User> chanUsers = chan.getUsers();
-            Optional<User> oKick = chanUsers.stream()
+            Optional<User> oPaUser = chanUsers.stream()
                     .filter(u -> u.getUsername().equals(username))
                     .findFirst();
-            if (!oKick.isPresent()) {
+            if (!oPaUser.isPresent()) {
                 throw new RChatException(Reason.GIVEN_BAD_USERNAME);
             }
 
-            User kick = oKick.get();
+            User paUser = oPaUser.get();
 
-            if (!chanUsers.contains(kick)) {
+            if (!chanUsers.contains(paUser)) {
                 throw new RChatException(Reason.GIVEN_BAD_USERNAME);
             }
 
-            if (!chanUsers.contains(user)) {
+            if (!chanUsers.contains(exUser)) {
                 throw new RChatException(Reason.NO_PERMISSION);
             }
 
-            if (!chan.getAdmins().contains(user.getUsername())) {
+            if (!chan.getAdmins().contains(exUser.getUsername())) {
                 throw new RChatException(Reason.NO_PERMISSION);
             }
 
-            chanUsers.remove(kick);
+            chanUsers.remove(paUser);
 
             for (User cu : chanUsers) {
                 cu.getNews().offer(
-                        new WhatsUp(What.KICK, chan.getName(), kick.getUsername(), user.getUsername())
+                        new WhatsUp(What.KICK, chan.getName(), paUser.getUsername(), exUser.getUsername())
                 );
             }
 
@@ -220,21 +224,81 @@ public class BestChatService implements ChatService {
 
         } finally {
             lock$c.unlock();
-            lock$k.unlock();
+            lock$p.unlock();
             lock$u.unlock();
         }
     }
 
     @Override
     public Response ban(String session, String channel, String username, boolean state) throws RChatException {
-        return null;
+        Lock lock$u = locks.get("U$" + sessionToUsername(session));
+        Lock lock$p = locks.get("U$" + username);
+        Lock lock$c = locks.get("C$" + channel);
+        lock$u.lock();
+        lock$p.lock();
+        lock$c.lock();
+
+        try {
+            User exUser = sessionToUser.get(session);
+            if (exUser == null) {
+                throw new RChatException(Reason.GIVEN_BAD_SESSION);
+            }
+
+            Channel chan = channelByName.get(channel);
+            if (chan == null) {
+                throw new RChatException(Reason.GIVEN_BAD_CHANNEL);
+            }
+
+            CopyOnWriteArrayList<User> chanUsers = chan.getUsers();
+            Optional<User> oPaUser = chanUsers.stream()
+                    .filter(u -> u.getUsername().equals(username))
+                    .findFirst();
+            if (!oPaUser.isPresent()) {
+                throw new RChatException(Reason.GIVEN_BAD_USERNAME);
+            }
+
+            User paUser = oPaUser.get();
+
+            if (!chanUsers.contains(paUser)) {
+                throw new RChatException(Reason.GIVEN_BAD_USERNAME);
+            }
+
+            if (!chanUsers.contains(exUser)) {
+                throw new RChatException(Reason.NO_PERMISSION);
+            }
+
+            if (!chan.getAdmins().contains(exUser.getUsername())) {
+                throw new RChatException(Reason.NO_PERMISSION);
+            }
+
+            boolean change = state
+                    ? chan.getBanned().addIfAbsent(paUser.getUsername())
+                    : chan.getBanned().remove(paUser.getUsername());
+
+            if (change) {
+                for (User cu : chanUsers) {
+                    cu.getNews().offer(
+                            new WhatsUp(
+                                    What.BAN, chan.getName(), paUser.getUsername(), exUser.getUsername(),
+                                    state ? "ON" : "OFF")
+                    );
+                }
+            }
+
+            return Response.Ok();
+
+        } finally {
+            lock$c.unlock();
+            lock$p.unlock();
+            lock$u.unlock();
+        }
     }
 
     @Override
     @Blocking(user = false, chan = false)
     public Response<ChannelUser[]> names(String session, String channel) throws RChatException {
-        User user = sessionToUser.get(session);
-        if (user == null) {
+        User exUser = sessionToUser.get(session);
+        if (exUser == null) {
             throw new RChatException(Reason.GIVEN_BAD_SESSION);
         }
 
@@ -243,7 +307,7 @@ public class BestChatService implements ChatService {
             throw new RChatException(Reason.GIVEN_BAD_CHANNEL);
         }
 
-        if (!chan.getUsers().contains(user)) {
+        if (!chan.getUsers().contains(exUser)) {
             throw new RChatException(Reason.NO_PERMISSION);
         }
 
@@ -252,7 +316,7 @@ public class BestChatService implements ChatService {
                 .map(cUser -> new ChannelUser(
                         cUser.getUsername(),
                         accounts.containsKey(cUser.getUsername()),
-                        user.getIgnored().contains(cUser.getUsername()),
+                        exUser.getIgnored().contains(cUser.getUsername()),
                         chan.getAdmins().contains(cUser.getUsername())
                 ))
                 .toArray(ChannelUser[]::new);
@@ -261,18 +325,110 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response topic(String session, String channel) throws RChatException {
-        return null;
-    }
-
-    @Override
     public Response topic(String session, String channel, String text) throws RChatException {
-        return null;
+        Lock lock$u = locks.get("U$" + sessionToUsername(session));
+        Lock lock$c = locks.get("C$" + channel);
+        lock$u.lock();
+        lock$c.lock();
+
+        try {
+            User exUser = sessionToUser.get(session);
+            if (exUser == null) {
+                throw new RChatException(Reason.GIVEN_BAD_SESSION);
+            }
+
+            Channel chan = channelByName.get(channel);
+            if (chan == null) {
+                throw new RChatException(Reason.GIVEN_BAD_CHANNEL);
+            }
+
+            if (!chan.getUsers().contains(exUser)) {
+                throw new RChatException(Reason.NO_PERMISSION);
+            }
+
+            if (!chan.getAdmins().contains(exUser.getUsername())) {
+                throw new RChatException(Reason.NO_PERMISSION);
+            }
+
+            chan.setTopic(text);
+
+            for (User cu : chan.getUsers()) {
+                cu.getNews().offer(
+                        new WhatsUp(What.TOPIC, chan.getName(), exUser.getUsername(), text)
+                );
+            }
+
+            return Response.Ok();
+
+        } finally {
+            lock$c.unlock();
+            lock$u.unlock();
+        }
     }
 
     @Override
     public Response admin(String session, String channel, String username, boolean state) throws RChatException {
-        return null;
+        Lock lock$u = locks.get("U$" + sessionToUsername(session));
+        Lock lock$p = locks.get("U$" + username);
+        Lock lock$c = locks.get("C$" + channel);
+        lock$u.lock();
+        lock$p.lock();
+        lock$c.lock();
+
+        try {
+            User exUser = sessionToUser.get(session);
+            if (exUser == null) {
+                throw new RChatException(Reason.GIVEN_BAD_SESSION);
+            }
+
+            Channel chan = channelByName.get(channel);
+            if (chan == null) {
+                throw new RChatException(Reason.GIVEN_BAD_CHANNEL);
+            }
+
+            CopyOnWriteArrayList<User> chanUsers = chan.getUsers();
+            Optional<User> oPaUser = chanUsers.stream()
+                    .filter(u -> u.getUsername().equals(username))
+                    .findFirst();
+            if (!oPaUser.isPresent()) {
+                throw new RChatException(Reason.GIVEN_BAD_USERNAME);
+            }
+
+            User paUser = oPaUser.get();
+
+            if (!chanUsers.contains(paUser)) {
+                throw new RChatException(Reason.GIVEN_BAD_USERNAME);
+            }
+
+            if (!chanUsers.contains(exUser)) {
+                throw new RChatException(Reason.NO_PERMISSION);
+            }
+
+            if (!chan.getAdmins().contains(exUser.getUsername())) {
+                throw new RChatException(Reason.NO_PERMISSION);
+            }
+
+            boolean change = state
+                    ? chan.getAdmins().addIfAbsent(paUser.getUsername())
+                    : chan.getAdmins().remove(paUser.getUsername());
+
+            if (change) {
+                for (User cu : chanUsers) {
+                    cu.getNews().offer(
+                            new WhatsUp(
+                                    What.ADMIN, chan.getName(), paUser.getUsername(), exUser.getUsername(),
+                                    state ? "ON" : "OFF")
+                    );
+                }
+            }
+
+            return Response.Ok();
+
+        } finally {
+            lock$c.unlock();
+            lock$p.unlock();
+            lock$u.unlock();
+        }
     }
 
     @Override
