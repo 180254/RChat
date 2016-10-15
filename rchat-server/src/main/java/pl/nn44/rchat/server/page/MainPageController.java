@@ -1,4 +1,4 @@
-package pl.nn44.rchat.server;
+package pl.nn44.rchat.server.page;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

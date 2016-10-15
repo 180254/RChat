@@ -1,4 +1,4 @@
-package pl.nn44.rchat.server;
+package pl.nn44.rchat.server.page;
 
 import org.springframework.boot.autoconfigure.web.AbstractErrorController;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
@@ -8,14 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
-import java.util.Collections;
 import java.util.Map;
 
 @RequestMapping("/error")
 public class PlainErrorController extends AbstractErrorController {
 
     public PlainErrorController() {
-        super(new DefaultErrorAttributes(), Collections.emptyList());
+        super(new DefaultErrorAttributes());
     }
 
     @Override

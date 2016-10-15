@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
 import org.springframework.remoting.caucho.HessianServiceExporter;
 import pl.nn44.rchat.protocol.ChatService;
-import pl.nn44.rchat.server.impl.ChatServiceImpl;
+import pl.nn44.rchat.server.impl.BestChatService;
+import pl.nn44.rchat.server.page.MainPageController;
+import pl.nn44.rchat.server.page.PlainErrorController;
 import pl.nn44.rchat.server.xmlrpc.XmlRpcController;
 
 @Configuration
@@ -22,7 +24,7 @@ public class ServerApp {
 
     @Bean
     public ChatService chatService() {
-        return new ChatServiceImpl();
+        return new BestChatService();
     }
 
     @Bean(name = "/hessian")
@@ -42,22 +44,24 @@ public class ServerApp {
     }
 
     @Bean
-    public XmlRpcController xmlRpcController() throws XmlRpcException {
+    public XmlRpcController xmlRpcService() throws XmlRpcException {
+        int cores = Runtime.getRuntime().availableProcessors();
+
         return new XmlRpcController(
                 "ChatService",
                 ChatService.class,
                 chatService(),
-                5
+                cores * 5
         );
-    }
-
-    @Bean
-    public ErrorController errorController() {
-        return new PlainErrorController();
     }
 
     @Bean
     public MainPageController mainPageController() {
         return new MainPageController();
+    }
+
+    @Bean
+    public ErrorController errorPageController() {
+        return new PlainErrorController();
     }
 }
