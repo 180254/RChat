@@ -61,7 +61,9 @@ public class ClientApp {
                 try {
                     return xr.execute("ChatService." + method.getName(), args);
                 } catch (XmlRpcInvocationException e) {
-                    throw e.getCause();
+                    throw e.getCause() != null
+                            ? e.getCause()
+                            : e;
                 }
             };
 
@@ -119,9 +121,8 @@ public class ClientApp {
             System.out.println(LocalDateTime.now());
         }
 
-
         // org.springframework.remoting.RemoteAccessException
         // org.apache.xmlrpc.XmlRpcException
-
+        // pl.nn44.rchat.protocol.RChatException
     }
 }
