@@ -19,6 +19,13 @@ public class Response<T extends Serializable> implements Serializable {
         this.payload = payload;
     }
 
+    public static Response Ok() {
+        return new Response();
+    }
+
+    public static <T extends Serializable> Response<T> Ok(T payload) {
+        return new Response<>(payload);
+    }
 
     public T getPayload() {
         return payload;

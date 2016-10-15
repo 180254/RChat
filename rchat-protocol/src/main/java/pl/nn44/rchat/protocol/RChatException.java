@@ -15,11 +15,14 @@ public class RChatException extends Exception {
     }
 
     public enum Reason {
-        NOT_LOGGED_IN,
-        BAD_PASSWORD,
-        NOT_INSIDE,
+        ALREADY_LOGGED_IN,
+
+        GIVEN_BAD_PASSWORD,
+        GIVEN_BAD_SESSION,
+        GIVEN_BAD_CHANNEL,
+        GIVEN_BAD_USERNAME,
+
         NO_PERMISSION,
-        NO_SUCH_USER,
-        ERROR_BANNED,
+        UNWELCOME_BANNED
     }
 }

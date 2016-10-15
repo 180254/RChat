@@ -6,6 +6,8 @@ public interface ChatService {
 
     Response<String> login(String username, @Nullable String password) throws RChatException;
 
+    Response logout(String session) throws RChatException;
+
     Response join(String session, String channel, @Nullable String password) throws RChatException;
 
     Response part(String session, String channel) throws RChatException;

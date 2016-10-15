@@ -12,17 +12,17 @@ public class WhatsUp implements Serializable {
     private final What what;
     private final String channel;
     private final String username;
-    private final String param;
+    private final String[] params;
 
     public WhatsUp(What what,
                    String channel,
                    String username,
-                   String param) {
+                   String... params) {
 
         this.what = what;
         this.channel = channel;
         this.username = username;
-        this.param = param;
+        this.params = params.clone();
     }
 
     public What getWhat() {
@@ -37,8 +37,8 @@ public class WhatsUp implements Serializable {
         return username;
     }
 
-    public String getParam() {
-        return param;
+    public String[] getParams() {
+        return params.clone();
     }
 
     @Override
@@ -49,12 +49,12 @@ public class WhatsUp implements Serializable {
         return what == whatsUp.what &&
                 Objects.equal(channel, whatsUp.channel) &&
                 Objects.equal(username, whatsUp.username) &&
-                Objects.equal(param, whatsUp.param);
+                Objects.equal(params, whatsUp.params);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(what, channel, username, param);
+        return Objects.hashCode(what, channel, username, params);
     }
 
     @Override
@@ -63,14 +63,13 @@ public class WhatsUp implements Serializable {
                 .add("what", what)
                 .add("channel", channel)
                 .add("username", username)
-                .add("param", param)
+                .add("params", params)
                 .toString();
     }
 
-    enum What {
+    public enum What {
         MESSAGE, // MESSAGE $channel $username(who) some-text
         TOPIC, // TOPIC $channel $username(who) some-text
-        NAME, // NAME $channel $username(who) JOIN/PART
-        KICK // KICK $channel $username(who) $null
+        NAME, // NAME $channel $username(who) JOIN/PART/KICK $who-kicked
     }
 }
