@@ -8,14 +8,15 @@ import pl.nn44.rchat.protocol.WhatsUp.What;
 import pl.nn44.rchat.server.util.BigIdGenerator;
 
 import java.security.SecureRandom;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 public class BestChatService implements ChatService {
+
+    static int MAX_NEWS_PER_REQUEST = 10;
 
     Random random = new SecureRandom();
     Iterator<String> idGenerator = BigIdGenerator.bits(random, 128);
@@ -294,22 +295,121 @@ public class BestChatService implements ChatService {
 
     @Override
     public Response ignore(String session, String channel, String username, boolean state) throws RChatException {
-        return null;
+        Locks locks = locks(session, channel, username);
+
+        try {
+            Params params = params(session, channel, username, false);
+
+            boolean change = state
+                    ? params.caller.getIgnored().addIfAbsent(params.affUser)
+                    : params.caller.getIgnored().remove(params.affUser);
+
+            if (change) {
+                WhatsUp whatsUp = new WhatsUp(
+                        What.IGNORE,
+                        params.channel.getName(),
+                        params.affUser.getUsername(),
+                        params.caller.getUsername(),
+                        state ? "ON" : "OFF"
+                );
+
+                params.caller.getNews().offer(whatsUp);
+                params.affUser.getNews().offer(whatsUp);
+            }
+
+            return Response.Ok();
+
+        } finally {
+            locks.unlock();
+        }
     }
 
     @Override
-    public Response privy(String session, String nickname, String text) throws RChatException {
-        throw new RChatException(Reason.GIVEN_BAD_PASSWORD);
+    public Response privy(String session, String username, String message) throws RChatException {
+        Locks locks = locks(session, null, username);
+
+        try {
+            Params params = params(session, null, username, false);
+
+            WhatsUp whatsUp = new WhatsUp(
+                    What.PRIVY,
+                    null,
+                    params.affUser.getUsername(),
+                    params.caller.getUsername(),
+                    message
+            );
+
+            params.caller.getNews().offer(whatsUp);
+            params.affUser.getNews().offer(whatsUp);
+
+            return Response.Ok();
+
+        } finally {
+            locks.unlock();
+        }
     }
 
     @Override
     public Response message(String session, String channel, String message) throws RChatException {
-        return null;
+        Locks locks = locks(session, channel, null);
+
+        try {
+            Params params = params(session, channel, null, false);
+
+            WhatsUp whatsUp = new WhatsUp(
+                    What.MESSAGE,
+                    params.channel.getName(),
+                    params.caller.getUsername(),
+                    message
+            );
+
+            for (User cu : params.channel.getUsers()) {
+                cu.getNews().offer(whatsUp);
+            }
+
+            return Response.Ok();
+
+        } finally {
+            locks.unlock();
+        }
     }
 
     @Override
     public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws RChatException {
-        return null;
+        Locks locks = locks(session, null, null);
+
+        try {
+            Params params = params(session, null, null, false);
+
+            List<WhatsUp> news = new LinkedList<>();
+
+            while (news.size() < MAX_NEWS_PER_REQUEST) {
+                WhatsUp poll = params.caller.getNews().poll();
+
+                if (poll != null) {
+                    news.add(poll);
+
+                } else if (news.size() == 0) {
+                    try {
+                        poll = params.caller.getNews().poll(longPoolingTimeoutMs, TimeUnit.MILLISECONDS);
+                        if (poll != null) {
+                            news.add(poll);
+                        }
+                    } catch (InterruptedException ignored) {
+                    }
+
+                    break;
+
+                } else {
+                    break;
+                }
+            }
+
+            return Response.Ok(news.toArray(new WhatsUp[news.size()]));
+
+        } finally {
+            locks.unlock();
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------
