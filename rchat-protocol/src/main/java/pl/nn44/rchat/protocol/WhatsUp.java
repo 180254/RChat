@@ -68,8 +68,12 @@ public class WhatsUp implements Serializable {
     }
 
     public enum What {
-        MESSAGE, // MESSAGE $channel $username(who) some-text
-        TOPIC, // TOPIC $channel $username(who) some-text
-        NAME, // NAME $channel $username(who) JOIN/PART/KICK $who-kicked
+        MESSAGE, // MESSAGE $channel $username(who-msg) some-text
+        TOPIC, // TOPIC $channel $username(who-changed) some-text
+
+        JOIN, // JOIN $channel $username(who-join)
+        PART, // PART $channel $username(who-part)
+        KICK, // KICK $channel $username(who-kicked) username-kicked-by
+        BAN // BAN $channel $username(who-banned) username-banned-by
     }
 }
