@@ -9,20 +9,27 @@ public class ChannelUser implements Serializable {
 
     private static final long serialVersionUID = -5068302409312104587L;
 
+    private final String channel;
     private final String username;
     private final boolean authorized;
     private final boolean ignored;
     private final boolean admin;
 
-    public ChannelUser(String username,
+    public ChannelUser(String channel,
+                       String username,
                        boolean authorized,
                        boolean ignored,
                        boolean admin) {
 
-        this.authorized = authorized;
+        this.channel = channel;
         this.username = username;
+        this.authorized = authorized;
         this.ignored = ignored;
         this.admin = admin;
+    }
+
+    public String getChannel() {
+        return channel;
     }
 
     public String getUsername() {
@@ -46,20 +53,19 @@ public class ChannelUser implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChannelUser that = (ChannelUser) o;
-        return authorized == that.authorized &&
-                ignored == that.ignored &&
-                admin == that.admin &&
+        return Objects.equal(channel, that.channel) &&
                 Objects.equal(username, that.username);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(username, authorized, ignored, admin);
+        return Objects.hashCode(channel, username);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .add("channel", channel)
                 .add("username", username)
                 .add("authorized", authorized)
                 .add("ignored", ignored)
