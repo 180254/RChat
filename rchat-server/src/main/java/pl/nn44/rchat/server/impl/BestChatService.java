@@ -32,6 +32,7 @@ public class BestChatService implements ChatService {
 
     public BestChatService() {
         LOG.debug("instance created");
+        channelByName.put("standard", new Channel("standard", null));
     }
 
     @Override
@@ -49,7 +50,7 @@ public class BestChatService implements ChatService {
 
             String session = idGenerator.next();
             User exUser = new User(session, username);
-            sessionToUser.put(username, exUser);
+            sessionToUser.put(session, exUser);
             return Response.Ok(session);
 
         } finally {
@@ -93,7 +94,9 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, false);
+            Params params = params(session, null, null, false);
+            // cannot get channel in one params request as then there is verified if user is on channel
+            params.channel = params(null, channel, null, false).channel;
 
             if (!Objects.equals(params.channel.getPassword(), password)) {
                 throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
@@ -546,6 +549,20 @@ public class BestChatService implements ChatService {
             if (channel != null) {
                 this.lock$channel = stripedLocks.get("C$" + channel);
             }
+
+            this.lock();
+        }
+
+        void lock() {
+            if (this.lock$channel != null) {
+                this.lock$channel.lock();
+            }
+            if (this.lock$affUser != null) {
+                this.lock$affUser.lock();
+            }
+            if (this.lock$caller != null) {
+                this.lock$caller.lock();
+            }
         }
 
         void unlock() {
@@ -569,3 +586,5 @@ public class BestChatService implements ChatService {
         return new Locks(session, channel, username);
     }
 }
+
+// TODO: - keep ignored on quit
