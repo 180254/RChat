@@ -18,6 +18,7 @@ import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.server.impl.BestChatService;
 import pl.nn44.rchat.server.page.MainPageController;
 import pl.nn44.rchat.server.page.PlainErrorController;
+import pl.nn44.xmlrpc.AnyTypeFactory;
 
 @Configuration
 @EnableAutoConfiguration
@@ -54,8 +55,8 @@ public class ServerApp {
 
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
         config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
-        config.setEnabledForExceptions(true);
-        config.setEnabledForExtensions(true);
+        config.setEnabledForExceptions(false);
+        config.setEnabledForExtensions(false);
         config.setKeepAliveEnabled(true);
 
         PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
@@ -68,6 +69,7 @@ public class ServerApp {
         server.setErrorLogger(new XmlRpcErrorLogger());
         server.setMaxThreads(cores * 5);
         server.setHandlerMapping(handlerMapping);
+        server.setTypeFactory(new AnyTypeFactory(server));
 
         return server::execute;
     }

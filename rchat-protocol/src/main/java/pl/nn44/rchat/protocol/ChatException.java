@@ -7,6 +7,7 @@ public class ChatException extends Exception {
     private Reason reason;
 
     public ChatException(Reason reason) {
+        super(reason.name());
         this.reason = reason;
     }
 

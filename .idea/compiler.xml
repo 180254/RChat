@@ -22,6 +22,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="apache-xml-rpc-extension" />
         <module name="rchat-client" />
         <module name="rchat-interface" />
         <module name="rchat-protocol" />
@@ -29,6 +30,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="apache-xml-rpc-extension" target="1.8" />
       <module name="RChat" target="1.8" />
       <module name="rchat-client" target="1.8" />
       <module name="rchat-interface" target="1.5" />

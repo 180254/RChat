@@ -8,6 +8,8 @@ import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.rchat.protocol.ChatException;
 import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.rchat.protocol.Response;
+import pl.nn44.xmlrpc.AnyTypeFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,15 +53,16 @@ public class ClientApp {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
             config.setServerURL(new URL(prop.getProperty("url.app") + prop.getProperty("url.xml-rpc")));
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
-            config.setEnabledForExceptions(true);
-            config.setEnabledForExtensions(true);
+            config.setEnabledForExceptions(false);
+            config.setEnabledForExtensions(false);
 
-            XmlRpcClient xr = new XmlRpcClient();
-            xr.setConfig(config);
+            XmlRpcClient client = new XmlRpcClient();
+            client.setConfig(config);
+            client.setTypeFactory(new AnyTypeFactory(client));
 
             InvocationHandler invHandler = (proxy, method, args) -> {
                 try {
-                    return xr.execute("ChatService." + method.getName(), args);
+                    return client.execute("ChatService." + method.getName(), args);
                 } catch (XmlRpcInvocationException e) {
                     throw e.getCause() != null
                             ? e.getCause()
@@ -88,38 +91,41 @@ public class ClientApp {
 
         System.out.println(LocalDateTime.now());
 
-        System.out.println(hessianClient.message("any1", "x1", "y1"));
+        Response<String> aaa = hessianClient.login("Pabhyrghggggfbghj", null);
+        String payload = aaa.getPayload();
+
+
+        hessianClient.join(payload, "asd", null);
+
+        System.out.println(hessianClient.message(payload, "asd", "y1"));
         System.out.println(LocalDateTime.now());
 
-        System.out.println(burlapClient.message("any2", "x2", "y2"));
-        System.out.println(LocalDateTime.now());
 
-        System.out.println(xmlRpcClient.message("any3", "x3", "y3"));
-        System.out.println(LocalDateTime.now());
-
-        System.out.println(burlapClient.whatsUp("any4", 2000));
-        System.out.println(LocalDateTime.now());
-
-        try {
-            hessianClient.privy("any1", "x1", "y1");
-        } catch (ChatException e) {
-            System.out.println("EXCEPTION EXPECTED <0>");
+        System.out.println(burlapClient.message(payload, "asd", "y2"));
             System.out.println(LocalDateTime.now());
-        }
 
-        try {
-            burlapClient.privy("any2", "x2", "y2");
-        } catch (ChatException e) {
-            System.out.println("EXCEPTION EXPECTED <1>");
-            System.out.println(LocalDateTime.now());
-        }
 
-        try {
-            xmlRpcClient.privy("any3", "x3", "y3");
-        } catch (ChatException e) {
-            System.out.println("EXCEPTION EXPECTED <2>");
+        System.out.println(xmlRpcClient.message(payload, "asd", "y3"));
             System.out.println(LocalDateTime.now());
-        }
+
+
+        System.out.println(burlapClient.whatsUp(payload, 2000));
+            System.out.println(LocalDateTime.now());
+
+
+        hessianClient.privy(payload, "x1", "y1");
+        System.out.println(LocalDateTime.now());
+
+
+        burlapClient.privy(payload, "x2", "y2");
+
+        System.out.println(LocalDateTime.now());
+
+
+        xmlRpcClient.privy(payload, "x3", "y3");
+
+        System.out.println(LocalDateTime.now());
+
 
         // org.springframework.remoting.RemoteAccessException
         // org.apache.xmlrpc.XmlRpcException
