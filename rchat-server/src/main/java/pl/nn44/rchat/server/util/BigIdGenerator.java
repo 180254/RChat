@@ -11,8 +11,8 @@ import java.util.Random;
 
 public class BigIdGenerator implements Iterator<String> {
 
-    private final static int NUMBER_BASE = 32;
-    private final static int BIT_PER_CHAR = IntMath.log2(NUMBER_BASE, RoundingMode.UNNECESSARY);
+    private static final int NUMBER_BASE = 32;
+    private static final int BIT_PER_CHAR = IntMath.log2(NUMBER_BASE, RoundingMode.UNNECESSARY);
 
     private final Random random;
     private final int chars;

@@ -19,20 +19,21 @@ import java.util.concurrent.locks.Lock;
 
 public class BestChatService implements ChatService {
 
-    static Logger LOG = LoggerFactory.getLogger(BestChatService.class);
-    static int MAX_NEWS_PER_REQUEST = 10;
+    private static final Logger LOG = LoggerFactory.getLogger(BestChatService.class);
+    private static final int MAX_NEWS_PER_REQUEST = 10;
 
-    Random random = new SecureRandom();
-    Iterator<String> idGenerator = BigIdGenerator.bits(random, 128);
+    private Random random = new SecureRandom();
+    private Iterator<String> idGenerator = BigIdGenerator.bits(random, 128);
 
-    ConcurrentMap<String, String> accounts/*username$user/password*/ = new ConcurrentHashMap<>();
-    ConcurrentMap<String, User> sessionToUser = new ConcurrentHashMap<>();
-    ConcurrentMap<String, Channel> channelByName = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, User> sessionToUser = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Channel> channelByName = new ConcurrentHashMap<>();
 
-    Striped<Lock> stripedLocks = Striped.lazyWeakLock(100);
+    private Striped<Lock> stripedLocks = Striped.lazyWeakLock(100);
 
     public BestChatService() {
         LOG.debug("instance created");
+        accounts.put("admin", "admin");
         channelByName.put("standard", new Channel("standard", null));
     }
 
@@ -477,7 +478,7 @@ public class BestChatService implements ChatService {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    class Params {
+    private class Params {
 
         public User caller;
         public Channel channel;
@@ -540,10 +541,10 @@ public class BestChatService implements ChatService {
     // - caller is admin on channel (NO_PERMISSION)
     // and:
     // - update caller last sync timestamp
-    Params params(String session,
-                  String channel,
-                  String username,
-                  boolean needAdmin)
+    private Params params(String session,
+                          String channel,
+                          String username,
+                          boolean needAdmin)
             throws ChatException {
 
         return new Params(session, channel, username, needAdmin);
@@ -551,7 +552,7 @@ public class BestChatService implements ChatService {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    class Locks {
+    private class Locks {
 
         Lock lock$caller;
         Lock lock$channel;
@@ -606,9 +607,9 @@ public class BestChatService implements ChatService {
         }
     }
 
-    Locks locks(String session,
-                String channel,
-                String username)
+    private Locks locks(String session,
+                        String channel,
+                        String username)
             throws ChatException {
 
         return new Locks(session, channel, username);

@@ -43,6 +43,7 @@ public class ServerApp {
 
     @Bean(name = "/burlap")
     public HttpRequestHandler burlapChatController() {
+        // noinspection deprecation
         BurlapServiceExporter exporter = new BurlapServiceExporter();
         exporter.setService(chatService());
         exporter.setServiceInterface(ChatService.class);
