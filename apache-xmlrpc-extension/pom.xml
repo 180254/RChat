@@ -9,8 +9,8 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>apache-xml-rpc-extension</artifactId>
-    <name>apache-xml-rpc-extension</name>
+    <artifactId>apache-xmlrpc-extension</artifactId>
+    <name>apache-xmlrpc-extension</name>
 
     <packaging>jar</packaging>
 

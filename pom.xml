@@ -9,7 +9,7 @@
     <version>1.0</version>
 
     <modules>
-        <module>apache-xml-rpc-extension</module>
+        <module>apache-xmlrpc-extension</module>
         <module>rchat-protocol</module>
         <module>rchat-client</module>
         <module>rchat-server</module>
@@ -35,6 +35,7 @@
         <version>1.4.1.RELEASE</version>
         <relativePath/>
     </parent>
+
 
     <profiles>
         <profile>
