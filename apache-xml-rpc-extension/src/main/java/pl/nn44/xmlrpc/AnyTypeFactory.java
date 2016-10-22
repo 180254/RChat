@@ -13,8 +13,7 @@ import org.apache.xmlrpc.serializer.TypeSerializerImpl;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 
 public class AnyTypeFactory extends TypeFactoryImpl {
@@ -22,17 +21,34 @@ public class AnyTypeFactory extends TypeFactoryImpl {
     protected static final Set<Class<?>> BASIC_CLASSES = new HashSet<>();
 
     static {
+        // Integer
         BASIC_CLASSES.add(Integer.class);
         BASIC_CLASSES.add(int.class);
+
+        // Boolean
         BASIC_CLASSES.add(Boolean.class);
         BASIC_CLASSES.add(boolean.class);
+
+        // String
         BASIC_CLASSES.add(String.class);
+
+        // Double
         BASIC_CLASSES.add(Double.class);
         BASIC_CLASSES.add(double.class);
+
+        // java.util.Date
         BASIC_CLASSES.add(Date.class);
+
+        // byte[]
         BASIC_CLASSES.add(byte[].class);
+
+        // java.util.Map
         BASIC_CLASSES.add(Map.class);
+
+        // Object[]
         BASIC_CLASSES.add(Object[].class);
+
+        //  java.util.List
         BASIC_CLASSES.add(List.class);
     }
 
@@ -40,9 +56,13 @@ public class AnyTypeFactory extends TypeFactoryImpl {
         return BASIC_CLASSES.stream().anyMatch(bs -> bs.isAssignableFrom(clazz));
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public AnyTypeFactory(XmlRpcController pController) {
         super(pController);
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public TypeSerializer getSerializer(XmlRpcStreamConfig pConfig,
@@ -57,8 +77,8 @@ public class AnyTypeFactory extends TypeFactoryImpl {
                 public void write(ContentHandler pHandler, Object pObject) throws SAXException {
                     try {
                         mapSerializer.write(pHandler, objectToMap(pObject));
-                    } catch (IllegalAccessException e) {
-                        throw new SAXException(e);
+                    } catch (Exception e) {
+                        throw new SAXException(e.getMessage(), e);
                     }
                 }
             };
@@ -67,6 +87,8 @@ public class AnyTypeFactory extends TypeFactoryImpl {
             return super.getSerializer(pConfig, pObject);
         }
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public TypeParser getParser(XmlRpcStreamConfig pConfig,
@@ -80,22 +102,10 @@ public class AnyTypeFactory extends TypeFactoryImpl {
                 @Override
                 public Object getResult() throws XmlRpcException {
                     try {
-                        // noinspection unchecked
-                        Map<String, Object> result = (Map<String, Object>) super.getResult();
-
-                        if (result != null && result.containsKey("__class__")) {
-                            return mapToObject(result);
-                        } else {
-                            return result;
-                        }
-
-                    } catch (IllegalAccessException |
-                            InstantiationException |
-                            ClassNotFoundException |
-                            NoSuchFieldException e) {
+                        return mapToObject((Map<?, ?>) super.getResult());
+                    } catch (Exception e) {
                         throw new XmlRpcException(e.getMessage(), e);
                     }
-
                 }
             };
 
@@ -104,72 +114,118 @@ public class AnyTypeFactory extends TypeFactoryImpl {
         }
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     protected Map<String, Object> objectToMap(Object object)
             throws IllegalAccessException {
 
         Map<String, Object> map = new HashMap<>();
 
+        // special case: null value
         if (object == null) {
             map.put("__class__", "null");
             return map;
         }
 
-        map.put("__class__", object.getClass().getName());
+        Class<?> clazz = object.getClass();
 
-        for (Field field : object.getClass().getDeclaredFields()) {
+        // special case: enum class
+        if (Enum.class.isAssignableFrom(clazz)) {
+            map.put("__class__", "enum");
+            map.put("type", clazz.getName());
+            map.put("name", ((Enum) object).name());
+            return map;
+        }
+
+        // any other class: map of (field-name, value)
+        map.put("__class__", clazz.getName());
+
+        for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
 
             String key = field.getName();
             Object value = field.get(object);
 
-            if (field.getName().equals("serialVersionUID")) {
-                // long is not supported
+            // ignored fields
+            if (Arrays.asList("serialVersionUID", "__ignore__")
+                    .contains(field.getName())) {
                 continue;
             }
 
-            if (value != null && isBasicClass(value.getClass())) {
-                map.put(key, value);
-            } else {
-                map.put(key, objectToMap(value));
-            }
+            map.put(key, value);
         }
 
         return map;
     }
 
-    protected Object mapToObject(Map<String, Object> map)
+    // ---------------------------------------------------------------------------------------------------------------
+
+    protected Object mapToObject(Map<?, ?> map)
             throws
             ClassNotFoundException,
+            ClassCastException,
             IllegalAccessException,
             InstantiationException,
-            NoSuchFieldException {
+            NoSuchFieldException,
+            NoSuchMethodException,
+            InvocationTargetException {
 
-        if (map.get("__class__").equals("null")) {
+        Object __class__ = map.get("__class__");
+
+        // special case: not-special-map
+        if (__class__ == null) {
+            return map;
+        }
+
+        // special case: null value
+        if (__class__.equals("null")) {
             return null;
         }
 
-        Class<?> clazz = Class.forName(map.get("__class__").toString());
-        Object instance = clazz.newInstance();
+        // special case: enum class
+        if (__class__.equals("enum")) {
+            Class<?> enumType = Class.forName(map.get("type").toString());
+            String keyName = map.get("name").toString();
 
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            // noinspection unchecked
+            return Enum.valueOf((Class<Enum>) enumType, keyName);
+        }
+
+
+        Class<?> clazz = Class.forName(__class__.toString());
+
+        // new instance
+        Constructor<?> constructor = clazz.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        Object instance = constructor.newInstance();
+
+        // fill all given fields
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             if (entry.getKey().equals("__class__")) {
                 continue;
             }
 
-            Field field = clazz.getDeclaredField(entry.getKey());
+            Field field = clazz.getDeclaredField(entry.getKey().toString());
             field.setAccessible(true);
 
+            // write also to finals
             Field modifiers = Field.class.getDeclaredField("modifiers");
             modifiers.setAccessible(true);
             modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
             Object value = entry.getValue();
 
-            if (value != null && value.getClass().isAssignableFrom(Map.class)) {
-                field.set(instance, mapToObject(map));
-            } else {
-                field.set(instance, value);
+            // special case: array
+            if (value != null && value.getClass().isArray()) {
+                Object[] oldValue = (Object[]) value;
+                Object[] newValue = (Object[]) Array.newInstance(field.getType().getComponentType(), oldValue.length);
+
+                System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
+                value = newValue;
             }
+
+            field.set(instance, value);
         }
 
         return instance;
