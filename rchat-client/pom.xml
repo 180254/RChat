@@ -16,6 +16,7 @@
 
     <build>
         <plugins>
+            <!-- http://stackoverflow.com/questions/19049253/intelij-idea-gui-designer-maven -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>ideauidesigner-maven-plugin</artifactId>
@@ -69,10 +70,11 @@
 
         <dependency>
             <groupId>pl.nn44</groupId>
-            <artifactId>apache-xml-rpc-extension</artifactId>
+            <artifactId>apache-xmlrpc-extension</artifactId>
             <version>1.0</version>
         </dependency>
 
+        <!-- http://stackoverflow.com/questions/19049253/intelij-idea-gui-designer-maven -->
         <dependency>
             <groupId>com.intellij</groupId>
             <artifactId>forms_rt</artifactId>

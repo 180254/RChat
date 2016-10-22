@@ -10,8 +10,6 @@ import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -21,42 +19,43 @@ import java.util.Properties;
 
 public class Clients {
 
-    static Logger LOG = LoggerFactory.getLogger(Clients.class);
-
+    private static final Logger LOG = LoggerFactory.getLogger(Clients.class);
     private final Properties prop;
 
-    public Clients() throws IOException {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream("app.properties");
-
-        this.prop = new Properties();
-        this.prop.load(stream);
+    public Clients(Properties prop) {
+        this.prop = prop;
     }
 
     public ChatService hessianClient() {
-        LOG.debug("HessianClient instance created.");
         String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.hessian");
 
         HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
         factory.setServiceUrl(serviceUrl);
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
-        return (ChatService) factory.getObject();
+
+        ChatService chatService = (ChatService) factory.getObject();
+
+        LOG.info("HessianClient instance created.");
+        return chatService;
     }
 
     public ChatService burlapClient() {
-        LOG.debug("BurlapClient instance created.");
         String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.burlap");
 
+        // noinspection deprecation
         BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
         factory.setServiceUrl(serviceUrl);
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
-        return (ChatService) factory.getObject();
+
+        ChatService chatService = (ChatService) factory.getObject();
+
+        LOG.info("BurlapClient instance created.");
+        return chatService;
     }
 
     public ChatService xmlRpcClient() {
-        LOG.debug("XML-RPC-Client instance created.");
         String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.xml-rpc");
 
         try {
@@ -77,20 +76,22 @@ public class Clients {
                         return method.getName().equals("toString") && args == null
                                 ? "XmlRpcProxy[" + config.getServerURL() + "]"
                                 : client.execute("ChatService." + method.getName(), args);
+
                     } catch (XmlRpcInvocationException e) {
-                        throw e.getCause() != null
-                                ? e.getCause()
-                                : e;
+                        throw e.getCause() != null ? e.getCause() : e;
                     }
                 }
             };
 
-            return (ChatService)
+            ChatService chatService = (ChatService)
                     Proxy.newProxyInstance(
                             getClass().getClassLoader(),
                             new Class<?>[]{ChatService.class},
                             invHandler
                     );
+
+            LOG.info("XML-RPC-Client instance created.");
+            return chatService;
 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
