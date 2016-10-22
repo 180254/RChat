@@ -16,6 +16,21 @@ import org.xml.sax.SAXException;
 import java.lang.reflect.*;
 import java.util.*;
 
+/**
+ * <pre>
+ * Extended Type Factory for apache-xml-rpc.
+ *
+ * Provided support for additional types:
+ * - null
+ * - enum
+ * - classes with fields of supported types
+ *
+ * Features:
+ * - without any extension, only xml-rpc standard tags
+ * - there is no to-byte-serialization
+ * - classes are served as maps with special __class__ key
+ * </pre>
+ */
 public class AnyTypeFactory extends TypeFactoryImpl {
 
     protected static final Set<Class<?>> BASIC_CLASSES = new HashSet<>();
