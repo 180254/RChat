@@ -55,8 +55,8 @@ public class ServerApp {
 
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
         config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
-        config.setEnabledForExceptions(false);
-        config.setEnabledForExtensions(false);
+        config.setEnabledForExceptions(true);
+        config.setEnabledForExtensions(true); // required by enabledForExceptions
         config.setKeepAliveEnabled(true);
 
         PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
