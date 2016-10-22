@@ -23,17 +23,17 @@ import java.util.*;
  * Provided support for additional types:
  * - null
  * - enum
- * - classes with fields of supported types
+ * - class with fields of supported types
  *
  * Features:
  * - without any extension, only xml-rpc standard tags
  * - there is no to-byte-serialization
- * - classes are served as maps with special __class__ key
+ * - class are served as map, entry=(field.name, value)
  * </pre>
  */
 public class AnyTypeFactory extends TypeFactoryImpl {
 
-    protected static final Set<Class<?>> BASIC_CLASSES = new HashSet<>();
+    protected static final Set<Class<?>> BASIC_CLASSES = new HashSet<>(12);
 
     static {
         // Integer
@@ -67,7 +67,7 @@ public class AnyTypeFactory extends TypeFactoryImpl {
         BASIC_CLASSES.add(List.class);
     }
 
-    protected boolean isBasicClass(Class<?> clazz) {
+    protected static boolean isBasicClass(Class<?> clazz) {
         return BASIC_CLASSES.stream().anyMatch(bs -> bs.isAssignableFrom(clazz));
     }
 
@@ -134,7 +134,7 @@ public class AnyTypeFactory extends TypeFactoryImpl {
     protected Map<String, Object> objectToMap(Object object)
             throws IllegalAccessException {
 
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(10);
 
         // special case: null value
         if (object == null) {
@@ -148,7 +148,7 @@ public class AnyTypeFactory extends TypeFactoryImpl {
         if (Enum.class.isAssignableFrom(clazz)) {
             map.put("__class__", "enum");
             map.put("type", clazz.getName());
-            map.put("name", ((Enum) object).name());
+            map.put("name", ((Enum<?>) object).name());
             return map;
         }
 
@@ -156,16 +156,16 @@ public class AnyTypeFactory extends TypeFactoryImpl {
         map.put("__class__", clazz.getName());
 
         for (Field field : clazz.getDeclaredFields()) {
-            field.setAccessible(true);
-
-            String key = field.getName();
-            Object value = field.get(object);
-
             // ignored fields
             if (Arrays.asList("serialVersionUID", "__ignore__")
                     .contains(field.getName())) {
                 continue;
             }
+
+            field.setAccessible(true);
+
+            String key = field.getName();
+            Object value = field.get(object);
 
             map.put(key, value);
         }
@@ -178,7 +178,6 @@ public class AnyTypeFactory extends TypeFactoryImpl {
     protected Object mapToObject(Map<?, ?> map)
             throws
             ClassNotFoundException,
-            ClassCastException,
             IllegalAccessException,
             InstantiationException,
             NoSuchFieldException,
@@ -202,8 +201,14 @@ public class AnyTypeFactory extends TypeFactoryImpl {
             Class<?> enumType = Class.forName(map.get("type").toString());
             String keyName = map.get("name").toString();
 
-            // noinspection unchecked
-            return Enum.valueOf((Class<Enum>) enumType, keyName);
+            // or Enum.valueOf((Class<Enum>) enumType, keyName);
+            // but then unchecked cast warning
+            return Arrays.stream(enumType.getEnumConstants())
+                    .filter(ec -> ec.toString().equals(keyName))
+                    .findFirst()
+                    .orElseThrow(() -> new InstantiationException(
+                            "enum=" + map.get("type") + ';' + map.get("name"))
+                    );
         }
 
 
