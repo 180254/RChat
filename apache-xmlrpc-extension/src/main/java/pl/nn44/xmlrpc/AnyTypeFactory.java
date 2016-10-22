@@ -204,7 +204,7 @@ public class AnyTypeFactory extends TypeFactoryImpl {
             // or Enum.valueOf((Class<Enum>) enumType, keyName);
             // but then unchecked cast warning
             return Arrays.stream(enumType.getEnumConstants())
-                    .filter(ec -> ec.toString().equals(keyName))
+                    .filter(ec -> ((Enum<?>) ec).name().equals(keyName))
                     .findFirst()
                     .orElseThrow(() -> new InstantiationException(
                             "enum=" + map.get("type") + ';' + map.get("name"))

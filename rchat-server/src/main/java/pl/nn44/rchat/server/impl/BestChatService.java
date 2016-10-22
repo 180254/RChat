@@ -61,7 +61,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response logout(String session) throws ChatException {
+    public Response<?> logout(String session) throws ChatException {
         Locks locks = locks(session, null, null);
 
         try {
@@ -135,7 +135,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response part(String session, String channel) throws ChatException {
+    public Response<?> part(String session, String channel) throws ChatException {
         Locks locks = locks(session, channel, null);
 
         try {
@@ -168,7 +168,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response kick(String session, String channel, String username) throws ChatException {
+    public Response<?> kick(String session, String channel, String username) throws ChatException {
         Locks locks = locks(session, channel, username);
 
         try {
@@ -202,7 +202,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response ban(String session, String channel, String username, boolean state) throws ChatException {
+    public Response<?> ban(String session, String channel, String username, boolean state) throws ChatException {
         Locks locks = locks(session, channel, username);
 
         try {
@@ -260,7 +260,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response topic(String session, String channel, String text) throws ChatException {
+    public Response<?> topic(String session, String channel, String text) throws ChatException {
         Locks locks = new Locks(session, channel, null);
 
         try {
@@ -291,7 +291,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response admin(String session, String channel, String username, boolean state) throws ChatException {
+    public Response<?> admin(String session, String channel, String username, boolean state) throws ChatException {
         Locks locks = locks(session, channel, username);
 
         try {
@@ -323,7 +323,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response ignore(String session, String username, boolean state) throws ChatException {
+    public Response<?> ignore(String session, String username, boolean state) throws ChatException {
         Locks locks = locks(session, null, username);
 
         try {
@@ -354,7 +354,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response privy(String session, String username, String text) throws ChatException {
+    public Response<?> privy(String session, String username, String text) throws ChatException {
         Locks locks = locks(session, null, username);
 
         try {
@@ -383,7 +383,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response message(String session, String channel, String text) throws ChatException {
+    public Response<?> message(String session, String channel, String text) throws ChatException {
         Locks locks = locks(session, channel, null);
 
         try {
@@ -453,7 +453,7 @@ public class BestChatService implements ChatService {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
-    public Response test(boolean exception) throws ChatException {
+    public Response<?> test(boolean exception) throws ChatException {
         if (exception) {
             throw new ChatException(Reason.NO_PERMISSION);
         }
