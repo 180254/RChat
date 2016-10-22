@@ -32,7 +32,7 @@ public class BestChatService implements ChatService {
     private Striped<Lock> stripedLocks = Striped.lazyWeakLock(100);
 
     public BestChatService() {
-        LOG.debug("instance created");
+        LOG.info("BestChatService instance created.");
         accounts.put("admin", "admin");
         channelByName.put("standard", new Channel("standard", null));
     }
