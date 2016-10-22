@@ -4,11 +4,14 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class WhatsUp implements Serializable {
 
     private static final long serialVersionUID = -2493165937560638279L;
 
+    private final String isoTime;
     private final What what;
     private final String channel;
     private final String username;
@@ -19,10 +22,23 @@ public class WhatsUp implements Serializable {
                    String username,
                    String... params) {
 
+        this.isoTime = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
         this.what = what;
         this.channel = channel;
         this.username = username;
         this.params = params.clone();
+    }
+
+    protected WhatsUp() {
+        this.isoTime = null;
+        this.what = null;
+        this.channel = null;
+        this.username = null;
+        this.params = null;
+    }
+
+    public LocalDateTime getTime() {
+        return LocalDateTime.parse(this.isoTime, DateTimeFormatter.ISO_DATE_TIME);
     }
 
     public What getWhat() {
@@ -46,7 +62,8 @@ public class WhatsUp implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WhatsUp whatsUp = (WhatsUp) o;
-        return what == whatsUp.what &&
+        return Objects.equal(isoTime, whatsUp.isoTime) &&
+                what == whatsUp.what &&
                 Objects.equal(channel, whatsUp.channel) &&
                 Objects.equal(username, whatsUp.username) &&
                 Objects.equal(params, whatsUp.params);
@@ -54,12 +71,13 @@ public class WhatsUp implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(what, channel, username, params);
+        return Objects.hashCode(isoTime, what, channel, username, params);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                .add("isoTime", isoTime)
                 .add("what", what)
                 .add("channel", channel)
                 .add("username", username)

@@ -28,6 +28,14 @@ public class ChannelUser implements Serializable {
         this.admin = admin;
     }
 
+    protected ChannelUser() {
+        this.channel = null;
+        this.username = null;
+        this.authorized = false;
+        this.ignored = false;
+        this.admin = false;
+    }
+
     public String getChannel() {
         return channel;
     }
