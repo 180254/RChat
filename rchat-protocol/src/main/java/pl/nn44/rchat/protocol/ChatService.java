@@ -29,4 +29,6 @@ public interface ChatService {
     Response message(String session, String channel, String text) throws ChatException;
 
     Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException;
+
+    Response test(boolean exception) throws ChatException;
 }

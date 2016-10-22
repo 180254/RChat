@@ -53,8 +53,8 @@ public class ClientApp {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
             config.setServerURL(new URL(prop.getProperty("url.app") + prop.getProperty("url.xml-rpc")));
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
-            config.setEnabledForExceptions(false);
-            config.setEnabledForExtensions(false);
+            config.setEnabledForExceptions(true);
+            config.setEnabledForExtensions(true); // required by enabledForExceptions
 
             XmlRpcClient client = new XmlRpcClient();
             client.setConfig(config);
@@ -91,41 +91,14 @@ public class ClientApp {
 
         System.out.println(LocalDateTime.now());
 
-        Response<String> aaa = hessianClient.login("Pabhyrghggggfbghj", null);
-        String payload = aaa.getPayload();
+        System.out.println(xmlRpcClient.test(false));
+        System.out.println(xmlRpcClient.test(true));
 
+        Response<String> session = hessianClient.login("somebody", null);
+        String payload = session.getPayload();
 
-        hessianClient.join(payload, "asd", null);
-
-        System.out.println(hessianClient.message(payload, "asd", "y1"));
-        System.out.println(LocalDateTime.now());
-
-
-        System.out.println(burlapClient.message(payload, "asd", "y2"));
-            System.out.println(LocalDateTime.now());
-
-
-        System.out.println(xmlRpcClient.message(payload, "asd", "y3"));
-            System.out.println(LocalDateTime.now());
-
-
-        System.out.println(burlapClient.whatsUp(payload, 2000));
-            System.out.println(LocalDateTime.now());
-
-
-        hessianClient.privy(payload, "x1", "y1");
-        System.out.println(LocalDateTime.now());
-
-
-        burlapClient.privy(payload, "x2", "y2");
-
-        System.out.println(LocalDateTime.now());
-
-
-        xmlRpcClient.privy(payload, "x3", "y3");
-
-        System.out.println(LocalDateTime.now());
-
+        System.out.println(xmlRpcClient.join(payload, "standard", null));
+        System.out.println(xmlRpcClient.message(payload, "standard", "y3"));
 
         // org.springframework.remoting.RemoteAccessException
         // org.apache.xmlrpc.XmlRpcException

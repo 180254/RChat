@@ -1,5 +1,6 @@
 package pl.nn44.rchat.server.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Striped;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -402,7 +403,8 @@ public class BestChatService implements ChatService {
                 }
             }
 
-            return Response.Ok();
+            throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
+            //  return Response.Ok();
 
         } finally {
             locks.unlock();
@@ -445,6 +447,32 @@ public class BestChatService implements ChatService {
         } finally {
             locks.unlock();
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public Response test(boolean exception) throws ChatException {
+        if (exception) {
+            throw new ChatException(Reason.NO_PERMISSION);
+        }
+
+        return Response.Ok(
+                Response.Ok(
+                        new ImmutableMap.Builder<>()
+                                .put("null", "null")
+                                .put("string", "xxx")
+                                .put("number", 999)
+                                .put("response", Response.Ok(10))
+                                .put("response-null", Response.Ok())
+                                .put("array-object", new Object[]{1, "2", What.BAN})
+                                .put("list", Arrays.asList(2, "3", What.JOIN))
+                                .put("map", ImmutableMap.<Object, Object>of("key", "value"))
+                                .put("whatsUp", new WhatsUp(What.TOPIC, "any", "topic"))
+                                .put("whatsUp-param", new WhatsUp(What.TOPIC, "any", "topic", "p1", "p2"))
+                                .build()
+                )
+        );
     }
 
     // ---------------------------------------------------------------------------------------------------------------
