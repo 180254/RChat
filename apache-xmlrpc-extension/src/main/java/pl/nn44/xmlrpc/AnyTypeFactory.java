@@ -207,10 +207,9 @@ public class AnyTypeFactory extends TypeFactoryImpl {
                     .filter(ec -> ((Enum<?>) ec).name().equals(keyName))
                     .findFirst()
                     .orElseThrow(() -> new InstantiationException(
-                            "enum=" + map.get("type") + ';' + map.get("name"))
-                    );
+                            "enum=" + map.get("type") + ';' + map.get("name")
+                    ));
         }
-
 
         Class<?> clazz = Class.forName(__class__.toString());
 
