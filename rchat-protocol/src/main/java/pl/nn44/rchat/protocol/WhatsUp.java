@@ -22,6 +22,7 @@ public class WhatsUp implements Serializable {
                    String username,
                    String... params) {
 
+        // LocalDateTime and long are not supported by xml-rpc
         this.isoTime = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
         this.what = what;
         this.channel = channel;
