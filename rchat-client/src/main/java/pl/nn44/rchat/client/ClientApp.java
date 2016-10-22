@@ -4,6 +4,8 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.common.XmlRpcInvocationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.rchat.protocol.ChatException;
@@ -22,6 +24,8 @@ import java.util.Properties;
 
 public class ClientApp {
 
+    static Logger LOG = LoggerFactory.getLogger(ClientApp.class);
+
     private final Properties prop;
 
     public ClientApp() throws IOException {
@@ -33,25 +37,34 @@ public class ClientApp {
     }
 
     public ChatService hessianClient() {
+        LOG.debug("HessianClient instance created.");
+        String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.hessian");
+
         HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-        factory.setServiceUrl(prop.getProperty("url.app") + prop.getProperty("url.hessian"));
+        factory.setServiceUrl(serviceUrl);
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
         return (ChatService) factory.getObject();
     }
 
     public ChatService burlapClient() {
+        LOG.debug("BurlapClient instance created.");
+        String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.burlap");
+
         BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
-        factory.setServiceUrl(prop.getProperty("url.app") + prop.getProperty("url.burlap"));
+        factory.setServiceUrl(serviceUrl);
         factory.setServiceInterface(ChatService.class);
         factory.afterPropertiesSet();
         return (ChatService) factory.getObject();
     }
 
     public ChatService xmlRpcClient() {
+        LOG.debug("XML-RPC-Client instance created.");
+        String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.xml-rpc");
+
         try {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-            config.setServerURL(new URL(prop.getProperty("url.app") + prop.getProperty("url.xml-rpc")));
+            config.setServerURL(new URL(serviceUrl));
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
             config.setEnabledForExceptions(true);
             config.setEnabledForExtensions(true); // required by enabledForExceptions
@@ -62,7 +75,9 @@ public class ClientApp {
 
             InvocationHandler invHandler = (proxy, method, args) -> {
                 try {
-                    return client.execute("ChatService." + method.getName(), args);
+                    return method.getName().equals("toString") && args == null
+                            ? "XmlRpcProxy[" + config.getServerURL() + "]"
+                            : client.execute("ChatService." + method.getName(), args);
                 } catch (XmlRpcInvocationException e) {
                     throw e.getCause() != null
                             ? e.getCause()
@@ -91,7 +106,8 @@ public class ClientApp {
 
         System.out.println(LocalDateTime.now());
 
-        System.out.println(xmlRpcClient.test(false));
+        Response test = xmlRpcClient.test(false);
+        System.out.println(test);
         System.out.println(xmlRpcClient.test(true));
 
         Response<String> session = hessianClient.login("somebody", null);
