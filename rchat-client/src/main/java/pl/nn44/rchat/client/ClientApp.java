@@ -1,78 +1,56 @@
 package pl.nn44.rchat.client;
 
-import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.protocol.ChatException;
-import pl.nn44.rchat.protocol.ChatService;
-import pl.nn44.rchat.protocol.Response;
+import pl.nn44.rchat.client.controller.MainController;
 
-import javax.swing.*;
-import java.util.Properties;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class ClientApp {
+// org.springframework.remoting.RemoteAccessException
+// org.apache.xmlrpc.XmlRpcException
+// pl.nn44.rchat.protocol.ChatException
+
+public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
-    private JPanel panel;
-    private JButton button;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final CsHandler csHandler = new CsHandler(executor);
+    private final Map<Class<?>, Object> controllers = new HashMap<>();
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        csHandler.init();
+        csHandler.runTestAsync();
+        controllers.put(MainController.class, new MainController(csHandler));
+
+        URL fxmlLayout = getClass().getClassLoader().getResource("layout_main.fxml");
+        if (fxmlLayout == null) {
+            throw new AssertionError();
+        }
+
+        FXMLLoader loader = new FXMLLoader(fxmlLayout);
+        loader.setControllerFactory(controllers::get);
+
+        VBox root = loader.load();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("RChat");
+        stage.show();
+    }
 
     public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(WindowsLookAndFeel.class.getName());
-        } catch (ClassNotFoundException | InstantiationException |
-                UnsupportedLookAndFeelException | IllegalAccessException ignored) {
-        }
-
-        JFrame frame = new JFrame("ClientApp");
-        frame.setContentPane(new ClientApp().panel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        LOG.info("App started.");
+        Application.launch(ClientApp.class, args);
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
-
-    private final ChatService[] chatServices = new ChatService[3];
-
-    public ClientApp() {
-        Properties prop = PropLoader.get();
-        Clients clients = new Clients(prop);
-
-        try {
-            this.chatServices[0] = clients.hessianClient();
-        } catch (Exception e) {
-            LOG.error("HessianClient creation fail.", e);
-        }
-
-        try {
-            this.chatServices[1] = clients.burlapClient();
-        } catch (Exception e) {
-            LOG.error("BurlapClient creation fail.", e);
-        }
-
-        try {
-            this.chatServices[2] = clients.xmlRpcClient();
-        } catch (Exception e) {
-            LOG.error("XML-RPC-Client creation fail.", e);
-        }
-
-        for (int i = 0; i < 3; i++) {
-            try {
-                Response<?> test = this.chatServices[i].test(false);
-                LOG.debug("ChatService.test.a({})=OK;   {}", i, test);
-            } catch (ChatException e) {
-                LOG.error("ChatService.test.a({})=FAIL; {}", i, e.toString());
-            }
-
-            try {
-                Response<?> test = this.chatServices[i].test(true);
-                LOG.error("ChatService.test.a({})=FAIL; {}", i, test);
-            } catch (ChatException e) {
-                LOG.debug("ChatService.test.b({})=OK;   {}", i, e.toString());
-            }
-        }
-
-    }
 }

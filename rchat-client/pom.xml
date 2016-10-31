@@ -14,30 +14,6 @@
 
     <packaging>jar</packaging>
 
-    <build>
-        <plugins>
-            <!-- http://stackoverflow.com/questions/19049253/intelij-idea-gui-designer-maven -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>ideauidesigner-maven-plugin</artifactId>
-                <version>1.0-beta-1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>javac2</goal>
-                        </goals>
-                    </execution>
-                </executions>
-
-                <configuration>
-                    <fork>true</fork>
-                    <debug>true</debug>
-                    <failOnError>true</failOnError>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <dependency>
             <groupId>pl.nn44</groupId>
@@ -72,13 +48,6 @@
             <groupId>pl.nn44</groupId>
             <artifactId>apache-xmlrpc-extension</artifactId>
             <version>1.0</version>
-        </dependency>
-
-        <!-- http://stackoverflow.com/questions/19049253/intelij-idea-gui-designer-maven -->
-        <dependency>
-            <groupId>com.intellij</groupId>
-            <artifactId>forms_rt</artifactId>
-            <version>7.0.3</version>
         </dependency>
     </dependencies>
 </project>

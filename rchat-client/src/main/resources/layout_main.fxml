@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="pl.nn44.rchat.client.controller.MainController">
+    <MenuBar VBox.vgrow="NEVER">
+        <Menu text="File">
+            <MenuItem mnemonicParsing="false" text="Exit"/>
+        </Menu>
+        <Menu text="Mode">
+            <RadioMenuItem mnemonicParsing="false" selected="true" text="Hessian">
+                <toggleGroup>
+                    <ToggleGroup fx:id="protocol"/>
+                </toggleGroup>
+            </RadioMenuItem>
+            <RadioMenuItem mnemonicParsing="false" text="Burlap" toggleGroup="$protocol"/>
+            <RadioMenuItem mnemonicParsing="false" text="XML-RPC" toggleGroup="$protocol"/>
+        </Menu>
+    </MenuBar>
+    <HBox VBox.vgrow="NEVER">
+        <padding>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+        </padding>
+        <Label text="Status:">
+            <padding>
+                <Insets left="5.0"/>
+            </padding>
+        </Label>
+        <Label fx:id="status" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+                <Insets left="5.0"/>
+            </HBox.margin>
+        </Label>
+    </HBox>
+    <SplitPane dividerPositions="0.25, 0.75" focusTraversable="true" VBox.vgrow="ALWAYS">
+        <ListView/>
+        <ScrollPane>
+            <TextFlow/>
+        </ScrollPane>
+        <ListView/>
+    </SplitPane>
+    <HBox id="HBox" spacing="5.0" VBox.vgrow="NEVER">
+        <padding>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+        </padding>
+        <TextField HBox.hgrow="ALWAYS"/>
+        <Button fx:id="send" mnemonicParsing="false" onAction="#sendClicked" text="Send"/>
+    </HBox>
+</VBox>
