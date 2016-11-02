@@ -40,7 +40,7 @@
             <PasswordField fx:id="password" prefHeight="25.0" prefWidth="150.0"
                            GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0"
+            <Button fx:id="enter" mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0"
                     text="ENTER" onAction="#onEnterClicked"
                     GridPane.columnIndex="1" GridPane.rowIndex="3"/>
         </GridPane>

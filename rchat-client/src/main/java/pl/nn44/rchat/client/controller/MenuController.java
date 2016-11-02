@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.CsHandler;
 
+import java.util.concurrent.ExecutorService;
+
 public class MenuController {
 
     private static final Logger LOG = LoggerFactory.getLogger(MenuController.class);
@@ -16,7 +18,7 @@ public class MenuController {
 
     @FXML public ToggleGroup protocol;
 
-    public MenuController(CsHandler csHandler, Stage stage) {
+    public MenuController(ExecutorService executor, CsHandler csHandler, Stage stage) {
         this.csHandler = csHandler;
         this.stage = stage;
         LOG.debug("{} instance created.", getClass().getSimpleName());

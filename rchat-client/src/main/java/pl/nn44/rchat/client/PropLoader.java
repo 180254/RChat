@@ -12,17 +12,19 @@ public class PropLoader {
     private static final Logger LOG = LoggerFactory.getLogger(PropLoader.class);
 
     public static Properties get() {
-        Properties prop = new Properties();
-
         try {
+            Properties prop = new Properties();
+
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             InputStream stream = loader.getResourceAsStream("app.properties");
             prop.load(stream);
 
+            LOG.debug("Loaded properties. {}", prop);
+            return prop;
+
         } catch (IOException e) {
             LOG.error("Unable to load .properties file.", e);
+            throw new AssertionError(e);
         }
-
-        return prop;
     }
 }

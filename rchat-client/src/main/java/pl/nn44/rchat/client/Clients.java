@@ -23,6 +23,7 @@ public class Clients {
 
     public Clients(Properties prop) {
         this.prop = prop;
+        LOG.debug("{} instance created.", getClass().getSimpleName());
     }
 
     public ChatService hessianClient() {
@@ -35,7 +36,7 @@ public class Clients {
 
         ChatService chatService = (ChatService) factory.getObject();
 
-        LOG.info("HessianClient instance created.");
+        LOG.debug("HessianClient instance created.");
         return chatService;
     }
 
@@ -50,7 +51,7 @@ public class Clients {
 
         ChatService chatService = (ChatService) factory.getObject();
 
-        LOG.info("BurlapClient instance created.");
+        LOG.debug("BurlapClient instance created.");
         return chatService;
     }
 
@@ -70,9 +71,12 @@ public class Clients {
 
             InvocationHandler invHandler = (proxy, method, args) -> {
                 try {
-                    return method.getName().equals("toString") && args == null
-                            ? "XmlRpcProxy[" + config.getServerURL() + "]"
-                            : client.execute("ChatService." + method.getName(), args);
+                    return
+                            // execute method on XmlRpcClient
+                            // toString() specially handled: avoid exceptions during debugging
+                            method.getName().equals("toString") && args == null
+                                    ? "XmlRpcProxy[" + config.getServerURL() + "]"
+                                    : client.execute("ChatService." + method.getName(), args);
 
                 } catch (XmlRpcInvocationException e) {
                     throw e.getCause() != null ? e.getCause() : e;
@@ -86,11 +90,30 @@ public class Clients {
                             invHandler
                     );
 
-            LOG.info("XML-RPC-Client instance created.");
+            LOG.debug("XmlRpcClient instance created.");
             return chatService;
 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public enum Cs {
+
+        Burlap(0),
+        Hessian(1),
+        XmlRpc(2);
+
+        private final int i;
+
+        Cs(int i) {
+            this.i = i;
+        }
+
+        public int i() {
+            return i;
         }
     }
 }
