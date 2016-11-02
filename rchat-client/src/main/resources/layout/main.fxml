@@ -26,7 +26,7 @@
         </Label>
     </HBox>
 
-    <SplitPane dividerPositions="0.25, 0.75" focusTraversable="true" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.25, 0.75" VBox.vgrow="ALWAYS">
         <ListView/>
         <ScrollPane>
             <TextFlow/>

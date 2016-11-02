@@ -36,12 +36,12 @@ public class CsHandler {
                 Response<?> test = chatServices[i].test(false);
                 LOG.debug("ChatService.test.a({})=OK;   {}", i, test);
             } catch (Exception e) {
-                LOG.error("ChatService.test.a({})=FAIL; {}", i, e.toString());
+                LOG.debug("ChatService.test.a({})=FAIL; {}", i, e.toString());
             }
 
             try {
                 Response<?> test = chatServices[i].test(true);
-                LOG.error("ChatService.test.a({})=FAIL; {}", i, test);
+                LOG.debug("ChatService.test.a({})=FAIL; {}", i, test);
             } catch (ChatException e) {
                 LOG.debug("ChatService.test.b({})=OK;   {}", i, e.toString());
             } catch (Exception e) {

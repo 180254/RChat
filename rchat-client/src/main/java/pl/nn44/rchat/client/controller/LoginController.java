@@ -2,6 +2,7 @@ package pl.nn44.rchat.client.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -10,16 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.CsHandler;
 
+import java.net.URL;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-public class LoginController {
+public class LoginController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
-    private final ExecutorService executor;
     private final CsHandler csHandler;
     private final Consumer<String> sceneChanger;
 
@@ -28,15 +29,15 @@ public class LoginController {
     @FXML public Button enter;
     @FXML public Label status;
 
-    public LoginController(ExecutorService executor, CsHandler csHandler, Consumer<String> sceneChanger) {
-        this.executor = executor;
+    public LoginController(CsHandler csHandler, Consumer<String> sceneChanger) {
         this.csHandler = csHandler;
         this.sceneChanger = sceneChanger;
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
 
     @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         status.setText("Initializing app, please wait ...");
         enter.setDisable(true);
 
@@ -45,7 +46,8 @@ public class LoginController {
                 .thenRunAsync(() -> {
                     status.setText("");
                     enter.setDisable(false);
-                });
+                })
+                .thenRunAsync(csHandler::runTest);
     }
 
     int temp = 0;

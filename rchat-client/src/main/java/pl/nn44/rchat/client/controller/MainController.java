@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.CsHandler;
 
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 
 public class MainController {
 
@@ -19,9 +18,9 @@ public class MainController {
     @FXML public Label status;
     @FXML public Button send;
 
-    public MainController(ExecutorService executor, CsHandler csHandler) {
+    public MainController(CsHandler csHandler) {
         this.csHandler = csHandler;
-        LOG.info("{} instance created.", getClass().getSimpleName());
+        LOG.debug("{} instance created.", getClass().getSimpleName());
     }
 
     @FXML

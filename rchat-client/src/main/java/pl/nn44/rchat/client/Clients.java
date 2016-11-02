@@ -102,8 +102,8 @@ public class Clients {
 
     public enum Cs {
 
-        Burlap(0),
-        Hessian(1),
+        Hessian(0),
+        Burlap(1),
         XmlRpc(2);
 
         private final int i;

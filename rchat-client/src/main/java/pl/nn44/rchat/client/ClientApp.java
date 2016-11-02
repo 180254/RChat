@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 // org.springframework.remoting.RemoteAccessException
@@ -29,7 +27,6 @@ public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
-    private final ExecutorService executor = Executors.newCachedThreadPool();
     private final CsHandler csHandler = new CsHandler();
     private final Map<Class<?>, Supplier<Object>> controllers = new HashMap<>();
 
@@ -55,9 +52,9 @@ public class ClientApp extends Application {
             }
         };
 
-        controllers.put(LoginController.class, () -> new LoginController(executor, csHandler, sceneChanger));
-        controllers.put(MainController.class, () -> new MainController(executor, csHandler));
-        controllers.put(MenuController.class, () -> new MenuController(executor, csHandler, stage));
+        controllers.put(LoginController.class, () -> new LoginController(csHandler, sceneChanger));
+        controllers.put(MainController.class, () -> new MainController(csHandler));
+        controllers.put(MenuController.class, () -> new MenuController(csHandler, stage));
 
         sceneChanger.accept("login");
         stage.setTitle("RChat");
@@ -66,7 +63,6 @@ public class ClientApp extends Application {
 
     @Override
     public void stop() {
-        executor.shutdown();
         Platform.exit();
     }
 
