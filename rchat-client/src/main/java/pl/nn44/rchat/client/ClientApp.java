@@ -1,13 +1,16 @@
 package pl.nn44.rchat.client;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.nn44.rchat.client.controller.LoginController;
 import pl.nn44.rchat.client.controller.MainController;
+import pl.nn44.rchat.client.controller.MenuController;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -31,9 +34,11 @@ public class ClientApp extends Application {
     public void start(Stage stage) throws Exception {
         csHandler.init();
         csHandler.runTestAsync();
+        controllers.put(LoginController.class, new LoginController(csHandler));
         controllers.put(MainController.class, new MainController(csHandler));
+        controllers.put(MenuController.class, new MenuController(csHandler, stage));
 
-        URL fxmlLayout = getClass().getClassLoader().getResource("layout_main.fxml");
+        URL fxmlLayout = getClass().getClassLoader().getResource("layout/main.fxml");
         if (fxmlLayout == null) {
             throw new AssertionError();
         }
@@ -46,6 +51,12 @@ public class ClientApp extends Application {
         stage.setScene(scene);
         stage.setTitle("RChat");
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+        executor.shutdown();
+        Platform.exit();
     }
 
     public static void main(String[] args) {

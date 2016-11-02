@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<MenuBar VBox.vgrow="NEVER"
+         xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
+         fx:controller="pl.nn44.rchat.client.controller.MenuController">
+
+    <Menu text="File">
+        <MenuItem mnemonicParsing="false" onAction="#onExitSelected" text="Exit"/>
+    </Menu>
+
+    <Menu text="Mode">
+        <RadioMenuItem mnemonicParsing="false" onAction="#onHessianSelected" selected="true" text="Hessian">
+            <toggleGroup>
+                <ToggleGroup fx:id="protocol"/>
+            </toggleGroup>
+        </RadioMenuItem>
+
+        <RadioMenuItem mnemonicParsing="false" onAction="#onBurlapSelected" text="Burlap" toggleGroup="$protocol"/>
+        <RadioMenuItem mnemonicParsing="false" onAction="#onXmlRpcSelected" text="XML-RPC" toggleGroup="$protocol"/>
+    </Menu>
+</MenuBar>

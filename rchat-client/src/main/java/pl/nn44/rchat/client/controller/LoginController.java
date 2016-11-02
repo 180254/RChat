@@ -2,29 +2,31 @@ package pl.nn44.rchat.client.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.CsHandler;
 
 import java.util.Random;
 
-public class MainController {
+public class LoginController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
     private final CsHandler csHandler;
 
+    @FXML public TextField username;
+    @FXML public PasswordField password;
     @FXML public Label status;
-    @FXML public Button send;
 
-    public MainController(CsHandler csHandler) {
+    public LoginController(CsHandler csHandler) {
         this.csHandler = csHandler;
-        LOG.info("{} instance created.", getClass().getSimpleName());
+        LOG.debug("{} instance created.", getClass().getSimpleName());
     }
 
     @FXML
-    public void sendClicked(ActionEvent ev) {
+    public void onEnterClicked(ActionEvent ev) {
         status.setText(Integer.toString(new Random().nextInt()));
     }
 }
