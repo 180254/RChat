@@ -7,17 +7,17 @@
          fx:controller="pl.nn44.rchat.client.controller.MenuController">
 
     <Menu text="File">
-        <MenuItem mnemonicParsing="false" onAction="#onExitSelected" text="Exit"/>
+        <MenuItem mnemonicParsing="false" onAction="#onExitClicked" text="Exit"/>
     </Menu>
 
     <Menu text="Mode">
-        <RadioMenuItem mnemonicParsing="false" onAction="#onHessianSelected" selected="true" text="Hessian">
+        <RadioMenuItem text="Hessian" mnemonicParsing="false" onAction="#onProtocolChanged" selected="true">
             <toggleGroup>
                 <ToggleGroup fx:id="protocol"/>
             </toggleGroup>
         </RadioMenuItem>
 
-        <RadioMenuItem mnemonicParsing="false" onAction="#onBurlapSelected" text="Burlap" toggleGroup="$protocol"/>
-        <RadioMenuItem mnemonicParsing="false" onAction="#onXmlRpcSelected" text="XML-RPC" toggleGroup="$protocol"/>
+        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged" text="Burlap" toggleGroup="$protocol"/>
+        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged" text="XmlRpc" toggleGroup="$protocol"/>
     </Menu>
 </MenuBar>

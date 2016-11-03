@@ -3,6 +3,7 @@ package pl.nn44.rchat.client.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import java.util.ResourceBundle;
 public class MenuController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MenuController.class);
+
     private final CsHandler csHandler;
     private final Stage stage;
 
@@ -38,26 +40,17 @@ public class MenuController implements Initializable {
     }
 
     @FXML
-    public void onExitSelected(ActionEvent ev) {
+    public void onExitClicked(ActionEvent ev) {
         stage.close();
     }
 
     @FXML
-    public void onHessianSelected(ActionEvent ev) {
-        csHandler.setCurrent(Clients.Cs.Hessian.i());
-        LOG.debug("HessianService selected");
-    }
+    public void onProtocolChanged(ActionEvent actionEvent) {
+        Toggle source = (Toggle) actionEvent.getSource();
+        int protocolIndex = protocol.getToggles().indexOf(source);
+        Clients.Cs cs = Clients.Cs.byIndex(protocolIndex);
 
-    @FXML
-    public void onBurlapSelected(ActionEvent ev) {
-        csHandler.setCurrent(Clients.Cs.Burlap.i());
-        LOG.debug("BurlapService selected");
+        csHandler.setCurrent(cs.i());
+        LOG.debug("{}Client selected", cs.name());
     }
-
-    @FXML
-    public void onXmlRpcSelected(ActionEvent ev) {
-        csHandler.setCurrent(Clients.Cs.XmlRpc.i());
-        LOG.debug("XmLRpcService selected");
-    }
-
 }
