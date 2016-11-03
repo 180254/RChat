@@ -405,8 +405,7 @@ public class BestChatService implements ChatService {
                 }
             }
 
-            throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
-            //  return Response.Ok();
+            return Response.Ok();
 
         } finally {
             locks.unlock();
@@ -618,3 +617,4 @@ public class BestChatService implements ChatService {
 }
 
 // TODO: - keep ignored on quit
+// TODO: - verify last sync. on login, or scheduled?
