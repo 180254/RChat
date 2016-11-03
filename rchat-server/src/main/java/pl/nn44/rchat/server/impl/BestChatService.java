@@ -618,3 +618,4 @@ public class BestChatService implements ChatService {
 
 // TODO: - keep ignored on quit
 // TODO: - verify last sync. on login, or scheduled?
+// TODO: - allowed chars in user/channel name
