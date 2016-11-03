@@ -1,8 +1,7 @@
-package pl.nn44.rchat.client;
+package pl.nn44.rchat.client.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.client.Clients.Cs;
 import pl.nn44.rchat.protocol.ChatException;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.protocol.Response;
@@ -24,28 +23,29 @@ public class CsHandler {
         Properties prop = PropLoader.get();
         Clients clients = new Clients(prop);
 
-        this.chatServices[Cs.Hessian.i()] = clients.hessianClient();
-        this.chatServices[Cs.Burlap.i()] = clients.burlapClient();
-        this.chatServices[Cs.XmlRpc.i()] = clients.xmlRpcClient();
+        this.chatServices[Clients.Cs.Hessian.i()] = clients.hessianClient();
+        this.chatServices[Clients.Cs.Burlap.i()] = clients.burlapClient();
+        this.chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpcClient();
     }
 
-    public void runTest() {
+    public void test() {
         for (int i = 0; i < chatServices.length; i++) {
+            String csName = Clients.Cs.byIndex(i).name();
 
             try {
-                Response<?> test = chatServices[i].test(false);
-                LOG.debug("ChatService.test.a({})=OK;   {}", i, test);
+                Response<?> response = chatServices[i].test(false);
+                LOG.info("ChatService({}).test(false): OK={}", csName, response);
             } catch (Exception e) {
-                LOG.debug("ChatService.test.a({})=FAIL; {}", i, e.toString());
+                LOG.warn("ChatService({}).test(false): FAIL={}", csName, e.toString());
             }
 
             try {
-                Response<?> test = chatServices[i].test(true);
-                LOG.debug("ChatService.test.a({})=FAIL; {}", i, test);
+                Response<?> response = chatServices[i].test(true);
+                LOG.warn("ChatService({}).test(true): FAIL={}", csName, response);
             } catch (ChatException e) {
-                LOG.debug("ChatService.test.b({})=OK;   {}", i, e.toString());
+                LOG.info("ChatService({}).test(true): OK={}", csName, e.toString());
             } catch (Exception e) {
-                LOG.error("ChatService.test.a({})=FAIL; {}", i, e.toString());
+                LOG.warn("ChatService({}).test(true): FAIL={}", csName, e.toString());
             }
         }
     }

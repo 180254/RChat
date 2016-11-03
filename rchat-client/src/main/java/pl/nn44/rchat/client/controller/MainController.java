@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.client.CsHandler;
+import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.util.Random;
 

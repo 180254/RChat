@@ -1,8 +1,8 @@
-package pl.nn44.rchat.client;
+package pl.nn44.rchat.client.impl;
 
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.apache.xmlrpc.common.XmlRpcInvocationException;
+import org.apache.xmlrpc.client.util.ClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
@@ -10,8 +10,6 @@ import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
@@ -69,25 +67,12 @@ public class Clients {
             client.setConfig(config);
             client.setTypeFactory(new AnyTypeFactory(client));
 
-            InvocationHandler invHandler = (proxy, method, args) -> {
-                try {
-                    return
-                            // execute method on XmlRpcClient
-                            // toString() specially handled: avoid exceptions during debugging
-                            method.getName().equals("toString") && args == null
-                                    ? "XmlRpcProxy[" + config.getServerURL() + "]"
-                                    : client.execute("ChatService." + method.getName(), args);
-
-                } catch (XmlRpcInvocationException e) {
-                    throw e.getCause() != null ? e.getCause() : e;
-                }
-            };
-
+            ClientFactory clientFactory = new ClientFactory(client);
             ChatService chatService = (ChatService)
-                    Proxy.newProxyInstance(
-                            getClass().getClassLoader(),
-                            new Class<?>[]{ChatService.class},
-                            invHandler
+                    clientFactory.newInstance(
+                            Thread.currentThread().getContextClassLoader(),
+                            ChatService.class,
+                            "ChatService"
                     );
 
             LOG.debug("XmlRpcClient instance created.");
@@ -102,18 +87,16 @@ public class Clients {
 
     public enum Cs {
 
-        Hessian(0),
-        Burlap(1),
-        XmlRpc(2);
-
-        private final int i;
-
-        Cs(int i) {
-            this.i = i;
-        }
+        Hessian,
+        Burlap,
+        XmlRpc;
 
         public int i() {
-            return i;
+            return ordinal();
+        }
+
+        public static Cs byIndex(int i) {
+            return Cs.values()[i];
         }
     }
 }

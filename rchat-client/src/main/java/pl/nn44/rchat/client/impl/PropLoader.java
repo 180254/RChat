@@ -1,4 +1,4 @@
-package pl.nn44.rchat.client;
+package pl.nn44.rchat.client.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

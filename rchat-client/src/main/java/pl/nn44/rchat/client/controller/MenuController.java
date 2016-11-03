@@ -7,8 +7,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.client.Clients;
-import pl.nn44.rchat.client.CsHandler;
+import pl.nn44.rchat.client.impl.Clients;
+import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.net.URL;
 import java.util.ResourceBundle;

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.controller.LoginController;
 import pl.nn44.rchat.client.controller.MainController;
 import pl.nn44.rchat.client.controller.MenuController;
+import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.io.IOException;
 import java.net.URL;
@@ -48,6 +49,7 @@ public class ClientApp extends Application {
                 stage.setScene(new Scene(fxmlParent));
 
             } catch (IOException e) {
+                LOG.error("Unable to change scene.", e);
                 throw new AssertionError(e);
             }
         };

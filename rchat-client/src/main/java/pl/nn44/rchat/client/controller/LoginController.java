@@ -9,7 +9,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.client.CsHandler;
+import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.net.URL;
 import java.util.Random;
@@ -47,7 +47,7 @@ public class LoginController implements Initializable {
                     status.setText("");
                     enter.setDisable(false);
                 })
-                .thenRunAsync(csHandler::runTest);
+                .thenRunAsync(csHandler::test);
     }
 
     int temp = 0;
