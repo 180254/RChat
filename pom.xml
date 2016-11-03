@@ -36,7 +36,6 @@
         <relativePath/>
     </parent>
 
-
     <profiles>
         <profile>
             <id>bintray</id>
