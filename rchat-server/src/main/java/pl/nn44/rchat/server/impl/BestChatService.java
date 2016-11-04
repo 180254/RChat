@@ -249,7 +249,8 @@ public class BestChatService implements ChatService {
                             cUser.getUsername(),
                             accounts.containsKey(cUser.getUsername()),
                             params.caller.getIgnored().contains(cUser),
-                            params.channel.getAdmins().contains(cUser)
+                            params.channel.getAdmins().contains(cUser),
+                            params.channel.getBanned().contains(cUser)
                     ))
                     .toArray(ChannelUser[]::new);
 

@@ -14,18 +14,21 @@ public class ChannelUser implements Serializable {
     private final boolean authorized;
     private final boolean ignored;
     private final boolean admin;
+    private final boolean banned;
 
     public ChannelUser(String channel,
                        String username,
                        boolean authorized,
                        boolean ignored,
-                       boolean admin) {
+                       boolean admin,
+                       boolean banned) {
 
         this.channel = channel;
         this.username = username;
         this.authorized = authorized;
         this.ignored = ignored;
         this.admin = admin;
+        this.banned = banned;
     }
 
     protected ChannelUser() {
@@ -34,6 +37,7 @@ public class ChannelUser implements Serializable {
         this.authorized = false;
         this.ignored = false;
         this.admin = false;
+        this.banned = false;
     }
 
     public String getChannel() {
@@ -54,6 +58,10 @@ public class ChannelUser implements Serializable {
 
     public boolean isAdmin() {
         return admin;
+    }
+
+    public boolean isBanned() {
+        return banned;
     }
 
     @Override
@@ -78,6 +86,7 @@ public class ChannelUser implements Serializable {
                 .add("authorized", authorized)
                 .add("ignored", ignored)
                 .add("admin", admin)
+                .add("banned", banned)
                 .toString();
     }
 }

@@ -33,5 +33,4 @@ public interface ChatService {
     Response<?> test(boolean exception) throws ChatException;
 
     // TODO: list of channels, is channel protected by password?
-    // TODO: info is user banned?
 }
