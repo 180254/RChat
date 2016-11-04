@@ -16,20 +16,22 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.regex.Pattern;
 
 public class BestChatService implements ChatService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BestChatService.class);
     private static final int MAX_NEWS_PER_REQUEST = 10;
 
-    private Random random = new SecureRandom();
-    private Iterator<String> idGenerator = BigIdGenerator.bits(random, 128);
+    private final Random random = new SecureRandom();
+    private final Iterator<String> idGenerator = BigIdGenerator.bits(random, 128);
+    private final Pattern nameValidator = Pattern.compile("[a-zA-Z0-9_.-]{1,10}");
 
-    private ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, User> sessionToUser = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, Channel> channelByName = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, User> sessionToUser = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Channel> channelByName = new ConcurrentHashMap<>();
 
-    private Striped<Lock> stripedLocks = Striped.lazyWeakLock(100);
+    private final Striped<Lock> stripedLocks = Striped.lazyWeakLock(100);
 
     public BestChatService() {
         accounts.put("admin", "admin");
@@ -49,6 +51,10 @@ public class BestChatService implements ChatService {
 
             if (!Objects.equals(accounts.get(username), password)) {
                 throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
+            }
+
+            if (!nameValidator.matcher(username).matches()) {
+                throw new ChatException(Reason.GIVEN_BAD_USERNAME);
             }
 
             String session = idGenerator.next();
@@ -129,6 +135,10 @@ public class BestChatService implements ChatService {
 
             if (params.channel.getBanned().contains(params.caller)) {
                 throw new ChatException(Reason.UNWELCOME_BANNED);
+            }
+
+            if (!nameValidator.matcher(channel).matches()) {
+                throw new ChatException(Reason.GIVEN_BAD_CHANNEL);
             }
 
             boolean addC = params.channel.getUsers().addIfAbsent(params.caller);
@@ -640,4 +650,3 @@ public class BestChatService implements ChatService {
 
 // TODO: - keep ignored on quit
 // TODO: - verify last sync. on login, or scheduled?
-// TODO: - allowed chars in user/channel name
