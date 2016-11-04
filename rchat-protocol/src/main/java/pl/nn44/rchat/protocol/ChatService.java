@@ -8,17 +8,19 @@ public interface ChatService {
 
     Response<?> logout(String session) throws ChatException;
 
-    Response<String> join(String session, String channel, @Nullable String password) throws ChatException;
+    Response<RChannel[]> channels(String session) throws ChatException;
+
+    Response<String/*topic*/> join(String session, String channel, @Nullable String password) throws ChatException;
 
     Response<?> part(String session, String channel) throws ChatException;
+
+    Response<?> topic(String session, String channel, String text) throws ChatException;
+
+    Response<RChUser[]> names(String session, String channel) throws ChatException;
 
     Response<?> kick(String session, String channel, String username) throws ChatException;
 
     Response<?> ban(String session, String channel, String username, boolean state) throws ChatException;
-
-    Response<ChannelUser[]> names(String session, String channel) throws ChatException;
-
-    Response<?> topic(String session, String channel, String text) throws ChatException;
 
     Response<?> admin(String session, String channel, String username, boolean state) throws ChatException;
 
@@ -31,6 +33,4 @@ public interface ChatService {
     Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException;
 
     Response<?> test(boolean exception) throws ChatException;
-
-    // TODO: list of channels, is channel protected by password?
 }

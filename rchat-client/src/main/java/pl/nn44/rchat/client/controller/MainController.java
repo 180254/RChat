@@ -11,7 +11,7 @@ import javafx.scene.text.TextFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.impl.CsHandler;
-import pl.nn44.rchat.protocol.ChannelUser;
+import pl.nn44.rchat.protocol.RChUser;
 
 import java.net.URL;
 import java.util.Random;
@@ -28,7 +28,7 @@ public class MainController implements Initializable {
     @FXML public TextField message;
     @FXML public Button send;
     @FXML public ListView<Object> channels;
-    @FXML public ListView<ChannelUser> users;
+    @FXML public ListView<RChUser> users;
 
     public MainController(CsHandler csHandler) {
         this.csHandler = csHandler;
@@ -40,9 +40,9 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> message.requestFocus());
 
-        users.setCellFactory(param -> new ListCell<ChannelUser>() {
+        users.setCellFactory(param -> new ListCell<RChUser>() {
             @Override
-            protected void updateItem(ChannelUser item, boolean empty) {
+            protected void updateItem(RChUser item, boolean empty) {
                 super.updateItem(item, empty);
 
                 if (empty) {
@@ -70,10 +70,10 @@ public class MainController implements Initializable {
         channels.getItems().add("other channel");
         channels.getItems().add("other 123");
 
-        users.getItems().add(new ChannelUser("x", "any_user", true, true, true));
-        users.getItems().add(new ChannelUser("x", "other_user", true, true, false));
-        users.getItems().add(new ChannelUser("x", "other_123", true, false, true));
-        users.getItems().add(new ChannelUser("x", "some", false, false, false));
+        users.getItems().add(new RChUser("x", "any_user", true, true, true, false));
+        users.getItems().add(new RChUser("x", "other_user", true, true, false, false));
+        users.getItems().add(new RChUser("x", "other_123", true, false, true, true));
+        users.getItems().add(new RChUser("x", "some", false, false, false, false));
     }
 
     @FXML

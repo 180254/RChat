@@ -93,6 +93,28 @@ public class BestChatService implements ChatService {
     }
 
     @Override
+    public Response<RChannel[]> channels(String session) throws ChatException {
+        Locks locks = locks(session, null, null);
+
+        try {
+            //  size-effect used: verify session
+            params(session, null, null, false);
+
+            RChannel[] rChannels = channelByName.values().stream()
+                    .map(c -> new RChannel(
+                            c.getName(),
+                            c.getPassword() != null
+                    ))
+                    .toArray(RChannel[]::new);
+
+            return Response.Ok(rChannels);
+
+        } finally {
+            locks.unlock();
+        }
+    }
+
+    @Override
     public Response<String> join(String session, String channel, @Nullable String password) throws ChatException {
         Locks locks = locks(session, channel, null);
 
@@ -169,6 +191,63 @@ public class BestChatService implements ChatService {
     }
 
     @Override
+    public Response<?> topic(String session, String channel, String text) throws ChatException {
+        Locks locks = new Locks(session, channel, null);
+
+        try {
+            Params params = params(session, channel, null, true);
+
+            boolean change = !params.channel.getTopic().equals(text);
+
+            if (change) {
+                params.channel.setTopic(text);
+
+                WhatsUp whatsUp = new WhatsUp(
+                        What.TOPIC,
+                        params.channel.getName(),
+                        params.caller.getUsername(),
+                        text
+                );
+
+                for (User cu : params.channel.getUsers()) {
+                    cu.getNews().offer(whatsUp);
+                }
+            }
+
+            return Response.Ok();
+
+        } finally {
+            locks.unlock();
+        }
+    }
+
+    @Override
+    public Response<RChUser[]> names(String session, String channel) throws ChatException {
+        Locks locks = new Locks(session, channel, null);
+
+        try {
+            Params params = params(session, channel, null, false);
+
+            RChUser[] rChUsers = params.channel.getUsers()
+                    .stream()
+                    .map(cUser -> new RChUser(
+                            params.channel.getName(),
+                            cUser.getUsername(),
+                            accounts.containsKey(cUser.getUsername()),
+                            params.caller.getIgnored().contains(cUser),
+                            params.channel.getAdmins().contains(cUser),
+                            params.channel.getBanned().contains(cUser)
+                    ))
+                    .toArray(RChUser[]::new);
+
+            return Response.Ok(rChUsers);
+
+        } finally {
+            locks.unlock();
+        }
+    }
+
+    @Override
     public Response<?> kick(String session, String channel, String username) throws ChatException {
         Locks locks = locks(session, channel, username);
 
@@ -220,64 +299,6 @@ public class BestChatService implements ChatService {
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
                         state ? "ON" : "OFF"
-                );
-
-                for (User cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
-                }
-            }
-
-            return Response.Ok();
-
-        } finally {
-            locks.unlock();
-        }
-    }
-
-    @Override
-
-    public Response<ChannelUser[]> names(String session, String channel) throws ChatException {
-        Locks locks = new Locks(session, channel, null);
-
-        try {
-            Params params = params(session, channel, null, false);
-
-            ChannelUser[] channelUsers = params.channel.getUsers()
-                    .stream()
-                    .map(cUser -> new ChannelUser(
-                            params.channel.getName(),
-                            cUser.getUsername(),
-                            accounts.containsKey(cUser.getUsername()),
-                            params.caller.getIgnored().contains(cUser),
-                            params.channel.getAdmins().contains(cUser),
-                            params.channel.getBanned().contains(cUser)
-                    ))
-                    .toArray(ChannelUser[]::new);
-
-            return Response.Ok(channelUsers);
-
-        } finally {
-            locks.unlock();
-        }
-    }
-
-    @Override
-    public Response<?> topic(String session, String channel, String text) throws ChatException {
-        Locks locks = new Locks(session, channel, null);
-
-        try {
-            Params params = params(session, channel, null, true);
-
-            boolean change = !params.channel.getTopic().equals(text);
-
-            if (change) {
-                params.channel.setTopic(text);
-
-                WhatsUp whatsUp = new WhatsUp(
-                        What.TOPIC,
-                        params.channel.getName(),
-                        params.caller.getUsername(),
-                        text
                 );
 
                 for (User cu : params.channel.getUsers()) {
