@@ -27,6 +27,7 @@ public class MainController implements Initializable {
     @FXML public TextFlow text;
     @FXML public TextField message;
     @FXML public Button send;
+    @FXML public TextField topic;
     @FXML public ListView<Object> channels;
     @FXML public ListView<RChUser> users;
 
