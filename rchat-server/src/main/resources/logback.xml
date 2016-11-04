@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="BU_EX" value="pl.nn44.rchat.protocol.ChatException"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <!-- don't log about ... -->
+            <onMatch>DENY</onMatch>
+
+            <evaluator>
+                <expression>
+                    <!-- ... business exception -->
+                    ${BU_EX}.class.isInstance(throwable)
+                    <!-- ... wrapped business exception -->
+                    || ${BU_EX}.class.isInstance(throwable != null ? throwable.getCause() : null)
+                </expression>
+            </evaluator>
+        </filter>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
 
     <logger name="org.springframework" level="INFO"/>
     <logger name="pl.nn44.rchat" level="DEBUG"/>
