@@ -13,6 +13,7 @@ public class CsHandler {
     private static final Logger LOG = LoggerFactory.getLogger(CsHandler.class);
 
     private final ChatService[] chatServices = new ChatService[3];
+    private String token = null;
     private int current = 0;
 
     public CsHandler() {
@@ -48,6 +49,14 @@ public class CsHandler {
                 LOG.warn("ChatService({}).test(true): FAIL={}", csName, e.toString());
             }
         }
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public int getCurrent() {

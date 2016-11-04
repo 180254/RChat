@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.nn44.rchat.client.controller.ErrorsMapper;
 import pl.nn44.rchat.client.controller.LoginController;
 import pl.nn44.rchat.client.controller.MainController;
 import pl.nn44.rchat.client.controller.MenuController;
@@ -20,15 +21,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-// org.springframework.remoting.RemoteAccessException
-// org.apache.xmlrpc.XmlRpcException
-// pl.nn44.rchat.protocol.ChatException
-
 public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
     private final CsHandler csHandler = new CsHandler();
+    private final ErrorsMapper errorsMapper = new ErrorsMapper();
     private final Map<Class<?>, Supplier<Object>> controllers = new HashMap<>();
 
     @Override
@@ -54,7 +52,7 @@ public class ClientApp extends Application {
             }
         };
 
-        controllers.put(LoginController.class, () -> new LoginController(csHandler, sceneChanger));
+        controllers.put(LoginController.class, () -> new LoginController(csHandler, errorsMapper, sceneChanger));
         controllers.put(MainController.class, () -> new MainController(csHandler));
         controllers.put(MenuController.class, () -> new MenuController(csHandler, stage));
 

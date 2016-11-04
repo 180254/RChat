@@ -35,10 +35,12 @@
                    GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 
             <TextField fx:id="username" prefHeight="25.0" prefWidth="150.0"
-                       GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                       GridPane.columnIndex="1" GridPane.rowIndex="1"
+                       onAction="#onEnterClicked"/>
 
             <PasswordField fx:id="password" prefHeight="25.0" prefWidth="150.0"
-                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                           GridPane.columnIndex="1" GridPane.rowIndex="2"
+                           onAction="#onEnterClicked"/>
 
             <Button fx:id="enter" mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0"
                     text="ENTER" onAction="#onEnterClicked"
