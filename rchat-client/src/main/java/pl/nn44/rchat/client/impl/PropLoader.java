@@ -16,7 +16,7 @@ public class PropLoader {
             Properties prop = new Properties();
 
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            InputStream stream = loader.getResourceAsStream("app.properties");
+            InputStream stream = loader.getResourceAsStream("prop/app.properties");
             prop.load(stream);
 
             LOG.debug("Loaded properties. {}", prop);

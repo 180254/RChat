@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 public class ClientApp extends Application {
@@ -39,9 +41,12 @@ public class ClientApp extends Application {
                     throw new IOException("no such scene: " + scene);
                 }
 
+                ResourceBundle res = PropertyResourceBundle.getBundle("prop/strings");
+
                 FXMLLoader loader = new FXMLLoader();
                 loader.setControllerFactory(clazz -> controllers.get(clazz).get());
                 loader.setLocation(fxmlResource);
+                loader.setResources(res);
 
                 Parent fxmlParent = loader.load();
                 stage.setScene(new Scene(fxmlParent));

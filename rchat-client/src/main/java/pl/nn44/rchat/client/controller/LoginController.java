@@ -10,6 +10,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.nn44.rchat.client.controller.ErrorsMapper.EMap;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.protocol.Response;
 
@@ -64,7 +65,6 @@ public class LoginController implements Initializable {
         });
     }
 
-
     @FXML
     public void onEnterClicked(ActionEvent ev) {
         runAsync(() -> {
@@ -90,7 +90,7 @@ public class LoginController implements Initializable {
 
             } catch (Exception e) {
                 runLater(() -> {
-                    status.setText(em.mapError(em.login, e));
+                    status.setText(em.mapError(EMap.login, e));
 
                     username.setDisable(false);
                     password.setDisable(false);
