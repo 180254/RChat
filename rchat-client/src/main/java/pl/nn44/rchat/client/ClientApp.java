@@ -9,11 +9,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.client.controller.ErrorsMapper;
 import pl.nn44.rchat.client.controller.LoginController;
 import pl.nn44.rchat.client.controller.MainController;
 import pl.nn44.rchat.client.controller.MenuController;
 import pl.nn44.rchat.client.impl.CsHandler;
+import pl.nn44.rchat.client.util.LocaleHelper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -28,11 +28,14 @@ public class ClientApp extends Application {
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
     private final CsHandler csHandler = new CsHandler();
-    private final ErrorsMapper errorsMapper = new ErrorsMapper();
+    private final LocaleHelper locHelper = new LocaleHelper();
     private final Map<Class<?>, Supplier<Object>> controllers = new HashMap<>();
 
     @Override
     public void start(Stage stage) throws Exception {
+        ResourceBundle res = PropertyResourceBundle.getBundle("prop/strings");
+        locHelper.setRes(res);
+
         Consumer<String> sceneChanger = (scene) -> {
             try {
                 ClassLoader classLoader = getClass().getClassLoader();
@@ -40,9 +43,6 @@ public class ClientApp extends Application {
                 if (fxmlResource == null) {
                     throw new IOException("no such scene: " + scene);
                 }
-
-                ResourceBundle res = PropertyResourceBundle.getBundle("prop/strings");
-                errorsMapper.setRes(res);
 
                 FXMLLoader loader = new FXMLLoader();
                 loader.setControllerFactory(clazz -> controllers.get(clazz).get());
@@ -58,7 +58,7 @@ public class ClientApp extends Application {
             }
         };
 
-        controllers.put(LoginController.class, () -> new LoginController(csHandler, errorsMapper, sceneChanger));
+        controllers.put(LoginController.class, () -> new LoginController(csHandler, locHelper, sceneChanger));
         controllers.put(MainController.class, () -> new MainController(csHandler));
         controllers.put(MenuController.class, () -> new MenuController(csHandler, stage));
 

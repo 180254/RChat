@@ -10,8 +10,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.client.controller.ErrorsMapper.EMap;
 import pl.nn44.rchat.client.impl.CsHandler;
+import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.Response;
 
 import java.net.URL;
@@ -27,7 +27,7 @@ public class LoginController implements Initializable {
 
     private final CsHandler csh;
     private final Consumer<String> sc;
-    private final ErrorsMapper em;
+    private final LocaleHelper i18n;
 
     @FXML public TextField username;
     @FXML public PasswordField password;
@@ -35,11 +35,11 @@ public class LoginController implements Initializable {
     @FXML public Label status;
 
     public LoginController(CsHandler csHandler,
-                           ErrorsMapper errorsMapper,
+                           LocaleHelper locHelper,
                            Consumer<String> sceneChanger) {
 
         this.csh = csHandler;
-        this.em = errorsMapper;
+        this.i18n = locHelper;
         this.sc = sceneChanger;
 
         LOG.debug("{} instance created.", getClass().getSimpleName());
@@ -50,7 +50,7 @@ public class LoginController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         runAsync(() -> {
             runLater(() -> {
-                status.setText("Initializing app, please wait ...");
+                status.setText(i18n.get("ctrl.login.initializing"));
                 enter.setDisable(true);
             });
 
@@ -69,7 +69,7 @@ public class LoginController implements Initializable {
     public void onEnterClicked(ActionEvent ev) {
         runAsync(() -> {
             runLater(() -> {
-                status.setText("Processing ...");
+                status.setText(i18n.get("ctrl.login.processing"));
                 username.setDisable(true);
                 password.setDisable(true);
                 enter.setDisable(true);
@@ -90,7 +90,7 @@ public class LoginController implements Initializable {
 
             } catch (Exception e) {
                 runLater(() -> {
-                    status.setText(em.mapError(EMap.login, e));
+                    status.setText(i18n.mapError("login", e));
 
                     username.setDisable(false);
                     password.setDisable(false);

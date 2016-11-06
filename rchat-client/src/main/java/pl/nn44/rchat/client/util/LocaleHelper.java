@@ -1,4 +1,4 @@
-package pl.nn44.rchat.client.controller;
+package pl.nn44.rchat.client.util;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.slf4j.Logger;
@@ -13,20 +13,20 @@ import java.util.ResourceBundle;
 // org.apache.xmlrpc.XmlRpcException
 // pl.nn44.rchat.protocol.ChatException
 
-public class ErrorsMapper {
+public class LocaleHelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ErrorsMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocaleHelper.class);
 
     private ResourceBundle res;
 
-    public ErrorsMapper() {
+    public LocaleHelper() {
         this.res = null;
     }
 
-    public String mapError(EMap map, Exception e) {
+    public String mapError(String map, Exception e) {
         if (e instanceof ChatException) {
             ChatException ce = (ChatException) e;
-            String resKey = MessageFormat.format("error.{0}.{1}", map.name(), ce.getReason().name());
+            String resKey = MessageFormat.format("error.{0}.{1}", map, ce.getReason().name());
 
             return res.containsKey(resKey)
                     ? res.getString(resKey)
@@ -43,13 +43,11 @@ public class ErrorsMapper {
         }
     }
 
-    public void setRes(ResourceBundle res) {
-        this.res = res;
+    public String get(String key) {
+        return res.getString(key);
     }
 
-    public enum EMap {
-        menu,
-        login,
-        main
+    public void setRes(ResourceBundle res) {
+        this.res = res;
     }
 }
