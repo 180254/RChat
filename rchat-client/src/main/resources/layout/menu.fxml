@@ -6,18 +6,20 @@
          xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
          fx:controller="pl.nn44.rchat.client.controller.MenuController">
 
-    <Menu text="File">
-        <MenuItem mnemonicParsing="false" onAction="#onExitClicked" text="Exit"/>
+    <Menu text="%fxml.menu.file">
+        <MenuItem mnemonicParsing="false" onAction="#onExitClicked" text="%fxml.menu.exit"/>
     </Menu>
 
-    <Menu text="Mode">
-        <RadioMenuItem text="Hessian" mnemonicParsing="false" onAction="#onProtocolChanged" selected="true">
+    <Menu text="%fxml.menu.mode">
+        <RadioMenuItem text="%fxml.menu.hessian" mnemonicParsing="false" onAction="#onProtocolChanged" selected="true">
             <toggleGroup>
                 <ToggleGroup fx:id="protocol"/>
             </toggleGroup>
         </RadioMenuItem>
 
-        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged" text="Burlap" toggleGroup="$protocol"/>
-        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged" text="XmlRpc" toggleGroup="$protocol"/>
+        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged"
+                       text="%fxml.menu.burlap" toggleGroup="$protocol"/>
+        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged"
+                       text="%fxml.menu.xml-rpc" toggleGroup="$protocol"/>
     </Menu>
 </MenuBar>

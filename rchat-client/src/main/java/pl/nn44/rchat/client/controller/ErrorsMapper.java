@@ -26,17 +26,17 @@ public class ErrorsMapper {
     public String mapError(EMap map, Exception e) {
         if (e instanceof ChatException) {
             ChatException ce = (ChatException) e;
-            String resKey = MessageFormat.format("{0}.error.{1}", map.name(), ce.getReason().name());
+            String resKey = MessageFormat.format("error.{0}.{1}", map.name(), ce.getReason().name());
 
             return res.containsKey(resKey)
                     ? res.getString(resKey)
-                    : res.getString("any.default-reason");
+                    : res.getString("any.default-err-reason");
 
         } else {
             LOG.error("Exception", e);
 
             if (e instanceof RemoteAccessException || e instanceof XmlRpcException) {
-                return res.getString("any.connection-error");
+                return res.getString("any.remote-conn-error");
             } else {
                 return res.getString("any.server-impl-failure");
             }

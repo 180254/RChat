@@ -42,6 +42,7 @@ public class ClientApp extends Application {
                 }
 
                 ResourceBundle res = PropertyResourceBundle.getBundle("prop/strings");
+                errorsMapper.setRes(res);
 
                 FXMLLoader loader = new FXMLLoader();
                 loader.setControllerFactory(clazz -> controllers.get(clazz).get());

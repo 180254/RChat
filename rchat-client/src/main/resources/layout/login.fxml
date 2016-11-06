@@ -9,7 +9,7 @@
     <fx:include source="menu.fxml"/>
     <AnchorPane prefHeight="100.0">
         <Label alignment="CENTER" contentDisplay="TOP" prefHeight="100.0"
-               text="%login.welcome"
+               text="%fxml.login.welcome"
                AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
     </AnchorPane>
@@ -29,9 +29,9 @@
                 <RowConstraints vgrow="SOMETIMES"/>
             </rowConstraints>
 
-            <Label text="%login.username" prefHeight="25.0" prefWidth="150.0"
+            <Label text="%fxml.login.username" prefHeight="25.0" prefWidth="150.0"
                    GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <Label text="%login.password" prefHeight="25.0" prefWidth="150.0"
+            <Label text="%fxml.login.password" prefHeight="25.0" prefWidth="150.0"
                    GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 
             <TextField fx:id="username" prefHeight="25.0" prefWidth="150.0"
@@ -43,7 +43,7 @@
                            onAction="#onEnterClicked"/>
 
             <Button fx:id="enter" mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0"
-                    text="%login.enter" onAction="#onEnterClicked"
+                    text="%fxml.login.enter" onAction="#onEnterClicked"
                     GridPane.columnIndex="1" GridPane.rowIndex="3"/>
         </GridPane>
     </AnchorPane>
