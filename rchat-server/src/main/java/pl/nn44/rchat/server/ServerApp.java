@@ -35,11 +35,6 @@ public class ServerApp {
     }
 
     @Bean
-    public AsLogger aspectLogger() {
-        return new AsLogger();
-    }
-
-    @Bean
     public ChatService chatService() {
         return new BestChatService();
     }
@@ -94,6 +89,11 @@ public class ServerApp {
     @Bean
     public ErrorController errorPageController() {
         return new PlainErrorController();
+    }
+
+    @Bean
+    public AsLogger aspectLogger() {
+        return new AsLogger();
     }
 
     @Bean

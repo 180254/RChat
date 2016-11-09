@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 
 @Aspect
@@ -52,10 +53,10 @@ public class AsLogger {
         long time = System.currentTimeMillis() - start;
 
         loggers.get(annotation.level()).log(
-                "#{}({}): {} in {}ms",
+                "#{}({}): {} ({}ms)",
                 MethodSignature.class.cast(point.getSignature()).getMethod().getName(),
-                point.getArgs(),
-                annotation.result() ? (throwable == null ? result : throwable) : "[?]",
+                removeFirstAndLastChar(Arrays.deepToString(point.getArgs())),
+                annotation.result() ? (throwable == null ? result : throwable) : "_",
                 time
         );
 
@@ -63,5 +64,9 @@ public class AsLogger {
             throw throwable;
         }
         return result;
+    }
+
+    public String removeFirstAndLastChar(String s) {
+        return s.substring(1, s.length() - 1);
     }
 }
