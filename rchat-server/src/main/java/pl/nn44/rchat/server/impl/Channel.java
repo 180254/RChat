@@ -67,9 +67,9 @@ public class Channel {
         return MoreObjects.toStringHelper(this)
                 .add("name", name)
                 .add("password", password)
-                .add("users", users)
-                .add("admins", admins)
-                .add("banned", banned)
+                .add("users", users.stream().map(User::getUsername))
+                .add("admins", admins.stream().map(User::getUsername))
+                .add("banned", banned.stream().map(User::getUsername))
                 .toString();
     }
 }

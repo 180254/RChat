@@ -73,11 +73,12 @@ public class User {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("caller", session)
+                .add("session", session)
                 .add("username", username)
                 .add("lastSync", lastSync)
-                .add("channels", channels)
-                .add("news", news)
+                .add("channels", channels.stream().map(Channel::getName))
+                .add("ignored", ignored.stream().map(User::getUsername))
+                // .add("news", news)
                 .toString();
     }
 }
