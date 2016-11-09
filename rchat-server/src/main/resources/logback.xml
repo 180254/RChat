@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    <property name="BU_EX" value="pl.nn44.rchat.protocol.ChatException"/>
+    <property name="BUSINESS-EXCEPTIONS" value="pl.nn44.rchat.protocol.ChatException"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <pattern>[UA=%X{req.userAgent}] ${CONSOLE_LOG_PATTERN}</pattern>
             <charset>utf8</charset>
         </encoder>
 
@@ -16,9 +16,9 @@
             <evaluator>
                 <expression>
                     <!-- business exception -->
-                    ${BU_EX}.class.isInstance(throwable)
+                    ${BUSINESS-EXCEPTIONS}.class.isInstance(throwable)
                     <!-- wrapped business exception -->
-                    || ${BU_EX}.class.isInstance(throwable != null ? throwable.getCause() : null)
+                    || ${BUSINESS-EXCEPTIONS}.class.isInstance(throwable != null ? throwable.getCause() : null)
                     <!-- POST requests to *ServiceExporter -->
                     || message.contains("ServiceExporter only supports POST requests")
                 </expression>
