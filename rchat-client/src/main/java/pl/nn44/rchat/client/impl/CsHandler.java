@@ -7,6 +7,7 @@ import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.protocol.Response;
 
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 
 public class CsHandler {
 
@@ -69,5 +70,17 @@ public class CsHandler {
 
     public ChatService getCs() {
         return chatServices[current];
+    }
+
+    public void quit() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                if (token != null) {
+                    getCs().quit(token);
+                }
+            } catch (Exception e) {
+                LOG.warn("quit()", e);
+            }
+        });
     }
 }

@@ -18,13 +18,13 @@ public class MenuController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MenuController.class);
 
-    private final CsHandler csHandler;
+    private final CsHandler csh;
     private final Stage stage;
 
     @FXML public ToggleGroup protocol;
 
     public MenuController(CsHandler csHandler, Stage stage) {
-        this.csHandler = csHandler;
+        this.csh = csHandler;
         this.stage = stage;
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
@@ -34,7 +34,7 @@ public class MenuController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         protocol.selectToggle(
                 protocol.getToggles().get(
-                        csHandler.getCurrent()
+                        csh.getCurrent()
                 )
         );
     }
@@ -50,7 +50,7 @@ public class MenuController implements Initializable {
         int protocolIndex = protocol.getToggles().indexOf(source);
         Clients.Cs cs = Clients.Cs.byIndex(protocolIndex);
 
-        csHandler.setCurrent(cs.i());
+        csh.setCurrent(cs.i());
         LOG.debug("{}Client selected", cs.name());
     }
 }

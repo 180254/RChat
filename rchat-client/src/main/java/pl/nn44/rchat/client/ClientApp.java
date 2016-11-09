@@ -69,6 +69,7 @@ public class ClientApp extends Application {
 
     @Override
     public void stop() {
+        csHandler.quit();
         Platform.exit();
     }
 
