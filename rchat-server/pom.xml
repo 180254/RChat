@@ -28,12 +28,14 @@
     </build>
 
     <dependencies>
+        <!-- rchat protocol -->
         <dependency>
             <groupId>pl.nn44</groupId>
             <artifactId>rchat-protocol</artifactId>
             <version>1.0</version>
         </dependency>
 
+        <!-- spring boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -56,18 +58,21 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- hessian -->
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
             <version>4.0.38</version>
         </dependency>
 
+        <!-- burlap -->
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>resin</artifactId>
             <version>3.0.9</version>
         </dependency>
 
+        <!-- xml rpc -->
         <dependency>
             <groupId>org.apache.xmlrpc</groupId>
             <artifactId>xmlrpc-server</artifactId>
@@ -80,6 +85,7 @@
             <version>1.0</version>
         </dependency>
 
+        <!-- logback filters -->
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
