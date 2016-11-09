@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import pl.nn44.rchat.protocol.*;
 import pl.nn44.rchat.protocol.ChatException.Reason;
 import pl.nn44.rchat.protocol.WhatsUp.What;
+import pl.nn44.rchat.server.as.AsLoggable;
 import pl.nn44.rchat.server.util.BigIdGenerator;
 
 import java.security.SecureRandom;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 
+@AsLoggable
 public class BestChatService implements ChatService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BestChatService.class);
