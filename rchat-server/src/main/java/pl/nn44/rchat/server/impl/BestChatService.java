@@ -492,8 +492,9 @@ public class BestChatService implements ChatService {
                         if (poll != null) {
                             news.add(poll);
                         }
-                    } catch (InterruptedException ex) {
-                        throw new AssertionError(ex);
+                    } catch (InterruptedException e) {
+                        LOG.warn("whatsUp assertion error", e);
+                        throw new AssertionError(e);
                     }
 
                     break;
@@ -537,12 +538,13 @@ public class BestChatService implements ChatService {
 
         sessionToUser
                 .entrySet().stream()
-                .filter(e -> ChronoUnit.MINUTES.between(e.getValue().getLastSync(), now) > 5)
-                .forEach(e -> {
+                .filter(se -> ChronoUnit.MINUTES.between(se.getValue().getLastSync(), now) >= 3)
+                .forEach(se -> {
                     try {
-                        quit(e.getKey());
-                    } catch (ChatException ex) {
-                        throw new AssertionError(ex);
+                        quit(se.getKey());
+                    } catch (ChatException e) {
+                        LOG.warn("sessionCleanup assertion error", e);
+                        throw new AssertionError(e);
                     }
                 });
     }
