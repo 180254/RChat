@@ -11,35 +11,38 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
 
 @Aspect
 public class AsLogger {
 
     private static final Logger LOG = LoggerFactory.getLogger(AsLogger.class);
 
-    private final Map<Integer, AsPrinter> loggers =
-            new ImmutableMap.Builder<Integer, AsPrinter>()
-                    .put(AsLoggable.NONE, ((f, a) -> {
+    private final Map<Integer, Function<Logger, AsPrinter>> loggers =
+            new ImmutableMap.Builder<Integer, Function<Logger, AsPrinter>>()
+                    .put(AsLoggable.NONE, (log) -> (f, a) -> {
                         // none!
-                    }))
-                    .put(AsLoggable.TRACE, (LOG::trace))
-                    .put(AsLoggable.DEBUG, (LOG::debug))
-                    .put(AsLoggable.INFO, (LOG::info))
-                    .put(AsLoggable.WARN, (LOG::warn))
-                    .put(AsLoggable.ERROR, (LOG::error))
+                    })
+                    .put(AsLoggable.TRACE, (log) -> log::trace)
+                    .put(AsLoggable.DEBUG, (log) -> log::debug)
+                    .put(AsLoggable.INFO, (log) -> log::info)
+                    .put(AsLoggable.WARN, (log) -> log::warn)
+                    .put(AsLoggable.ERROR, (log) -> log::error)
                     .build();
 
     @Around("(execution(* *(..)) && @annotation(AsLoggable))" // method
-            + "|| execution(public * (@AsLoggable *).*(..))" // class
+            + " ||" // or
+            + " (execution(public * (@AsLoggable *).*(..))" // class
             + " && !execution(String *.toString())"
             + " && !execution(int *.hashCode())"
-            + " && !execution(boolean *.equals(Object))")
+            + " && !execution(boolean *.equals(Object)))")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
+        Class<?> clazz = method.getDeclaringClass();
 
         AsLoggable annotation = method.getAnnotation(AsLoggable.class);
         if (annotation == null) {
-            annotation = method.getDeclaringClass().getAnnotation(AsLoggable.class);
+            annotation = clazz.getAnnotation(AsLoggable.class);
         }
 
         long start = System.currentTimeMillis();
@@ -52,7 +55,8 @@ public class AsLogger {
         }
         long time = System.currentTimeMillis() - start;
 
-        loggers.get(annotation.level()).log(
+        Logger logger = LoggerFactory.getLogger(clazz);
+        loggers.get(annotation.level()).apply(logger).log(
                 "#{}({}): {} ({}ms)",
                 MethodSignature.class.cast(point.getSignature()).getMethod().getName(),
                 removeFirstAndLastChar(Arrays.deepToString(point.getArgs())),
