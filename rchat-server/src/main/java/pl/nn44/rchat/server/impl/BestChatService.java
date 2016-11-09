@@ -5,12 +5,15 @@ import com.google.common.util.concurrent.Striped;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import pl.nn44.rchat.protocol.*;
 import pl.nn44.rchat.protocol.ChatException.Reason;
 import pl.nn44.rchat.protocol.WhatsUp.What;
 import pl.nn44.rchat.server.util.BigIdGenerator;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -35,7 +38,10 @@ public class BestChatService implements ChatService {
 
     public BestChatService() {
         accounts.put("admin", "admin");
+        accounts.put("student", "student");
+
         channelByName.put("standard", new Channel("standard", null));
+        channelByName.put("admins", new Channel("admins", "admins"));
 
         LOG.info("{} instance created.", getClass().getSimpleName());
     }
@@ -103,8 +109,8 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, null, null);
 
         try {
-            //  size-effect used: verify session
-            params(session, null, null, false);
+            //  side-effect used: verify session
+            Params params = params(session, null, null, false);
 
             RChannel[] rChannels = channelByName.values().stream()
                     .map(c -> new RChannel(
@@ -465,7 +471,8 @@ public class BestChatService implements ChatService {
                         if (poll != null) {
                             news.add(poll);
                         }
-                    } catch (InterruptedException ignored) {
+                    } catch (InterruptedException ex) {
+                        throw new AssertionError(ex);
                     }
 
                     break;
@@ -480,6 +487,43 @@ public class BestChatService implements ChatService {
         } finally {
             locks.unlock();
         }
+    }
+
+    @Override
+    public Response<?> quit(String session) throws ChatException {
+        Locks locks = locks(session, null, null);
+
+        try {
+            Params params = params(session, null, null, false);
+
+            for (Channel channel : params.caller.getChannels()) {
+                part(session, channel.getName());
+            }
+
+            sessionToUser.remove(session);
+
+            return Response.Ok();
+        } finally {
+            locks.unlock();
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    @Scheduled(cron = "0 */5 * * * *")
+    public void sessionCleanup() {
+        LocalDateTime now = LocalDateTime.now();
+
+        sessionToUser
+                .entrySet().stream()
+                .filter(e -> ChronoUnit.MINUTES.between(e.getValue().getLastSync(), now) > 5)
+                .forEach(e -> {
+                    try {
+                        quit(e.getKey());
+                    } catch (ChatException ex) {
+                        throw new AssertionError(ex);
+                    }
+                });
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -649,4 +693,4 @@ public class BestChatService implements ChatService {
 }
 
 // TODO: - keep ignored on quit
-// TODO: - verify last sync. on login, or scheduled?
+// TODO: - admin list/auto admin on join
