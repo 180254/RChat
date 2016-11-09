@@ -10,15 +10,17 @@
         </encoder>
 
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <!-- don't log about ... -->
+            <!-- don't log about: -->
             <onMatch>DENY</onMatch>
 
             <evaluator>
                 <expression>
-                    <!-- ... business exception -->
+                    <!-- business exception -->
                     ${BU_EX}.class.isInstance(throwable)
-                    <!-- ... wrapped business exception -->
+                    <!-- wrapped business exception -->
                     || ${BU_EX}.class.isInstance(throwable != null ? throwable.getCause() : null)
+                    <!-- POST requests to *ServiceExporter -->
+                    || message.contains("ServiceExporter only supports POST requests")
                 </expression>
             </evaluator>
         </filter>
