@@ -12,8 +12,8 @@ public class Channel {
     private String topic;
 
     private final CopyOnWriteArrayList<User> users = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<User> admins = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<User> banned = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<String> admins = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<String> banned = new CopyOnWriteArrayList<>();
 
     public Channel(String name, String password) {
         this.name = name;
@@ -37,11 +37,11 @@ public class Channel {
         return users;
     }
 
-    public CopyOnWriteArrayList<User> getAdmins() {
+    public CopyOnWriteArrayList<String> getAdmins() {
         return admins;
     }
 
-    public CopyOnWriteArrayList<User> getBanned() {
+    public CopyOnWriteArrayList<String> getBanned() {
         return banned;
     }
 
@@ -68,8 +68,8 @@ public class Channel {
                 .add("name", name)
                 .add("password", password)
                 .add("users", users.stream().map(User::getUsername))
-                .add("admins", admins.stream().map(User::getUsername))
-                .add("banned", banned.stream().map(User::getUsername))
+                .add("admins", admins)
+                .add("banned", banned)
                 .toString();
     }
 }

@@ -45,6 +45,10 @@ public class BestChatService implements ChatService {
         channelByName.put("standard", new Channel("standard", null));
         channelByName.put("admins", new Channel("admins", "admins"));
 
+        channelByName.get("standard").getAdmins().add("admin");
+        channelByName.get("standard").getAdmins().add("student");
+        channelByName.get("standard").getAdmins().add("admin");
+
         LOG.info("{} instance created.", getClass().getSimpleName());
     }
 
@@ -112,7 +116,7 @@ public class BestChatService implements ChatService {
 
         try {
             //  side-effect used: verify session
-            Params params = params(session, null, null, false);
+            params(session, null, null, false);
 
             RChannel[] rChannels = channelByName.values().stream()
                     .map(c -> new RChannel(
@@ -141,7 +145,7 @@ public class BestChatService implements ChatService {
                 throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
             }
 
-            if (params.channel.getBanned().contains(params.caller)) {
+            if (params.channel.getBanned().contains(params.caller.getUsername())) {
                 throw new ChatException(Reason.UNWELCOME_BANNED);
             }
 
@@ -151,6 +155,7 @@ public class BestChatService implements ChatService {
 
             boolean addC = params.channel.getUsers().addIfAbsent(params.caller);
             boolean addU = params.caller.getChannels().addIfAbsent(params.channel);
+            boolean admin = params.channel.getAdmins().contains(params.caller.getUsername());
 
             if (addC ^ addU) {
                 LOG.warn("join(): addC ^ addU is true, but it should not");
@@ -161,6 +166,20 @@ public class BestChatService implements ChatService {
                         What.JOIN,
                         params.channel.getName(),
                         params.caller.getUsername()
+                );
+
+                for (User cu : params.channel.getUsers()) {
+                    cu.getNews().offer(whatsUp);
+                }
+            }
+
+            if (addC && admin) {
+                WhatsUp whatsUp = new WhatsUp(
+                        What.ADMIN,
+                        params.channel.getName(),
+                        params.caller.getUsername(),
+                        null,
+                        "ON"
                 );
 
                 for (User cu : params.channel.getUsers()) {
@@ -253,8 +272,8 @@ public class BestChatService implements ChatService {
                             cUser.getUsername(),
                             accounts.containsKey(cUser.getUsername()),
                             params.caller.getIgnored().contains(cUser),
-                            params.channel.getAdmins().contains(cUser),
-                            params.channel.getBanned().contains(cUser)
+                            params.channel.getAdmins().contains(cUser.getUsername()),
+                            params.channel.getBanned().contains(cUser.getUsername())
                     ))
                     .toArray(RChUser[]::new);
 
@@ -307,8 +326,8 @@ public class BestChatService implements ChatService {
             Params params = params(session, channel, username, true);
 
             boolean change = state
-                    ? params.channel.getBanned().addIfAbsent(params.affUser)
-                    : params.channel.getBanned().remove(params.affUser);
+                    ? params.channel.getBanned().addIfAbsent(params.affUser.getUsername())
+                    : params.channel.getBanned().remove(params.affUser.getUsername());
 
             if (change) {
                 WhatsUp whatsUp = new WhatsUp(
@@ -339,8 +358,8 @@ public class BestChatService implements ChatService {
             Params params = params(session, channel, username, true);
 
             boolean change = state
-                    ? params.channel.getAdmins().addIfAbsent(params.affUser)
-                    : params.channel.getAdmins().remove(params.affUser);
+                    ? params.channel.getAdmins().addIfAbsent(params.affUser.getUsername())
+                    : params.channel.getAdmins().remove(params.affUser.getUsername());
 
             if (change) {
                 WhatsUp whatsUp = new WhatsUp(
@@ -600,7 +619,7 @@ public class BestChatService implements ChatService {
             }
 
             if (needAdmin && this.channel != null && this.caller != null) {
-                if (this.channel.getAdmins().contains(this.caller)) {
+                if (this.channel.getAdmins().contains(this.caller.getUsername())) {
                     throw new ChatException(Reason.NO_PERMISSION);
                 }
             }
@@ -693,6 +712,3 @@ public class BestChatService implements ChatService {
         return new Locks(session, channel, username);
     }
 }
-
-// TODO: - keep ignored on quit
-// TODO: - admin list/auto admin on join
