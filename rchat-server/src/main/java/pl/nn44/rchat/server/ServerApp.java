@@ -11,11 +11,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
 import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.HttpRequestHandler;
 import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.rchat.server.as.AsLogger;
 import pl.nn44.rchat.server.impl.BestChatService;
 import pl.nn44.rchat.server.page.MainPageController;
 import pl.nn44.rchat.server.page.PlainErrorController;
@@ -25,10 +27,16 @@ import javax.servlet.Filter;
 
 @SpringBootApplication
 @EnableScheduling
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class ServerApp {
 
     public static void main(String[] args) {
         SpringApplication.run(ServerApp.class, args);
+    }
+
+    @Bean
+    public AsLogger aspectLogger() {
+        return new AsLogger();
     }
 
     @Bean
