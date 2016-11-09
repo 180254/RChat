@@ -14,6 +14,8 @@ import pl.nn44.rchat.client.impl.CsHandler;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
+
 public class MenuController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MenuController.class);
@@ -52,5 +54,10 @@ public class MenuController implements Initializable {
 
         csh.setCurrent(cs.i());
         LOG.debug("{}Client selected", cs.name());
+    }
+
+    @FXML
+    public void onTextClicked(ActionEvent ev) {
+        runAsync(csh::test);
     }
 }

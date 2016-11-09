@@ -21,5 +21,8 @@
                        text="%fxml.menu.burlap" toggleGroup="$protocol"/>
         <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged"
                        text="%fxml.menu.xml-rpc" toggleGroup="$protocol"/>
+
+        <SeparatorMenuItem mnemonicParsing="false"/>
+        <MenuItem mnemonicParsing="false" onAction="#onTextClicked" text="%fxml.menu.test"/>
     </Menu>
 </MenuBar>
