@@ -5,8 +5,10 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[UA=%X{req.userAgent}] ${CONSOLE_LOG_PATTERN}</pattern>
+            <!-- @formatter:off -->
+            <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-30.30logger{29}){cyan} %clr(:){faint} %clr([us=%-10X{req.userAgent}, rh=%-15X{req.remoteHost}]){magenta} %m%n</pattern>
             <charset>utf8</charset>
+            <!-- @formatter:on -->
         </encoder>
 
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
