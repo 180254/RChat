@@ -53,22 +53,21 @@ public class ClientFactoryFix {
                 new Class[]{clazz},
                 (proxy, method, args) -> {
 
+                    // org.apache.xmlrpc.client.util.ClientFactory implementation:
+                    //
+                    // if (isObjectMethodLocal()  &&  pMethod.getDeclaringClass().equals(Object.class)) {
+                    //    return pMethod.invoke(pProxy, pArgs);
+                    // }
                     if (method.getDeclaringClass().equals(Object.class)) {
-                        if (method.getName().equals("toString")
-                                && method.getParameterCount() == 0) {
-                            return "XmlRpcProxy[" + serverUrl + "]";
-
-                        } else if (method.getName().equals("equals")
-                                && method.getParameterCount() == 1
-                                && method.getParameterTypes()[0].equals(Object.class)) {
-                            return proxy == args[0];
-
-                        } else if (method.getName().equals("hashCode")
-                                && method.getParameterCount() == 0) {
-                            return System.identityHashCode(proxy);
-
-                        } else {
-                            throw new AssertionError("unexpected method dispatched: " + method);
+                        switch (method.getName()) {
+                            case "toString":
+                                return "XmlRpcProxy[" + serverUrl + "]";
+                            case "equals":
+                                return proxy == args[0];
+                            case "hashCode":
+                                return System.identityHashCode(proxy);
+                            default:
+                                throw new AssertionError("unexpected method dispatched: " + method);
                         }
                     }
 
