@@ -7,13 +7,14 @@ import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianURLConnectionFactory;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.apache.xmlrpc.client.util.ClientFactory;
+import org.apache.xmlrpc.common.TypeConverterFactoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.xmlrpc.AnyTypeFactory;
+import pl.nn44.xmlrpc.ClientFactoryFix;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -68,7 +69,7 @@ public class Clients {
             @Override
             protected URLConnection openConnection(URL url) throws IOException {
                 URLConnection uc = super.openConnection(url);
-                uc.setRequestProperty("User-Agent", "RC-_Burlap");
+                uc.setRequestProperty("User-Agent", "RC-Burlap");
                 return uc;
             }
         };
@@ -95,19 +96,20 @@ public class Clients {
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
             config.setEnabledForExceptions(true);
             config.setEnabledForExtensions(true); // required by enabledForExceptions
-            config.setUserAgent("RC-_XmlRpc");
+            config.setUserAgent("RC-XmlRpc");
 
             XmlRpcClient client = new XmlRpcClient();
             client.setConfig(config);
             client.setTypeFactory(new AnyTypeFactory(client));
 
-            ClientFactory clientFactory = new ClientFactory(client);
-            ChatService chatService = (ChatService)
-                    clientFactory.newInstance(
-                            Thread.currentThread().getContextClassLoader(),
-                            ChatService.class,
-                            "ChatService"
-                    );
+            ChatService chatService = (ChatService) ClientFactoryFix.newInstance(
+                    Thread.currentThread().getContextClassLoader(),
+                    ChatService.class,
+                    "ChatService",
+                    client::execute,
+                    config.getServerURL().toString(),
+                    new TypeConverterFactoryImpl()
+            );
 
             LOG.debug("XmlRpcClient instance created.");
             return chatService;
