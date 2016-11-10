@@ -1,6 +1,6 @@
 package pl.nn44.rchat.server.as;
 
-public interface AsPrinter {
+interface AsPrinter {
 
     void log(String format, Object... arguments);
 }

@@ -1,5 +1,7 @@
 package pl.nn44.rchat.server.as;
 
+import org.slf4j.event.Level;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -9,14 +11,9 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface AsLoggable {
 
-    int NONE = 0;
-    int TRACE = 1;
-    int DEBUG = 2;
-    int INFO = 3;
-    int WARN = 4;
-    int ERROR = 5;
+    Level level() default Level.INFO;
 
-    int level() default AsLoggable.INFO;
+    boolean params() default true;
 
     boolean result() default false;
 }

@@ -7,6 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -18,24 +19,28 @@ public class AsLogger {
 
     private static final Logger LOG = LoggerFactory.getLogger(AsLogger.class);
 
-    private final Map<Integer, Function<Logger, AsPrinter>> loggers =
-            new ImmutableMap.Builder<Integer, Function<Logger, AsPrinter>>()
-                    .put(AsLoggable.NONE, (log) -> (f, a) -> {
-                        // none!
-                    })
-                    .put(AsLoggable.TRACE, (log) -> log::trace)
-                    .put(AsLoggable.DEBUG, (log) -> log::debug)
-                    .put(AsLoggable.INFO, (log) -> log::info)
-                    .put(AsLoggable.WARN, (log) -> log::warn)
-                    .put(AsLoggable.ERROR, (log) -> log::error)
+    private final Map<Level, Function<Logger, AsPrinter>> loggers =
+            new ImmutableMap.Builder<Level, Function<Logger, AsPrinter>>()
+                    .put(Level.TRACE, (log) -> log::trace)
+                    .put(Level.DEBUG, (log) -> log::debug)
+                    .put(Level.INFO, (log) -> log::info)
+                    .put(Level.WARN, (log) -> log::warn)
+                    .put(Level.ERROR, (log) -> log::error)
                     .build();
 
-    @Around("(execution(* *(..)) && @annotation(AsLoggable))" // method
-            + " ||" // or
-            + " (execution(public * (@AsLoggable *).*(..))" // class
+    @Around("execution(public * (@AsLoggable *).*(..))"
             + " && !execution(String *.toString())"
             + " && !execution(int *.hashCode())"
-            + " && !execution(boolean *.equals(Object)))")
+            + " && !execution(boolean *.equals(Object))")
+    public Object aClass(ProceedingJoinPoint point) throws Throwable {
+        return around(point);
+    }
+
+    @Around("execution(* *(..)) && @annotation(AsLoggable))")
+    public Object aMethod(ProceedingJoinPoint point) throws Throwable {
+        return around(point);
+    }
+
     public Object around(ProceedingJoinPoint point) throws Throwable {
         Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
         Class<?> clazz = method.getDeclaringClass();
@@ -56,10 +61,11 @@ public class AsLogger {
         long time = System.currentTimeMillis() - start;
 
         Logger logger = LoggerFactory.getLogger(clazz);
-        loggers.get(annotation.level()).apply(logger).log(
+        AsPrinter printer = loggers.get(annotation.level()).apply(logger);
+        printer.log(
                 "#{}({}): {} ({}ms)",
                 MethodSignature.class.cast(point.getSignature()).getMethod().getName(),
-                removeFirstAndLastChar(Arrays.deepToString(point.getArgs())),
+                annotation.params() ? removeFirstAndLastChar(Arrays.deepToString(point.getArgs())) : "_",
                 annotation.result() ? (throwable == null ? result : throwable) : "_",
                 time
         );
