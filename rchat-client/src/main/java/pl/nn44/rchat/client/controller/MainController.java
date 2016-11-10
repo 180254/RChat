@@ -1,6 +1,5 @@
 package pl.nn44.rchat.client.controller;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -16,6 +15,8 @@ import pl.nn44.rchat.protocol.RChUser;
 import java.net.URL;
 import java.util.Random;
 import java.util.ResourceBundle;
+
+import static javafx.application.Platform.runLater;
 
 public class MainController implements Initializable {
 
@@ -39,7 +40,7 @@ public class MainController implements Initializable {
     @FXML
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Platform.runLater(() -> message.requestFocus());
+        runLater(() -> message.requestFocus());
 
         users.setCellFactory(param -> new ListCell<RChUser>() {
             @Override

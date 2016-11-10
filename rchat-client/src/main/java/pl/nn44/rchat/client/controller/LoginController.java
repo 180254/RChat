@@ -60,8 +60,6 @@ public class LoginController implements Initializable {
                 status.setText("");
                 enter.setDisable(false);
             });
-
-            // csh.test();
         });
     }
 
@@ -77,7 +75,7 @@ public class LoginController implements Initializable {
 
             try {
                 Response<String> response =
-                        csh.getCs().login(
+                        csh.cs().login(
                                 username.getText(),
                                 Strings.emptyToNull(password.getText())
                         );

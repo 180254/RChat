@@ -23,6 +23,8 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
+import static java.util.concurrent.CompletableFuture.runAsync;
+
 public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
@@ -69,7 +71,7 @@ public class ClientApp extends Application {
 
     @Override
     public void stop() {
-        csHandler.quit();
+        runAsync(csHandler::quit);
         Platform.exit();
     }
 
