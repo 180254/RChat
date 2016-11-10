@@ -59,6 +59,7 @@ public class ServerApp {
     @Bean(name = "/xml-rpc")
     public HttpRequestHandler xmlRpcChatController() throws XmlRpcException {
         int cores = Runtime.getRuntime().availableProcessors();
+        int threads = cores * 5;
 
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
         config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
@@ -74,7 +75,7 @@ public class ServerApp {
         XmlRpcServletServer server = new XmlRpcServletServer();
         server.setConfig(config);
         server.setErrorLogger(new XmlRpcErrorLogger());
-        server.setMaxThreads(cores * 5);
+        server.setMaxThreads(threads);
         server.setHandlerMapping(handlerMapping);
         server.setTypeFactory(new AnyTypeFactory(server));
 
