@@ -161,6 +161,10 @@ public class AnyTypeFactory extends TypeFactoryImpl {
                     .contains(field.getName())) {
                 continue;
             }
+            // transient fields
+            if (Modifier.isTransient(field.getModifiers())) {
+                continue;
+            }
 
             field.setAccessible(true);
 
