@@ -4,10 +4,7 @@ import com.google.common.base.Strings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.impl.CsHandler;
@@ -26,13 +23,16 @@ public class LoginController implements Initializable {
     private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
     private final CsHandler csh;
-    private final Consumer<String> sc;
     private final LocaleHelper i18n;
+    private final Consumer<String> sc;
 
     @FXML public TextField username;
     @FXML public PasswordField password;
     @FXML public Button enter;
     @FXML public Label status;
+
+    @FXML public MenuBar menu;
+    @FXML public MenuController menuController;
 
     public LoginController(CsHandler csHandler,
                            LocaleHelper locHelper,
@@ -50,6 +50,7 @@ public class LoginController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         runAsync(() -> {
             runLater(() -> {
+                menuController.logout.setDisable(true);
                 status.setText(i18n.get("ctrl.login.initializing"));
                 enter.setDisable(true);
             });

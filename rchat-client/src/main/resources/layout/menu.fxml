@@ -7,7 +7,8 @@
          fx:controller="pl.nn44.rchat.client.controller.MenuController">
 
     <Menu text="%fxml.menu.file">
-        <MenuItem mnemonicParsing="false" onAction="#onExitClicked" text="%fxml.menu.exit"/>
+        <MenuItem mnemonicParsing="false" onAction="#onLogoutCLicked" text="%fxml.menu.logout" fx:id="logout"/>
+        <MenuItem mnemonicParsing="false" onAction="#onExitClicked" text="%fxml.menu.exit" fx:id="exit"/>
     </Menu>
 
     <Menu text="%fxml.menu.mode">
@@ -23,6 +24,6 @@
                        text="%fxml.menu.xml-rpc" toggleGroup="$protocol"/>
 
         <SeparatorMenuItem mnemonicParsing="false"/>
-        <MenuItem mnemonicParsing="false" onAction="#onTextClicked" text="%fxml.menu.test"/>
+        <MenuItem mnemonicParsing="false" onAction="#onTextClicked" text="%fxml.menu.test" fx:id="test"/>
     </Menu>
 </MenuBar>

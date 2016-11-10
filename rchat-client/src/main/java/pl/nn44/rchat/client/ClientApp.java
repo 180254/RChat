@@ -60,9 +60,15 @@ public class ClientApp extends Application {
             }
         };
 
-        controllers.put(LoginController.class, () -> new LoginController(csHandler, locHelper, sceneChanger));
-        controllers.put(MainController.class, () -> new MainController(csHandler));
-        controllers.put(MenuController.class, () -> new MenuController(csHandler, stage));
+        controllers.put(LoginController.class, () ->
+                new LoginController(csHandler, locHelper, sceneChanger)
+        );
+        controllers.put(MainController.class, () ->
+                new MainController(csHandler))
+        ;
+        controllers.put(MenuController.class, () ->
+                new MenuController(csHandler, stage, sceneChanger)
+        );
 
         sceneChanger.accept("login");
         stage.setTitle("RChat");
@@ -71,7 +77,7 @@ public class ClientApp extends Application {
 
     @Override
     public void stop() {
-        runAsync(csHandler::quit);
+        runAsync(csHandler::logout);
         Platform.exit();
     }
 

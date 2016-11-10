@@ -71,13 +71,15 @@ public class CsHandler {
         return chatServices[current];
     }
 
-    public void quit() {
+    public void logout() {
         try {
+            String token = this.token;
             if (token != null) {
+                this.token = null;
                 cs().logout(token);
             }
         } catch (Exception e) {
-            LOG.warn("quit()", e);
+            LOG.warn("logout()", e);
         }
     }
 }
