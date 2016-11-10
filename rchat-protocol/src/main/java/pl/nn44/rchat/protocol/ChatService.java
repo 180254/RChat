@@ -32,7 +32,5 @@ public interface ChatService {
 
     Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException;
 
-    Response<?> quit(String session) throws ChatException;
-
     Response<?> test(boolean exception) throws ChatException;
 }

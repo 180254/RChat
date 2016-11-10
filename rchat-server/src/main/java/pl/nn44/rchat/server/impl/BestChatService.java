@@ -29,7 +29,7 @@ public class BestChatService implements ChatService {
     private static final int MAX_NEWS_PER_REQUEST = 10;
 
     private final Random random = new SecureRandom();
-    private final Iterator<String> idGenerator = BigIdGenerator.bits(random, 128);
+    private final Iterator<String> idGenerator = BigIdGenerator.chars(random, 6);
     private final Pattern nameValidator = Pattern.compile("[a-zA-Z0-9_.-]{1,10}");
 
     private final ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
@@ -86,23 +86,15 @@ public class BestChatService implements ChatService {
         try {
             Params params = params(session, null, null, false);
 
-            for (Channel chan : params.caller.getChannels()) {
-                boolean remove = chan.getUsers().remove(params.caller);
-
-                if (remove) {
-                    WhatsUp whatsUp = new WhatsUp(
-                            What.PART,
-                            chan.getName(),
-                            params.caller.getUsername()
-                    );
-
-                    for (User cu : chan.getUsers()) {
-                        cu.getNews().offer(whatsUp);
-                    }
-                }
+            for (Channel channel : params.caller.getChannels()) {
+                // double lock is safe operation:
+                // "If the current thread already holds the lock
+                // then the hold count is incremented by one and the method returns immediately."
+                part(session, channel.getName());
             }
 
             sessionToUser.remove(session);
+
             return Response.Ok();
 
         } finally {
@@ -149,9 +141,11 @@ public class BestChatService implements ChatService {
                 throw new ChatException(Reason.UNWELCOME_BANNED);
             }
 
+            /* unnecessary until own channels are allowed
             if (!nameValidator.matcher(channel).matches()) {
                 throw new ChatException(Reason.GIVEN_BAD_CHANNEL);
             }
+            */
 
             boolean addC = params.channel.getUsers().addIfAbsent(params.caller);
             boolean addU = params.caller.getChannels().addIfAbsent(params.channel);
@@ -511,25 +505,6 @@ public class BestChatService implements ChatService {
         }
     }
 
-    @Override
-    public Response<?> quit(String session) throws ChatException {
-        Locks locks = locks(session, null, null);
-
-        try {
-            Params params = params(session, null, null, false);
-
-            for (Channel channel : params.caller.getChannels()) {
-                part(session, channel.getName());
-            }
-
-            sessionToUser.remove(session);
-
-            return Response.Ok();
-        } finally {
-            locks.unlock();
-        }
-    }
-
     // ---------------------------------------------------------------------------------------------------------------
 
     @Scheduled(cron = "0 */5 * * * *")
@@ -541,7 +516,7 @@ public class BestChatService implements ChatService {
                 .filter(se -> ChronoUnit.MINUTES.between(se.getValue().getLastSync(), now) >= 3)
                 .forEach(se -> {
                     try {
-                        quit(se.getKey());
+                        logout(se.getKey());
                     } catch (ChatException e) {
                         LOG.warn("sessionCleanup assertion error", e);
                         throw new AssertionError(e);
@@ -677,8 +652,6 @@ public class BestChatService implements ChatService {
             if (channel != null) {
                 this.lock$channel = stripedLocks.get("C$" + channel);
             }
-
-            this.lock();
         }
 
         void lock() {
@@ -711,6 +684,8 @@ public class BestChatService implements ChatService {
                         String username)
             throws ChatException {
 
-        return new Locks(session, channel, username);
+        Locks locks = new Locks(session, channel, username);
+        locks.lock();
+        return locks;
     }
 }
