@@ -10,6 +10,8 @@ import pl.nn44.rchat.protocol.*;
 import pl.nn44.rchat.protocol.ChatException.Reason;
 import pl.nn44.rchat.protocol.WhatsUp.What;
 import pl.nn44.rchat.server.as.AsLoggable;
+import pl.nn44.rchat.server.model.SeChannel;
+import pl.nn44.rchat.server.model.SeUser;
 import pl.nn44.rchat.server.util.BigIdGenerator;
 
 import java.security.SecureRandom;

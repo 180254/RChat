@@ -1,4 +1,4 @@
-package pl.nn44.rchat.server.impl;
+package pl.nn44.rchat.server.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -29,6 +29,8 @@ public class SeUser {
         return new SeUser(null, username);
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public String getSession() {
         return session;
     }
@@ -56,6 +58,8 @@ public class SeUser {
     public void updateLastSync() {
         this.lastSync = LocalDateTime.now();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public boolean equals(Object o) {

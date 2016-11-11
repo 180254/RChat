@@ -40,6 +40,8 @@ public class RcChUser implements Serializable {
         this.banned = false;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public String getChannel() {
         return channel;
     }
@@ -63,6 +65,8 @@ public class RcChUser implements Serializable {
     public boolean isBanned() {
         return banned;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public boolean equals(Object o) {

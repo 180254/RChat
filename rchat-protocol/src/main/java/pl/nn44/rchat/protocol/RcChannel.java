@@ -42,6 +42,8 @@ public class RcChannel implements Serializable {
         this.rcChUsers = null;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public String getName() {
         return name;
     }
@@ -57,6 +59,8 @@ public class RcChannel implements Serializable {
     public RcChUser[] getRcChUsers() {
         return rcChUsers.clone();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public boolean equals(Object o) {

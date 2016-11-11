@@ -1,4 +1,4 @@
-package pl.nn44.rchat.server.impl;
+package pl.nn44.rchat.server.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -20,6 +20,8 @@ public class SeChannel {
         this.password = password;
         this.topic = "";
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public String getName() {
         return name;
@@ -48,6 +50,8 @@ public class SeChannel {
     public CopyOnWriteArrayList<String> getBanned() {
         return banned;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public boolean equals(Object o) {
