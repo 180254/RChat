@@ -36,17 +36,7 @@
             </ScrollPane>
         </VBox>
 
-        <ListView fx:id="users">
-            <contextMenu>
-                <ContextMenu>
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Kick"/>
-                        <MenuItem mnemonicParsing="false" text="Ban/Unban"/>
-                        <CheckMenuItem mnemonicParsing="false" text="Ignore/Unignore"/>
-                    </items>
-                </ContextMenu>
-            </contextMenu>
-        </ListView>
+        <ListView fx:id="users"/>
     </SplitPane>
 
     <HBox id="HBox" spacing="5.0" VBox.vgrow="NEVER">

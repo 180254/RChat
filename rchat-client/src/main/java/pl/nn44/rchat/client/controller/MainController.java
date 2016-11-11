@@ -15,13 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
 import pl.nn44.rchat.client.impl.CsHandler;
-import pl.nn44.rchat.client.impl.CtChannel;
-import pl.nn44.rchat.client.impl.CtUser;
+import pl.nn44.rchat.client.model.CtChannel;
+import pl.nn44.rchat.client.model.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.RcChannel;
 import pl.nn44.rchat.protocol.Response;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -50,7 +51,9 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MainController(CsHandler csHandler, LocaleHelper localeHelper) {
+    public MainController(CsHandler csHandler,
+                          LocaleHelper localeHelper) {
+
         this.csh = csHandler;
         i18n = localeHelper;
 
@@ -70,20 +73,22 @@ public class MainController implements Initializable {
 
         runAsync(() -> {
             runLater(() -> {
-                status.setText(i18n.get("ctrl.main.initializing"));
+                status.setText(i18n.get2("ctrl.main.initializing"));
                 send.setDisable(true);
             });
 
             try {
                 Response<RcChannel[]> channels = csh.cs().channels(csh.token());
+
                 for (RcChannel rcChannel : channels.getPayload()) {
                     CtChannel channelEx = new CtChannel(rcChannel);
                     this.channels.getItems().add(channelEx);
                 }
 
                 runLater(() -> status.setText(""));
+
             } catch (Exception e) {
-                runLater(() -> status.setText(i18n.mapError("channels", e)));
+                runLater(() -> status.setText(i18n.mapError2("channels", e)));
             }
         });
     }
@@ -104,36 +109,42 @@ public class MainController implements Initializable {
 
 
     public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
+
+    }
+
+    public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
         if (!selected.isJoin()) {
             runAsync(() -> {
                 try {
-                    Response<RcChannel> rChannel = csh.cs().join(
+                    Response<RcChannel> rcChannel = csh.cs().join(
                             csh.token(),
-                            selected.getRChannel().getName(),
+                            selected.getChannel().getName(),
                             null
                     );
-                    ObservableList<CtUser> orChUsers = FXCollections.observableArrayList(
-                            Stream.of(rChannel.getPayload().getRChUsers())
-                                    .map(CtUser::new)
-                                    .collect(Collectors.toList())
-                    );
+
+                    List<CtUser> ctUsers = Stream
+                            .of(rcChannel.getPayload().getRcChUsers())
+                            .map(CtUser::new)
+                            .collect(Collectors.toList());
+
+                    ObservableList<CtUser> oCtUsers = FXCollections.observableArrayList(ctUsers);
+
+                    selected.setJoin(true);
+                    selected.setChannel(rcChannel.getPayload());
+                    users.setItems(oCtUsers);
 
                     channelsSkin.refresh();
-                    selected.setJoin(true);
-                    selected.setRChannel(rChannel.getPayload());
-                    channels.getItems();
-                    users.setItems(orChUsers);
+
                 } catch (Exception e) {
                     runLater(() -> status.setText(i18n.mapError2("join", e)));
                 }
             });
+
         } else {
+            runAsync(() -> {
 
+            });
         }
-    }
-
-    public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
-
     }
 
     // ---------------------------------------------------------------------------------------------------------------

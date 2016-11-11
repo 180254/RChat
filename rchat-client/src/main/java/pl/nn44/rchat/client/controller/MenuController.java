@@ -34,10 +34,9 @@ public class MenuController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MenuController(
-            CsHandler csHandler,
-            Stage appStage,
-            Consumer<String> sceneChanger) {
+    public MenuController(CsHandler csHandler,
+                          Stage appStage,
+                          Consumer<String> sceneChanger) {
 
         this.csh = csHandler;
         this.stage = appStage;
