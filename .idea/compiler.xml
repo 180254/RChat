@@ -30,8 +30,8 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="RChat" target="1.8" />
       <module name="apache-xmlrpc-extension" target="1.8" />
+      <module name="RChat" target="1.8" />
       <module name="rchat-client" target="1.8" />
       <module name="rchat-interface" target="1.5" />
       <module name="rchat-protocol" target="1.8" />

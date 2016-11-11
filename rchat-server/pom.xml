@@ -32,7 +32,7 @@
         <dependency>
             <groupId>pl.nn44</groupId>
             <artifactId>rchat-protocol</artifactId>
-            <version>1.0</version>
+            <version>${version.self}</version>
         </dependency>
 
         <!-- spring boot -->
@@ -46,6 +46,7 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- spring boot dev -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -58,7 +59,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- aop -->
+        <!-- spring boot aop -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
@@ -68,34 +69,42 @@
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
-            <version>4.0.38</version>
+            <version>${version.hessian}</version>
         </dependency>
 
         <!-- burlap -->
         <dependency>
             <groupId>com.caucho</groupId>
-            <artifactId>resin</artifactId>
-            <version>3.0.9</version>
+            <artifactId>burlap</artifactId>
+            <version>${version.burlap}</version>
         </dependency>
 
         <!-- xml rpc -->
         <dependency>
             <groupId>org.apache.xmlrpc</groupId>
             <artifactId>xmlrpc-server</artifactId>
-            <version>3.1.3</version>
+            <version>${version.xmlrpc}</version>
         </dependency>
 
         <dependency>
             <groupId>pl.nn44</groupId>
             <artifactId>apache-xmlrpc-extension</artifactId>
-            <version>1.0</version>
+            <version>${version.self}</version>
         </dependency>
 
         <!-- logback filters -->
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
-            <version>3.0.6</version>
+            <version>${version.janino}</version>
+        </dependency>
+
+        <!-- other -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${version.jetann}</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>
