@@ -15,19 +15,24 @@ public class RcChannel implements Serializable {
     private final String topic;
     private final RcChUser[] rcChUsers;
 
-    public RcChannel(String name, boolean password) {
+    public RcChannel(String name,
+                     boolean password) {
+
         this.name = name;
         this.password = password;
         this.topic = null;
         this.rcChUsers = null;
     }
 
-    public RcChannel(String name, boolean password,
-                     String topic, RcChUser[] rcChUsers) {
+    public RcChannel(String name,
+                     boolean password,
+                     String topic,
+                     RcChUser[] rcChUsers) {
+
         this.name = name;
         this.password = password;
         this.topic = topic;
-        this.rcChUsers = rcChUsers;
+        this.rcChUsers = rcChUsers.clone();
     }
 
     protected RcChannel() {
@@ -49,8 +54,8 @@ public class RcChannel implements Serializable {
         return topic;
     }
 
-    public RcChUser[] getRChUsers() {
-        return rcChUsers;
+    public RcChUser[] getRcChUsers() {
+        return rcChUsers.clone();
     }
 
     @Override
@@ -72,7 +77,7 @@ public class RcChannel implements Serializable {
                 .add("name", name)
                 .add("password", password)
                 .add("topic", topic)
-                .add("rChUsers", Stream.of(
+                .add("rcChUsers", Stream.of(
                         rcChUsers != null ? rcChUsers : new RcChUser[0]
                 ).map(RcChUser::getUsername))
                 .toString();
