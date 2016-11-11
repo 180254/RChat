@@ -13,7 +13,7 @@
         <padding>
             <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
         </padding>
-        <Label text="Status:">
+        <Label text="%fxml.main.status">
             <padding>
                 <Insets left="5.0"/>
             </padding>
@@ -54,6 +54,6 @@
             <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
         </padding>
         <TextField fx:id="message" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="send" mnemonicParsing="false" onAction="#sendClicked" text="Send"/>
+        <Button fx:id="send" mnemonicParsing="false" onAction="#sendClicked" text="%fxml.main.send"/>
     </HBox>
 </VBox>

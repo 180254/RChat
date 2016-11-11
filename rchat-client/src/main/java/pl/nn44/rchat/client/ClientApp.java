@@ -64,7 +64,7 @@ public class ClientApp extends Application {
                 new LoginController(csHandler, locHelper, sceneChanger)
         );
         controllers.put(MainController.class, () ->
-                new MainController(csHandler))
+                new MainController(csHandler, locHelper))
         ;
         controllers.put(MenuController.class, () ->
                 new MenuController(csHandler, stage, sceneChanger)
