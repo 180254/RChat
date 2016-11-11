@@ -14,15 +14,14 @@ import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
-
-import static java.util.concurrent.CompletableFuture.runAsync;
-import static javafx.application.Platform.runLater;
 
 public class MenuController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MenuController.class);
 
+    private final ExecutorService exs;
     private final CsHandler csh;
     private final Stage stage;
     private final Consumer<String> sc;
@@ -34,10 +33,12 @@ public class MenuController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MenuController(CsHandler csHandler,
+    public MenuController(ExecutorService executor,
+                          CsHandler csHandler,
                           Stage appStage,
                           Consumer<String> sceneChanger) {
 
+        this.exs = executor;
         this.csh = csHandler;
         this.stage = appStage;
         this.sc = sceneChanger;
@@ -59,8 +60,8 @@ public class MenuController implements Initializable {
 
     @FXML
     public void onLogoutCLicked(ActionEvent ev) {
-        runAsync(csh::logout);
-        runAsync(() -> runLater(() -> sc.accept("login")));
+        exs.submit(csh::logout);
+        sc.accept("login");
     }
 
     @FXML
@@ -72,7 +73,7 @@ public class MenuController implements Initializable {
 
     @FXML
     public void onProtocolChanged(ActionEvent actionEvent) {
-        runAsync(() -> {
+        exs.submit(() -> {
             Toggle source = (Toggle) actionEvent.getSource();
             int protocolIndex = protocol.getToggles().indexOf(source);
             Clients.Cs cs = Clients.Cs.byIndex(protocolIndex);
@@ -84,6 +85,6 @@ public class MenuController implements Initializable {
 
     @FXML
     public void onTextClicked(ActionEvent ev) {
-        runAsync(csh::test);
+        exs.submit(csh::test);
     }
 }

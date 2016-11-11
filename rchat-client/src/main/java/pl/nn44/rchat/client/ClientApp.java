@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
@@ -29,6 +31,7 @@ public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final CsHandler csHandler = new CsHandler();
     private final LocaleHelper locHelper = new LocaleHelper();
     private final Map<Class<?>, Supplier<Object>> controllers = new HashMap<>();
@@ -61,13 +64,13 @@ public class ClientApp extends Application {
         };
 
         controllers.put(LoginController.class, () ->
-                new LoginController(csHandler, locHelper, sceneChanger)
+                new LoginController(executor, csHandler, locHelper, sceneChanger)
         );
         controllers.put(MainController.class, () ->
-                new MainController(csHandler, locHelper))
+                new MainController(executor, csHandler, locHelper))
         ;
         controllers.put(MenuController.class, () ->
-                new MenuController(csHandler, stage, sceneChanger)
+                new MenuController(executor, csHandler, stage, sceneChanger)
         );
 
         sceneChanger.accept("login");
@@ -77,6 +80,7 @@ public class ClientApp extends Application {
 
     @Override
     public void stop() {
+        executor.shutdownNow();
         runAsync(csHandler::logout);
         Platform.exit();
     }

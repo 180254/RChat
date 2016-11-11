@@ -1,5 +1,6 @@
 package pl.nn44.rchat.client.controller;
 
+import com.google.common.collect.ImmutableMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,24 +18,32 @@ import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.model.CtChannel;
 import pl.nn44.rchat.client.model.CtUser;
+import pl.nn44.rchat.client.util.Lf;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.RcChannel;
 import pl.nn44.rchat.protocol.Response;
+import pl.nn44.rchat.protocol.WhatsUp;
+import pl.nn44.rchat.protocol.WhatsUp.What;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.concurrent.CompletableFuture.runAsync;
 import static javafx.application.Platform.runLater;
 
 public class MainController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+    private static final int WHATS_UP_LONG_POOLING = (int) TimeUnit.MINUTES.toMillis(1);
 
+    private final ExecutorService exs;
     private final CsHandler csh;
     private final LocaleHelper i18n;
 
@@ -46,15 +55,29 @@ public class MainController implements Initializable {
     @FXML public ListView<CtChannel> channels;
     @FXML public ListView<CtUser> users;
 
-    private RefreshableListViewSkin<CtChannel> channelsSkin;
-    private RefreshableListViewSkin<CtUser> usersSkin;
+    public RefreshableListViewSkin<CtChannel> channelsSkin;
+    public RefreshableListViewSkin<CtUser> usersSkin;
+
+    private Map<What, Consumer<WhatsUp>> whatsUpMap =
+            ImmutableMap.<What, Consumer<WhatsUp>>builder()
+                    .put(What.MESSAGE, this::onSomeMessage)
+                    .put(What.PRIVY, this::onSomePrivy)
+                    .put(What.TOPIC, this::onSomeTopic)
+                    .put(What.JOIN, this::onSomeJoin)
+                    .put(What.PART, this::onSomePart)
+                    .put(What.KICK, this::onSomeKick)
+                    .put(What.BAN, this::onSomeBan)
+                    .put(What.ADMIN, this::onSomeAdmin)
+                    .put(What.IGNORE, this::onSomeIgnore)
+                    .build();
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MainController(CsHandler csHandler,
+    public MainController(ExecutorService executor, CsHandler csHandler,
                           LocaleHelper localeHelper) {
 
         this.csh = csHandler;
+        this.exs = executor;
         i18n = localeHelper;
 
         LOG.debug("{} instance created.", getClass().getSimpleName());
@@ -71,9 +94,9 @@ public class MainController implements Initializable {
 
         runLater(() -> message.requestFocus());
 
-        runAsync(() -> {
+        exs.submit(() -> {
             runLater(() -> {
-                status.setText(i18n.get2("ctrl.main.initializing"));
+                status.setText(Lf.r(i18n.get("ctrl.main.initializing")));
                 send.setDisable(true);
             });
 
@@ -89,10 +112,68 @@ public class MainController implements Initializable {
 
                 runLater(() -> status.setText(""));
 
+                exs.submit(this::listenWhatHappens);
             } catch (Exception e) {
-                runLater(() -> status.setText(i18n.mapError2("channels", e)));
+                runLater(() -> status.setText(Lf.r(i18n.mapError("channels", e))));
             }
         });
+
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public void listenWhatHappens() {
+
+        try {
+            WhatsUp[] whatsUps = csh.cs()
+                    .whatsUp(csh.token(), WHATS_UP_LONG_POOLING)
+                    .getPayload();
+
+            for (WhatsUp whatsUp : whatsUps) {
+                whatsUpMap.get(whatsUp.getWhat()).accept(whatsUp);
+            }
+
+            exs.submit(this::listenWhatHappens);
+        } catch (Exception e) {
+            LOG.error("XX", e);
+        }
+
+    }
+
+    public void onSomeMessage(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeMessage", whatsUp);
+    }
+
+    public void onSomePrivy(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomePrivy", whatsUp);
+    }
+
+    public void onSomeTopic(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeTopic", whatsUp);
+    }
+
+    public void onSomeJoin(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeJoin", whatsUp);
+    }
+
+    public void onSomePart(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomePart", whatsUp);
+    }
+
+    public void onSomeKick(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeKick", whatsUp);
+    }
+
+    public void onSomeBan(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeBan", whatsUp);
+    }
+
+    public void onSomeAdmin(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeAdmin", whatsUp);
+    }
+
+    public void onSomeIgnore(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeIgnore", whatsUp);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -116,8 +197,9 @@ public class MainController implements Initializable {
 
     public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
         if (!selected.isJoin()) {
-            runAsync(() -> {
+            exs.submit(() -> {
                 try {
+
                     RcChannel rcChannel = csh.cs().join(
                             csh.token(),
                             selected.getChannel().getName(),
@@ -140,13 +222,14 @@ public class MainController implements Initializable {
                         channelsSkin.refresh();
                     });
 
+
                 } catch (Exception e) {
-                    runLater(() -> status.setText(i18n.mapError2("join", e)));
+                    runLater(() -> status.setText(Lf.r(i18n.mapError("join", e))));
                 }
             });
 
         } else {
-            runAsync(() -> {
+            exs.submit(() -> {
                 try {
                     Response<?> part = csh.cs().part(
                             csh.token(),
@@ -160,7 +243,7 @@ public class MainController implements Initializable {
                     });
 
                 } catch (Exception e) {
-                    runLater(() -> status.setText(i18n.mapError2("part", e)));
+                    runLater(() -> status.setText(Lf.r(i18n.mapError("part", e))));
                 }
             });
         }

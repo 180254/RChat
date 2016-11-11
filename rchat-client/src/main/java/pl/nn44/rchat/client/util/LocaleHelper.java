@@ -8,7 +8,6 @@ import pl.nn44.rchat.protocol.ChatException;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
-import java.util.regex.Pattern;
 
 // org.springframework.remoting.RemoteAccessException
 // org.apache.xmlrpc.XmlRpcException
@@ -17,7 +16,6 @@ import java.util.regex.Pattern;
 public class LocaleHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocaleHelper.class);
-    private static final Pattern NL_PATTERN = Pattern.compile("\n");
 
     private ResourceBundle res;
 
@@ -45,16 +43,8 @@ public class LocaleHelper {
         }
     }
 
-    public String mapError2(String map, Exception e) {
-        return NL_PATTERN.matcher(mapError(map, e)).replaceAll(" ");
-    }
-
     public String get(String key) {
         return res.getString(key);
-    }
-
-    public String get2(String key) {
-        return NL_PATTERN.matcher(get(key)).replaceAll(" ");
     }
 
     public void setRes(ResourceBundle res) {

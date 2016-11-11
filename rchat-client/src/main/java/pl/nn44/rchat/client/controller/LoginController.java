@@ -13,15 +13,16 @@ import pl.nn44.rchat.protocol.Response;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
-import static java.util.concurrent.CompletableFuture.runAsync;
 import static javafx.application.Platform.runLater;
 
 public class LoginController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
+    private final ExecutorService exs;
     private final CsHandler csh;
     private final LocaleHelper i18n;
     private final Consumer<String> sc;
@@ -36,11 +37,13 @@ public class LoginController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public LoginController(CsHandler csHandler,
+    public LoginController(ExecutorService executor,
+                           CsHandler csHandler,
                            LocaleHelper locHelper,
                            Consumer<String> sceneChanger) {
 
         this.csh = csHandler;
+        this.exs = executor;
         this.i18n = locHelper;
         this.sc = sceneChanger;
 
@@ -50,7 +53,7 @@ public class LoginController implements Initializable {
     @FXML
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        runAsync(() -> {
+        exs.submit(() -> {
             runLater(() -> {
                 menuController.logout.setDisable(true);
                 status.setText(i18n.get("ctrl.login.initializing"));
@@ -70,7 +73,7 @@ public class LoginController implements Initializable {
 
     @FXML
     public void onEnterClicked(ActionEvent ev) {
-        runAsync(() -> {
+        exs.submit(() -> {
             runLater(() -> {
                 status.setText(i18n.get("ctrl.login.processing"));
                 username.setDisable(true);
