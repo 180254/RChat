@@ -165,9 +165,9 @@ public class BestChatService implements ChatService {
                         params.caller.getUsername()
                 );
 
-                for (SeUser cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
-                }
+                params.channel.getUsers().stream()
+                        .filter(cu -> !cu.equals(params.caller))
+                        .forEach(cu -> cu.getNews().offer(whatsUp));
             }
 
             if (addC && admin) {
@@ -179,9 +179,10 @@ public class BestChatService implements ChatService {
                         "ON"
                 );
 
-                for (SeUser cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
-                }
+                params.channel.getUsers().stream()
+                        .filter(cu -> !cu.equals(params.caller))
+                        .forEach(cu -> cu.getNews().offer(whatsUp));
+
             }
 
             RcChUser[] rcChUsers = params.channel.getUsers()
