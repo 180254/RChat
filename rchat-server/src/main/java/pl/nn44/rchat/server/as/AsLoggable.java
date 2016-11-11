@@ -15,5 +15,5 @@ public @interface AsLoggable {
 
     boolean params() default true;
 
-    boolean result() default false;
+    boolean result() default true;
 }

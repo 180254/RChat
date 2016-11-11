@@ -3,6 +3,8 @@ package pl.nn44.rchat.server.util;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.math.IntMath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -10,6 +12,8 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class BigIdGenerator implements Iterator<String> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BigIdGenerator.class);
 
     private static final int NUMBER_BASE = 32;
     private static final int BIT_PER_CHAR = IntMath.log2(NUMBER_BASE, RoundingMode.UNNECESSARY);
@@ -22,6 +26,8 @@ public class BigIdGenerator implements Iterator<String> {
         this.random = random;
         this.chars = chars;
         this.bits = chars * BIT_PER_CHAR;
+
+        LOG.info("{} instance created: chars={}, bits={}.", getClass().getSimpleName(), chars, bits);
     }
 
     public static BigIdGenerator chars(Random random, int chars) {
