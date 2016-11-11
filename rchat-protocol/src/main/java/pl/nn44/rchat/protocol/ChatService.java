@@ -10,13 +10,11 @@ public interface ChatService {
 
     Response<RChannel[]> channels(String session) throws ChatException;
 
-    Response<String/*topic*/> join(String session, String channel, @Nullable String password) throws ChatException;
+    Response<RChannel> join(String session, String channel, @Nullable String password) throws ChatException;
 
     Response<?> part(String session, String channel) throws ChatException;
 
     Response<?> topic(String session, String channel, String text) throws ChatException;
-
-    Response<RChUser[]> names(String session, String channel) throws ChatException;
 
     Response<?> kick(String session, String channel, String username) throws ChatException;
 

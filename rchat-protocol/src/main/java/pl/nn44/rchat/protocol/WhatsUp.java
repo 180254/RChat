@@ -28,7 +28,7 @@ public class WhatsUp implements Serializable {
         this.what = what;
         this.channel = channel;
         this.username = username;
-        this.params = params.clone();
+        this.params = params;
     }
 
     protected WhatsUp() {

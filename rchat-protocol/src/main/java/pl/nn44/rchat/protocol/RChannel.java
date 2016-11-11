@@ -11,15 +11,29 @@ public class RChannel implements Serializable {
 
     private final String name;
     private final boolean password;
+    private final String topic;
+    private final RChUser[] rChUsers;
 
     public RChannel(String name, boolean password) {
         this.name = name;
         this.password = password;
+        this.topic = null;
+        this.rChUsers = null;
+    }
+
+    public RChannel(String name, boolean password,
+                    String topic, RChUser[] rChUsers) {
+        this.name = name;
+        this.password = password;
+        this.topic = topic;
+        this.rChUsers = rChUsers;
     }
 
     protected RChannel() {
         this.name = null;
         this.password = false;
+        this.topic = null;
+        this.rChUsers = null;
     }
 
     public String getName() {
@@ -28,6 +42,14 @@ public class RChannel implements Serializable {
 
     public boolean isPassword() {
         return password;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public RChUser[] getrChUsers() {
+        return rChUsers;
     }
 
     @Override
