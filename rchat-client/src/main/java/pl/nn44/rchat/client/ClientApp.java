@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ public class ClientApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        stage.getIcons().add(new Image("layout/icon.png"));
+
         ResourceBundle res = PropertyResourceBundle.getBundle("prop/strings");
         locHelper.setRes(res);
 
