@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @AsLoggable
 public class BestChatService implements ChatService {
@@ -508,20 +509,25 @@ public class BestChatService implements ChatService {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Scheduled(cron = "0 */5 * * * *")
-    public void sessionCleanup() {
+    public int sessionCleanup() {
         LocalDateTime now = LocalDateTime.now();
 
-        sessionToUser
-                .entrySet().stream()
-                .filter(se -> ChronoUnit.MINUTES.between(se.getValue().getLastSync(), now) >= 3)
-                .forEach(se -> {
-                    try {
-                        logout(se.getKey());
-                    } catch (ChatException e) {
-                        LOG.warn("sessionCleanup assertion error", e);
-                        throw new AssertionError(e);
-                    }
-                });
+        List<Map.Entry<String, User>> ghosts =
+                sessionToUser
+                        .entrySet().stream()
+                        .filter(se -> ChronoUnit.MINUTES.between(se.getValue().getLastSync(), now) >= 3)
+                        .collect(Collectors.toList());
+
+        ghosts.forEach(se -> {
+            try {
+                logout(se.getKey());
+            } catch (ChatException e) {
+                LOG.warn("sessionCleanup assertion error", e);
+                throw new AssertionError(e);
+            }
+        });
+
+        return ghosts.size();
     }
 
     // ---------------------------------------------------------------------------------------------------------------
