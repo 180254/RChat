@@ -21,7 +21,7 @@
                     ${BUSINESS-EXCEPTIONS}.class.isInstance(throwable)
                     <!-- wrapped business exception -->
                     || ${BUSINESS-EXCEPTIONS}.class.isInstance(throwable != null ? throwable.getCause() : null)
-                    <!-- POST requests to *ServiceExporter -->
+                    <!-- GET requests to *ServiceExporter -->
                     || message.contains("ServiceExporter only supports POST requests")
                 </expression>
             </evaluator>
