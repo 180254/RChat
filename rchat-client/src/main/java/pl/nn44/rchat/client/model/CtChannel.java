@@ -2,31 +2,70 @@ package pl.nn44.rchat.client.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import pl.nn44.rchat.protocol.RcChUser;
 import pl.nn44.rchat.protocol.RcChannel;
 
 import java.text.MessageFormat;
 
 public class CtChannel {
 
-    private RcChannel channel;
+    private final String name;
+    private boolean password;
+    private String topic;
+    private ObservableList<CtUser> users;
     private boolean join;
 
-    private String topic;
-    private final ObservableList<CtUser> oUsers = FXCollections.observableArrayList();
-
     public CtChannel(RcChannel channel) {
-        this.channel = channel;
+        this.name = channel.getName();
+        update(channel);
         this.join = false;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public RcChannel getChannel() {
-        return channel;
+    public void update(RcChannel channel) {
+        this.password = channel.isPassword();
+        this.topic = channel.getTopic();
+
+        users = FXCollections.observableArrayList();
+        for (RcChUser user : channel.getRcChUsers()) {
+            users.add(new CtUser(user));
+        }
     }
 
-    public void setChannel(RcChannel channel) {
-        this.channel = channel;
+    public void clear() {
+        this.topic = "";
+        this.users.clear();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isPassword() {
+        return password;
+    }
+
+    public void setPassword(boolean password) {
+        this.password = password;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public ObservableList<CtUser> getUsers() {
+        return users;
+    }
+
+    public void setUsers(ObservableList<CtUser> users) {
+        this.users = users;
     }
 
     public boolean isJoin() {
@@ -37,10 +76,6 @@ public class CtChannel {
         this.join = join;
     }
 
-    public ObservableList<CtUser> getoUsers() {
-        return oUsers;
-    }
-
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
@@ -48,7 +83,7 @@ public class CtChannel {
         String join = this.join ? "[+]" : "[-]";
 
         String modes = "(";
-        modes += channel.isPassword() ? "p" : "";
+        modes += password ? "p" : "";
         modes += ")";
 
         modes = modes.length() > 2 ? modes : "";
@@ -56,16 +91,8 @@ public class CtChannel {
         return MessageFormat.format(
                 "{0} {1} {2}",
                 join,
-                channel.getName(),
+                name,
                 modes
         ).trim();
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
     }
 }

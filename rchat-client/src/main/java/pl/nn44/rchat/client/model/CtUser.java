@@ -6,20 +6,56 @@ import java.text.MessageFormat;
 
 public class CtUser {
 
-    private RcChUser user;
+    private final String username;
+    private boolean authorized;
+    private boolean ignored;
+    private boolean admin;
+    private boolean banned;
 
     public CtUser(RcChUser user) {
-        this.user = user;
+        this.username = user.getUsername();
+        this.authorized = user.isAuthorized();
+        this.ignored = user.isIgnored();
+        this.admin = user.isAdmin();
+        this.banned = user.isBanned();
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public RcChUser getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUser(RcChUser user) {
-        this.user = user;
+    public boolean isAuthorized() {
+        return authorized;
+    }
+
+    public void setAuthorized(boolean authorized) {
+        this.authorized = authorized;
+    }
+
+    public boolean isIgnored() {
+        return ignored;
+    }
+
+    public void setIgnored(boolean ignored) {
+        this.ignored = ignored;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
+    public boolean isBanned() {
+        return banned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.banned = banned;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -27,16 +63,16 @@ public class CtUser {
     @Override
     public String toString() {
         String modes = "(";
-        modes += user.isAuthorized() ? "a" : "";
-        modes += user.isAdmin() ? "o" : "";
-        modes += user.isIgnored() ? "i" : "";
+        modes += authorized ? "a" : "";
+        modes += admin ? "o" : "";
+        modes += ignored ? "i" : "";
         modes += ")";
 
         modes = modes.length() > 2 ? modes : "";
 
         return MessageFormat.format(
                 "{0} {1}",
-                user.getUsername(),
+                username,
                 modes
         ).trim();
     }

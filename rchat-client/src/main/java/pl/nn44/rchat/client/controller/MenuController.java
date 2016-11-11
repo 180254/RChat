@@ -9,13 +9,13 @@ import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.nn44.rchat.client.fx.SceneChanger;
 import pl.nn44.rchat.client.impl.Clients;
 import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
 
 public class MenuController implements Initializable {
 
@@ -24,7 +24,7 @@ public class MenuController implements Initializable {
     private final ExecutorService exs;
     private final CsHandler csh;
     private final Stage stage;
-    private final Consumer<String> sc;
+    private final SceneChanger sc;
 
     @FXML public MenuItem logout;
     @FXML public MenuItem exit;
@@ -36,7 +36,7 @@ public class MenuController implements Initializable {
     public MenuController(ExecutorService executor,
                           CsHandler csHandler,
                           Stage appStage,
-                          Consumer<String> sceneChanger) {
+                          SceneChanger sceneChanger) {
 
         this.exs = executor;
         this.csh = csHandler;
@@ -72,9 +72,9 @@ public class MenuController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     @FXML
-    public void onProtocolChanged(ActionEvent actionEvent) {
+    public void onProtocolChanged(ActionEvent ev) {
         exs.submit(() -> {
-            Toggle source = (Toggle) actionEvent.getSource();
+            Toggle source = (Toggle) ev.getSource();
             int protocolIndex = protocol.getToggles().indexOf(source);
             Clients.Cs cs = Clients.Cs.byIndex(protocolIndex);
 

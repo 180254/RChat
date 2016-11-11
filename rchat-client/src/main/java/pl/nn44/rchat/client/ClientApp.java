@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.controller.LoginController;
 import pl.nn44.rchat.client.controller.MainController;
 import pl.nn44.rchat.client.controller.MenuController;
+import pl.nn44.rchat.client.fx.SceneChanger;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.util.LocaleHelper;
 
@@ -23,7 +24,6 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 
@@ -41,7 +41,7 @@ public class ClientApp extends Application {
         ResourceBundle res = PropertyResourceBundle.getBundle("prop/strings");
         locHelper.setRes(res);
 
-        Consumer<String> sceneChanger = (scene) -> {
+        SceneChanger sceneChanger = (scene) -> {
             try {
                 ClassLoader classLoader = getClass().getClassLoader();
                 URL fxmlResource = classLoader.getResource("layout/" + scene + ".fxml");

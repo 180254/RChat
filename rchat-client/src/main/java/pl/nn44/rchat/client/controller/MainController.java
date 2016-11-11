@@ -1,8 +1,6 @@
 package pl.nn44.rchat.client.controller;
 
 import com.google.common.collect.ImmutableMap;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -25,7 +23,6 @@ import pl.nn44.rchat.protocol.WhatsUp;
 import pl.nn44.rchat.protocol.WhatsUp.What;
 
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -34,15 +31,12 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static javafx.application.Platform.runLater;
 
 public class MainController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
-
     private static final Pattern NL_PATTERN = Pattern.compile("\n");
     private static final int WHATS_UP_LONG_POOLING = (int) TimeUnit.MINUTES.toMillis(1);
 
@@ -74,12 +68,10 @@ public class MainController implements Initializable {
                     .put(What.IGNORE, this::onSomeIgnore)
                     .build();
 
-    private String r(String text) {
-        return NL_PATTERN.matcher(text).replaceAll(" ");
-    }
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MainController(ExecutorService executor, CsHandler csHandler,
+    public MainController(ExecutorService executor,
+                          CsHandler csHandler,
                           LocaleHelper localeHelper) {
 
         this.csh = csHandler;
@@ -98,7 +90,7 @@ public class MainController implements Initializable {
         usersSkin = new RefreshableListViewSkin<>(users);
         users.setSkin(usersSkin);
 
-        runLater(() -> message.requestFocus());
+        message.requestFocus();
 
         exs.submit(() -> {
             runLater(() -> {
@@ -117,8 +109,8 @@ public class MainController implements Initializable {
                 }
 
                 runLater(() -> status.setText(""));
-
                 exs.submit(this::listenWhatHappens);
+
             } catch (Exception e) {
                 runLater(() -> status.setText(r(i18n.mapError("channels", e))));
             }
@@ -129,7 +121,6 @@ public class MainController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     public void listenWhatHappens() {
-
         try {
             WhatsUp[] whatsUps = csh.cs()
                     .whatsUp(csh.token(), WHATS_UP_LONG_POOLING)
@@ -140,12 +131,16 @@ public class MainController implements Initializable {
             }
 
             exs.submit(this::listenWhatHappens);
+
         } catch (RejectedExecutionException e) {
+            LOG.debug("listenWhatHappens was interrupted.");
 
         } catch (Exception e) {
-            LOG.error("XX", e);
+            runLater(() -> {
+                status.setText(r(i18n.mapError("whats-up", e)));
+                send.setDisable(true);
+            });
         }
-
     }
 
     public void onSomeMessage(WhatsUp whatsUp) {
@@ -204,72 +199,54 @@ public class MainController implements Initializable {
 
 
     public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
-        exs.submit(() -> {
-            runLater(() -> {
-                topic.setText(selected.getTopic());
-                users.setItems(selected.getoUsers());
+        topic.setText(selected.getTopic());
+        users.setItems(selected.getUsers());
 
-                usersSkin.refresh();
-                channelsSkin.refresh();
-            });
-        });
+        usersSkin.refresh();
+        channelsSkin.refresh();
     }
 
     public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
         if (!selected.isJoin()) {
+            // join
             exs.submit(() -> {
                 try {
-
                     RcChannel rcChannel = csh.cs().join(
                             csh.token(),
-                            selected.getChannel().getName(),
+                            selected.getName(),
                             null
                     ).getPayload();
 
-                    List<CtUser> ctUsers = Stream
-                            .of(rcChannel.getRcChUsers())
-                            .map(CtUser::new)
-                            .collect(Collectors.toList());
-
-                    ObservableList<CtUser> oCtUsers = FXCollections.observableArrayList(ctUsers);
-
                     runLater(() -> {
-                        selected.getoUsers().addAll(oCtUsers);
+                        selected.update(rcChannel);
                         selected.setJoin(true);
-                        selected.setChannel(rcChannel);
-                        selected.setTopic(rcChannel.getTopic());
 
-                        topic.setText(selected.getTopic());
-                        users.setItems(selected.getoUsers());
-                        channelsSkin.refresh();
+                        onSingleClickedChannels(ev, selected);
                     });
 
-
                 } catch (Exception e) {
-                    runLater(() -> status.setText(r(i18n.mapError("join", e))));
+                    submitFleetingStatus(r(i18n.mapError("join", e)));
                 }
             });
 
         } else {
+            // part
             exs.submit(() -> {
                 try {
                     Response<?> part = csh.cs().part(
                             csh.token(),
-                            selected.getChannel().getName()
+                            selected.getName()
                     );
 
                     runLater(() -> {
-                        topic.setText("");
-
-                        selected.getoUsers().clear();
-                        selected.setTopic("");
+                        selected.clear();
                         selected.setJoin(false);
-                        users.setItems(null);
-                        channelsSkin.refresh();
+
+                        onSingleClickedChannels(ev, selected);
                     });
 
                 } catch (Exception e) {
-                    runLater(() -> status.setText(r(i18n.mapError("part", e))));
+                    submitFleetingStatus(r(i18n.mapError("part", e)));
                 }
             });
         }
@@ -277,11 +254,30 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    // ---------------------------------------------------------------------------------------------------------------
-
     @FXML
     public void sendClicked(ActionEvent ev) {
         status.setText(Integer.toString(new Random().nextInt()));
         channels.getSelectionModel().select(1);
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private String r(String text) {
+        return NL_PATTERN.matcher(text).replaceAll(" ");
+    }
+
+    private void submitFleetingStatus(String text) {
+        exs.submit(() -> {
+            runLater(() -> status.setText(text));
+
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                LOG.warn("fleetingStatus interrupted", e);
+                throw new AssertionError(e);
+            }
+
+            runLater(() -> status.setText(""));
+        });
     }
 }

@@ -7,6 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.nn44.rchat.client.fx.SceneChanger;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.Response;
@@ -14,7 +15,6 @@ import pl.nn44.rchat.protocol.Response;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
 
 import static javafx.application.Platform.runLater;
 
@@ -25,7 +25,7 @@ public class LoginController implements Initializable {
     private final ExecutorService exs;
     private final CsHandler csh;
     private final LocaleHelper i18n;
-    private final Consumer<String> sc;
+    private final SceneChanger sc;
 
     @FXML public TextField username;
     @FXML public PasswordField password;
@@ -40,7 +40,7 @@ public class LoginController implements Initializable {
     public LoginController(ExecutorService executor,
                            CsHandler csHandler,
                            LocaleHelper locHelper,
-                           Consumer<String> sceneChanger) {
+                           SceneChanger sceneChanger) {
 
         this.csh = csHandler;
         this.exs = executor;
@@ -90,9 +90,7 @@ public class LoginController implements Initializable {
 
                 csh.setToken(response.getPayload());
 
-                runLater(() -> {
-                    sc.accept("main");
-                });
+                runLater(() -> sc.accept("main"));
 
             } catch (Exception e) {
                 runLater(() -> {
