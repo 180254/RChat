@@ -45,12 +45,24 @@ public class BestChatService implements ChatService {
         accounts.put("admin", "admin");
         accounts.put("student", "student");
 
-        channelByName.put("standard", new SeChannel("standard", null));
+        channelByName.put("anybody", new SeChannel("anybody", null));
+        channelByName.put("python", new SeChannel("python", null));
+        channelByName.put("cars", new SeChannel("cars", null));
+        channelByName.put("students", new SeChannel("students", null));
         channelByName.put("admins", new SeChannel("admins", "admins"));
 
-        channelByName.get("standard").getAdmins().add("admin");
-        channelByName.get("standard").getAdmins().add("student");
-        channelByName.get("standard").getAdmins().add("admin");
+        channelByName.get("anybody").setTopic("");
+        channelByName.get("python").setTopic("python lovers");
+        channelByName.get("cars").setTopic("no bike");
+        channelByName.get("students").setTopic("trust me, i'm an engineer");
+        channelByName.get("admins").setTopic("keep silence");
+
+        channelByName.get("anybody").getAdmins().add("admin");
+        channelByName.get("python").getAdmins().add("admin");
+        channelByName.get("cars").getAdmins().add("admin");
+        channelByName.get("students").getAdmins().add("student");
+        channelByName.get("admins").getAdmins().add("student");
+        channelByName.get("admins").getAdmins().add("admin");
 
         LOG.info("{} instance created.", getClass().getSimpleName());
     }
