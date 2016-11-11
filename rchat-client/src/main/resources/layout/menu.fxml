@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.VBox?>
-<MenuBar VBox.vgrow="NEVER"
-         xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
+<MenuBar VBox.vgrow="NEVER" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
          fx:controller="pl.nn44.rchat.client.controller.MenuController">
 
-    <Menu text="%fxml.menu.file">
-        <MenuItem mnemonicParsing="false" onAction="#onLogoutCLicked" text="%fxml.menu.logout" fx:id="logout"/>
-        <MenuItem mnemonicParsing="false" onAction="#onExitClicked" text="%fxml.menu.exit" fx:id="exit"/>
+    <Menu text="%fxml.menu.fil">
+        <MenuItem fx:id="logout" mnemonicParsing="false" onAction="#onLogoutCLicked" text="%fxml.menu.logout"/>
+        <MenuItem fx:id="exit" mnemonicParsing="false" onAction="#onExitClicked" text="%fxml.menu.exit"/>
     </Menu>
 
     <Menu text="%fxml.menu.mode">
-        <RadioMenuItem text="%fxml.menu.hessian" mnemonicParsing="false" onAction="#onProtocolChanged" selected="true">
+        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged" selected="true" text="%fxml.menu.hessian">
             <toggleGroup>
                 <ToggleGroup fx:id="protocol"/>
             </toggleGroup>
         </RadioMenuItem>
 
-        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged"
-                       text="%fxml.menu.burlap" toggleGroup="$protocol"/>
-        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged"
-                       text="%fxml.menu.xml-rpc" toggleGroup="$protocol"/>
+        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged" text="%fxml.menu.burlap"
+                       toggleGroup="$protocol"/>
+        <RadioMenuItem mnemonicParsing="false" onAction="#onProtocolChanged" text="%fxml.menu.xml-rpc"
+                       toggleGroup="$protocol"/>
 
         <SeparatorMenuItem mnemonicParsing="false"/>
-        <MenuItem mnemonicParsing="false" onAction="#onTextClicked" text="%fxml.menu.test" fx:id="test"/>
+        <MenuItem fx:id="test" mnemonicParsing="false" onAction="#onTextClicked" text="%fxml.menu.test"/>
     </Menu>
 </MenuBar>

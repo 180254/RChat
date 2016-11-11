@@ -32,6 +32,8 @@ public class Clients {
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public ChatService hessianClient() {
         String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.hessian");
 
@@ -62,6 +64,8 @@ public class Clients {
         return chatService;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public ChatService burlapClient() {
         String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.burlap");
 
@@ -86,6 +90,8 @@ public class Clients {
         LOG.debug("BurlapClient instance created.");
         return chatService;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public ChatService xmlRpcClient() {
         String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.xml-rpc");

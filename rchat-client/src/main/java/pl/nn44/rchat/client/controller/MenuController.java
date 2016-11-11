@@ -25,22 +25,23 @@ public class MenuController implements Initializable {
 
     private final CsHandler csh;
     private final Stage stage;
-
-    private Consumer<String> sc;
+    private final Consumer<String> sc;
 
     @FXML public MenuItem logout;
     @FXML public MenuItem exit;
     @FXML public MenuItem test;
     @FXML public ToggleGroup protocol;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public MenuController(
             CsHandler csHandler,
-            Stage stage,
-            Consumer<String> sc) {
+            Stage appStage,
+            Consumer<String> sceneChanger) {
 
         this.csh = csHandler;
-        this.stage = stage;
-        this.sc = sc;
+        this.stage = appStage;
+        this.sc = sceneChanger;
 
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
@@ -50,10 +51,12 @@ public class MenuController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         protocol.selectToggle(
                 protocol.getToggles().get(
-                        csh.getCurrent()
+                        csh.current()
                 )
         );
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @FXML
     public void onLogoutCLicked(ActionEvent ev) {
@@ -65,6 +68,8 @@ public class MenuController implements Initializable {
     public void onExitClicked(ActionEvent ev) {
         stage.close();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @FXML
     public void onProtocolChanged(ActionEvent actionEvent) {

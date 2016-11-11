@@ -2,23 +2,20 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox prefHeight="600.0" prefWidth="900.0"
-      xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="pl.nn44.rchat.client.controller.LoginController">
 
-    <fx:include source="menu.fxml" fx:id="menu"/>
+    <fx:include fx:id="menu" source="menu.fxml"/>
 
     <AnchorPane prefHeight="100.0">
-        <Label alignment="CENTER" contentDisplay="TOP" prefHeight="100.0"
-               text="%fxml.login.welcome"
-               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+        <Label alignment="CENTER" contentDisplay="TOP" prefHeight="100.0" text="%fxml.login.welcom"
+               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+               AnchorPane.topAnchor="0.0"/>
     </AnchorPane>
 
     <AnchorPane>
-        <GridPane prefHeight="75.0" alignment="TOP_CENTER" hgap="20.0" vgap="10.0"
-                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <GridPane alignment="TOP_CENTER" hgap="20.0" prefHeight="75.0" vgap="10.0" AnchorPane.bottomAnchor="0.0"
+                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columnConstraints>
                 <ColumnConstraints/>
                 <ColumnConstraints/>
@@ -30,28 +27,24 @@
                 <RowConstraints vgrow="SOMETIMES"/>
             </rowConstraints>
 
-            <Label text="%fxml.login.username" prefHeight="25.0" prefWidth="150.0"
-                   GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <Label text="%fxml.login.password" prefHeight="25.0" prefWidth="150.0"
-                   GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Label prefHeight="25.0" prefWidth="150.0" text="%fxml.login.username" GridPane.columnIndex="0"
+                   GridPane.rowIndex="1"/>
+            <Label prefHeight="25.0" prefWidth="150.0" text="%fxml.login.password" GridPane.columnIndex="0"
+                   GridPane.rowIndex="2"/>
 
-            <TextField fx:id="username" prefHeight="25.0" prefWidth="150.0"
-                       GridPane.columnIndex="1" GridPane.rowIndex="1"
-                       onAction="#onEnterClicked"/>
+            <TextField fx:id="username" onAction="#onEnterClicked" prefHeight="25.0" prefWidth="150.0"
+                       GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-            <PasswordField fx:id="password" prefHeight="25.0" prefWidth="150.0"
-                           GridPane.columnIndex="1" GridPane.rowIndex="2"
-                           onAction="#onEnterClicked"/>
+            <PasswordField fx:id="password" onAction="#onEnterClicked" prefHeight="25.0" prefWidth="150.0"
+                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-            <Button fx:id="enter" mnemonicParsing="false" prefHeight="25.0" prefWidth="150.0"
-                    text="%fxml.login.enter" onAction="#onEnterClicked"
-                    GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+            <Button fx:id="enter" mnemonicParsing="false" onAction="#onEnterClicked" prefHeight="25.0" prefWidth="150.0"
+                    text="%fxml.login.enter" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
         </GridPane>
     </AnchorPane>
 
     <AnchorPane prefHeight="200.0">
-        <Label fx:id="status" alignment="CENTER" prefHeight="100.0" textFill="#da0000"
-               AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0"
-               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+        <Label fx:id="status" alignment="CENTER" prefHeight="100.0" textFill="#da0000" AnchorPane.bottomAnchor="100.0"
+               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
     </AnchorPane>
 </VBox>

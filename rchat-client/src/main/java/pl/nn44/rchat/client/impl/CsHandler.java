@@ -20,6 +20,8 @@ public class CsHandler {
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public void init() {
         Properties prop = PropLoader.get();
         Clients clients = new Clients(prop);
@@ -28,6 +30,8 @@ public class CsHandler {
         this.chatServices[Clients.Cs.Burlap.i()] = clients.burlapClient();
         this.chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpcClient();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void test() {
         for (int i = 0; i < chatServices.length; i++) {
@@ -51,25 +55,31 @@ public class CsHandler {
         }
     }
 
-    public String getToken() {
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public String token() {
         return token;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public int current() {
+        return current;
     }
 
-    public int getCurrent() {
-        return current;
+    public ChatService cs() {
+        return chatServices[current];
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public void setCurrent(int current) {
         this.current = current;
     }
 
-    public ChatService cs() {
-        return chatServices[current];
-    }
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void logout() {
         try {

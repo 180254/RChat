@@ -34,6 +34,8 @@ public class LoginController implements Initializable {
     @FXML public MenuBar menu;
     @FXML public MenuController menuController;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public LoginController(CsHandler csHandler,
                            LocaleHelper locHelper,
                            Consumer<String> sceneChanger) {
@@ -63,6 +65,8 @@ public class LoginController implements Initializable {
             });
         });
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @FXML
     public void onEnterClicked(ActionEvent ev) {
