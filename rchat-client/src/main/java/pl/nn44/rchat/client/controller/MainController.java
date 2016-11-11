@@ -18,7 +18,6 @@ import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.model.CtChannel;
 import pl.nn44.rchat.client.model.CtUser;
-import pl.nn44.rchat.client.util.Lf;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.RcChannel;
 import pl.nn44.rchat.protocol.Response;
@@ -31,8 +30,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,6 +42,8 @@ import static javafx.application.Platform.runLater;
 public class MainController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+
+    private static final Pattern NL_PATTERN = Pattern.compile("\n");
     private static final int WHATS_UP_LONG_POOLING = (int) TimeUnit.MINUTES.toMillis(1);
 
     private final ExecutorService exs;
@@ -71,6 +74,9 @@ public class MainController implements Initializable {
                     .put(What.IGNORE, this::onSomeIgnore)
                     .build();
 
+    private String r(String text) {
+        return NL_PATTERN.matcher(text).replaceAll(" ");
+    }
     // ---------------------------------------------------------------------------------------------------------------
 
     public MainController(ExecutorService executor, CsHandler csHandler,
@@ -96,7 +102,7 @@ public class MainController implements Initializable {
 
         exs.submit(() -> {
             runLater(() -> {
-                status.setText(Lf.r(i18n.get("ctrl.main.initializing")));
+                status.setText(r(i18n.get("ctrl.main.initializing")));
                 send.setDisable(true);
             });
 
@@ -114,7 +120,7 @@ public class MainController implements Initializable {
 
                 exs.submit(this::listenWhatHappens);
             } catch (Exception e) {
-                runLater(() -> status.setText(Lf.r(i18n.mapError("channels", e))));
+                runLater(() -> status.setText(r(i18n.mapError("channels", e))));
             }
         });
 
@@ -134,6 +140,8 @@ public class MainController implements Initializable {
             }
 
             exs.submit(this::listenWhatHappens);
+        } catch (RejectedExecutionException e) {
+
         } catch (Exception e) {
             LOG.error("XX", e);
         }
@@ -182,6 +190,10 @@ public class MainController implements Initializable {
     public void onMouseClickedChannels(MouseEvent ev) {
         CtChannel selected = channels.getSelectionModel().getSelectedItem();
 
+        if (selected == null) {
+            return;
+        }
+
         if (ev.getClickCount() == 1) {
             onSingleClickedChannels(ev, selected);
 
@@ -192,7 +204,15 @@ public class MainController implements Initializable {
 
 
     public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
-        System.out.println("SINGLE");
+        exs.submit(() -> {
+            runLater(() -> {
+                topic.setText(selected.getTopic());
+                users.setItems(selected.getoUsers());
+
+                usersSkin.refresh();
+                channelsSkin.refresh();
+            });
+        });
     }
 
     public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
@@ -214,17 +234,19 @@ public class MainController implements Initializable {
                     ObservableList<CtUser> oCtUsers = FXCollections.observableArrayList(ctUsers);
 
                     runLater(() -> {
+                        selected.getoUsers().addAll(oCtUsers);
                         selected.setJoin(true);
                         selected.setChannel(rcChannel);
+                        selected.setTopic(rcChannel.getTopic());
 
-                        topic.setText(rcChannel.getTopic());
-                        users.setItems(oCtUsers);
+                        topic.setText(selected.getTopic());
+                        users.setItems(selected.getoUsers());
                         channelsSkin.refresh();
                     });
 
 
                 } catch (Exception e) {
-                    runLater(() -> status.setText(Lf.r(i18n.mapError("join", e))));
+                    runLater(() -> status.setText(r(i18n.mapError("join", e))));
                 }
             });
 
@@ -237,13 +259,17 @@ public class MainController implements Initializable {
                     );
 
                     runLater(() -> {
+                        topic.setText("");
+
+                        selected.getoUsers().clear();
+                        selected.setTopic("");
                         selected.setJoin(false);
                         users.setItems(null);
                         channelsSkin.refresh();
                     });
 
                 } catch (Exception e) {
-                    runLater(() -> status.setText(Lf.r(i18n.mapError("part", e))));
+                    runLater(() -> status.setText(r(i18n.mapError("part", e))));
                 }
             });
         }

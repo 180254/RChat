@@ -1,5 +1,7 @@
 package pl.nn44.rchat.client.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import pl.nn44.rchat.protocol.RcChannel;
 
 import java.text.MessageFormat;
@@ -8,6 +10,9 @@ public class CtChannel {
 
     private RcChannel channel;
     private boolean join;
+
+    private String topic;
+    private final ObservableList<CtUser> oUsers = FXCollections.observableArrayList();
 
     public CtChannel(RcChannel channel) {
         this.channel = channel;
@@ -32,6 +37,10 @@ public class CtChannel {
         this.join = join;
     }
 
+    public ObservableList<CtUser> getoUsers() {
+        return oUsers;
+    }
+
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
@@ -50,5 +59,13 @@ public class CtChannel {
                 channel.getName(),
                 modes
         ).trim();
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 }
