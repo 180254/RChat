@@ -78,9 +78,11 @@ public class MainController implements Initializable {
             });
 
             try {
-                Response<RcChannel[]> channels = csh.cs().channels(csh.token());
+                RcChannel[] channels = csh.cs()
+                        .channels(csh.token())
+                        .getPayload();
 
-                for (RcChannel rcChannel : channels.getPayload()) {
+                for (RcChannel rcChannel : channels) {
                     CtChannel channelEx = new CtChannel(rcChannel);
                     this.channels.getItems().add(channelEx);
                 }
@@ -109,31 +111,34 @@ public class MainController implements Initializable {
 
 
     public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
-
+        System.out.println("SINGLE");
     }
 
     public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
         if (!selected.isJoin()) {
             runAsync(() -> {
                 try {
-                    Response<RcChannel> rcChannel = csh.cs().join(
+                    RcChannel rcChannel = csh.cs().join(
                             csh.token(),
                             selected.getChannel().getName(),
                             null
-                    );
+                    ).getPayload();
 
                     List<CtUser> ctUsers = Stream
-                            .of(rcChannel.getPayload().getRcChUsers())
+                            .of(rcChannel.getRcChUsers())
                             .map(CtUser::new)
                             .collect(Collectors.toList());
 
                     ObservableList<CtUser> oCtUsers = FXCollections.observableArrayList(ctUsers);
 
-                    selected.setJoin(true);
-                    selected.setChannel(rcChannel.getPayload());
-                    users.setItems(oCtUsers);
+                    runLater(() -> {
+                        selected.setJoin(true);
+                        selected.setChannel(rcChannel);
 
-                    channelsSkin.refresh();
+                        topic.setText(rcChannel.getTopic());
+                        users.setItems(oCtUsers);
+                        channelsSkin.refresh();
+                    });
 
                 } catch (Exception e) {
                     runLater(() -> status.setText(i18n.mapError2("join", e)));
@@ -142,7 +147,21 @@ public class MainController implements Initializable {
 
         } else {
             runAsync(() -> {
+                try {
+                    Response<?> part = csh.cs().part(
+                            csh.token(),
+                            selected.getChannel().getName()
+                    );
 
+                    runLater(() -> {
+                        selected.setJoin(false);
+                        users.setItems(null);
+                        channelsSkin.refresh();
+                    });
+
+                } catch (Exception e) {
+                    runLater(() -> status.setText(i18n.mapError2("part", e)));
+                }
             });
         }
     }

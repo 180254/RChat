@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
 <VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="pl.nn44.rchat.client.controller.MainController">
+      fx:controller="pl.nn44.rchat.client.controller.MainController" stylesheets="@style.css">
 
     <fx:include source="menu.fxml"/>
 

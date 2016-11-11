@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.VBox?>
 <MenuBar VBox.vgrow="NEVER" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
-         fx:controller="pl.nn44.rchat.client.controller.MenuController">
+         fx:controller="pl.nn44.rchat.client.controller.MenuController" stylesheets="@style.css">
 
     <Menu text="%fxml.menu.file">
         <MenuItem fx:id="logout" mnemonicParsing="false" onAction="#onLogoutCLicked" text="%fxml.menu.logout"/>
