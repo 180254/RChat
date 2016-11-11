@@ -33,6 +33,10 @@ public class SeChannel {
         return topic;
     }
 
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
     public CopyOnWriteArrayList<SeUser> getUsers() {
         return users;
     }
@@ -43,10 +47,6 @@ public class SeChannel {
 
     public CopyOnWriteArrayList<String> getBanned() {
         return banned;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
     }
 
     @Override

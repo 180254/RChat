@@ -33,11 +33,13 @@ public class AsLogger {
             + " && !execution(int *.hashCode())"
             + " && !execution(boolean *.equals(Object))")
     public Object aClass(ProceedingJoinPoint point) throws Throwable {
+        LOG.trace("{}.{}", getClass().getSimpleName(), "aClass");
         return around(point);
     }
 
     @Around("execution(* *(..)) && @annotation(AsLoggable))")
     public Object aMethod(ProceedingJoinPoint point) throws Throwable {
+        LOG.trace("{}.{}", getClass().getSimpleName(), "aMethod");
         return around(point);
     }
 
