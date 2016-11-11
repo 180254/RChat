@@ -23,8 +23,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static pl.nn44.rchat.protocol.ChatException.Reason.*;
-
 @AsLoggable
 public class BestChatService implements ChatService {
 
@@ -56,7 +54,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({ALREADY_LOGGED_IN, GIVEN_BAD_PASSWORD, GIVEN_BAD_USERNAME})
     public Response<String> login(String username, @Nullable String password) throws ChatException {
         Locks locks = locks(null, null, username);
 
@@ -84,7 +81,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION})
     public Response<?> logout(String session) throws ChatException {
         Locks locks = locks(session, null, null);
 
@@ -108,7 +104,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION})
     public Response<RcChannel[]> channels(String session) throws ChatException {
         Locks locks = locks(session, null, null);
 
@@ -131,7 +126,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_PASSWORD, UNWELCOME_BANNED})
     public Response<RcChannel> join(String session, String channel, @Nullable String password) throws ChatException {
         Locks locks = locks(session, channel, null);
 
@@ -215,7 +209,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL})
     public Response<?> part(String session, String channel) throws ChatException {
         Locks locks = locks(session, channel, null);
 
@@ -249,7 +242,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, NO_PERMISSION})
     public Response<?> topic(String session, String channel, String text) throws ChatException {
         Locks locks = new Locks(session, channel, null);
 
@@ -281,7 +273,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
     public Response<?> kick(String session, String channel, String username) throws ChatException {
         Locks locks = locks(session, channel, username);
 
@@ -316,7 +307,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
     public Response<?> ban(String session, String channel, String username, boolean state) throws ChatException {
         Locks locks = locks(session, channel, username);
 
@@ -349,7 +339,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
     public Response<?> admin(String session, String channel, String username, boolean state) throws ChatException {
         Locks locks = locks(session, channel, username);
 
@@ -382,7 +371,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
     public Response<?> ignore(String session, String username, boolean state) throws ChatException {
         Locks locks = locks(session, null, username);
 
@@ -414,7 +402,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
     public Response<?> privy(String session, String username, String text) throws ChatException {
         Locks locks = locks(session, null, username);
 
@@ -444,7 +431,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, NO_PERMISSION})
     public Response<?> message(String session, String channel, String text) throws ChatException {
         Locks locks = locks(session, channel, null);
 
@@ -474,7 +460,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    @CeReason({GIVEN_BAD_SESSION})
     public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException {
         Locks locks = locks(session, null, null);
 
@@ -517,7 +502,6 @@ public class BestChatService implements ChatService {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Scheduled(cron = "0 */5 * * * *")
-    @CeReason({NO_PERMISSION})
     public int sessionCleanup() {
         LocalDateTime now = LocalDateTime.now();
 
