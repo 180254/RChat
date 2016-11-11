@@ -6,7 +6,7 @@
 <MenuBar VBox.vgrow="NEVER" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
          fx:controller="pl.nn44.rchat.client.controller.MenuController">
 
-    <Menu text="%fxml.menu.fil">
+    <Menu text="%fxml.menu.file">
         <MenuItem fx:id="logout" mnemonicParsing="false" onAction="#onLogoutCLicked" text="%fxml.menu.logout"/>
         <MenuItem fx:id="exit" mnemonicParsing="false" onAction="#onExitClicked" text="%fxml.menu.exit"/>
     </Menu>
