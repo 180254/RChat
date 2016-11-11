@@ -53,11 +53,12 @@ public class ClientFactoryFix {
                 new Class[]{clazz},
                 (proxy, method, args) -> {
 
-                    // org.apache.xmlrpc.client.util.ClientFactory implementation:
-                    //
-                    // if (isObjectMethodLocal()  &&  pMethod.getDeclaringClass().equals(Object.class)) {
-                    //    return pMethod.invoke(pProxy, pArgs);
-                    // }
+                    /*
+                    org.apache.xmlrpc.client.util.ClientFactory implementation:
+                    if (isObjectMethodLocal()  &&  pMethod.getDeclaringClass().equals(Object.class)) {
+                        return pMethod.invoke(pProxy, pArgs);
+                    }
+                    */
                     if (method.getDeclaringClass().equals(Object.class)) {
                         switch (method.getName()) {
                             case "toString":
