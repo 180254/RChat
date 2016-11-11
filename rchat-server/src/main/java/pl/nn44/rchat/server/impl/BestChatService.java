@@ -132,7 +132,7 @@ public class BestChatService implements ChatService {
 
     @Override
     @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_PASSWORD, UNWELCOME_BANNED})
-    public Response<String> join(String session, String channel, @Nullable String password) throws ChatException {
+    public Response<RChannel> join(String session, String channel, @Nullable String password) throws ChatException {
         Locks locks = locks(session, channel, null);
 
         try {
@@ -188,7 +188,26 @@ public class BestChatService implements ChatService {
                 }
             }
 
-            return Response.Ok(params.channel.getTopic());
+            RChUser[] rChUsers = params.channel.getUsers()
+                    .stream()
+                    .map(cUser -> new RChUser(
+                            params.channel.getName(),
+                            cUser.getUsername(),
+                            accounts.containsKey(cUser.getUsername()),
+                            params.caller.getIgnored().contains(cUser),
+                            params.channel.getAdmins().contains(cUser.getUsername()),
+                            params.channel.getBanned().contains(cUser.getUsername())
+                    ))
+                    .toArray(RChUser[]::new);
+
+            RChannel rChannel = new RChannel(
+                    params.channel.getName(),
+                    params.channel.getPassword() != null,
+                    params.channel.getTopic(),
+                    rChUsers
+            );
+
+            return Response.Ok(rChannel);
 
         } finally {
             locks.unlock();
@@ -255,33 +274,6 @@ public class BestChatService implements ChatService {
             }
 
             return Response.Ok();
-
-        } finally {
-            locks.unlock();
-        }
-    }
-
-    @Override
-    @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, NO_PERMISSION})
-    public Response<RChUser[]> names(String session, String channel) throws ChatException {
-        Locks locks = new Locks(session, channel, null);
-
-        try {
-            Params params = params(session, channel, null, false);
-
-            RChUser[] rChUsers = params.channel.getUsers()
-                    .stream()
-                    .map(cUser -> new RChUser(
-                            params.channel.getName(),
-                            cUser.getUsername(),
-                            accounts.containsKey(cUser.getUsername()),
-                            params.caller.getIgnored().contains(cUser),
-                            params.channel.getAdmins().contains(cUser.getUsername()),
-                            params.channel.getBanned().contains(cUser.getUsername())
-                    ))
-                    .toArray(RChUser[]::new);
-
-            return Response.Ok(rChUsers);
 
         } finally {
             locks.unlock();
