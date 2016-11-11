@@ -23,6 +23,8 @@
                     || ${BUSINESS-EXCEPTIONS}.class.isInstance(throwable != null ? throwable.getCause() : null)
                     <!-- GET requests to *ServiceExporter -->
                     || message.contains("ServiceExporter only supports POST requests")
+                    <!-- closed connections -->
+                    || message.contains("closed by the remote host")
                 </expression>
             </evaluator>
         </filter>
