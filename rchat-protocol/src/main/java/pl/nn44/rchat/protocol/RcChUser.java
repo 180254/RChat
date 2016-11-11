@@ -5,7 +5,7 @@ import com.google.common.base.Objects;
 
 import java.io.Serializable;
 
-public class RChUser implements Serializable {
+public class RcChUser implements Serializable {
 
     private static final long serialVersionUID = -5068302409312104587L;
 
@@ -16,12 +16,12 @@ public class RChUser implements Serializable {
     private final boolean admin;
     private final boolean banned;
 
-    public RChUser(String channel,
-                   String username,
-                   boolean authorized,
-                   boolean ignored,
-                   boolean admin,
-                   boolean banned) {
+    public RcChUser(String channel,
+                    String username,
+                    boolean authorized,
+                    boolean ignored,
+                    boolean admin,
+                    boolean banned) {
 
         this.channel = channel;
         this.username = username;
@@ -31,7 +31,7 @@ public class RChUser implements Serializable {
         this.banned = banned;
     }
 
-    protected RChUser() {
+    protected RcChUser() {
         this.channel = null;
         this.username = null;
         this.authorized = false;
@@ -68,7 +68,7 @@ public class RChUser implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RChUser that = (RChUser) o;
+        RcChUser that = (RcChUser) o;
         return Objects.equal(channel, that.channel) &&
                 Objects.equal(username, that.username);
     }

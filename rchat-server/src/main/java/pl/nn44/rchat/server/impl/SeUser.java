@@ -9,24 +9,24 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class User {
+public class SeUser {
 
     private final String session;
     private final String username;
     private LocalDateTime lastSync;
 
-    private final CopyOnWriteArrayList<Channel> channels = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<User> ignored = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<SeChannel> channels = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<SeUser> ignored = new CopyOnWriteArrayList<>();
     private final BlockingQueue<WhatsUp> news = new LinkedBlockingQueue<>(); // offer(e), poll(), peek()
 
-    public User(String session, String username) {
+    public SeUser(String session, String username) {
         this.session = session;
         this.username = username;
         this.lastSync = LocalDateTime.now();
     }
 
-    public static User Dummy(String username) {
-        return new User(null, username);
+    public static SeUser Dummy(String username) {
+        return new SeUser(null, username);
     }
 
     public String getSession() {
@@ -41,11 +41,11 @@ public class User {
         return lastSync;
     }
 
-    public CopyOnWriteArrayList<Channel> getChannels() {
+    public CopyOnWriteArrayList<SeChannel> getChannels() {
         return channels;
     }
 
-    public CopyOnWriteArrayList<User> getIgnored() {
+    public CopyOnWriteArrayList<SeUser> getIgnored() {
         return ignored;
     }
 
@@ -61,7 +61,7 @@ public class User {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
+        SeUser user = (SeUser) o;
         return Objects.equal(
                 username.toLowerCase(),
                 user.username.toLowerCase()
@@ -79,8 +79,8 @@ public class User {
                 .add("session", session)
                 .add("username", username)
                 .add("lastSync", lastSync)
-                .add("channels", channels.stream().map(Channel::getName))
-                .add("ignored", ignored.stream().map(User::getUsername))
+                .add("channels", channels.stream().map(SeChannel::getName))
+                .add("ignored", ignored.stream().map(SeUser::getUsername))
                 // .add("news", news)
                 .toString();
     }

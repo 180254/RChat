@@ -6,35 +6,35 @@ import com.google.common.base.Objects;
 import java.io.Serializable;
 import java.util.stream.Stream;
 
-public class RChannel implements Serializable {
+public class RcChannel implements Serializable {
 
     private static final long serialVersionUID = -868502509392109589L;
 
     private final String name;
     private final boolean password;
     private final String topic;
-    private final RChUser[] rChUsers;
+    private final RcChUser[] rcChUsers;
 
-    public RChannel(String name, boolean password) {
+    public RcChannel(String name, boolean password) {
         this.name = name;
         this.password = password;
         this.topic = null;
-        this.rChUsers = null;
+        this.rcChUsers = null;
     }
 
-    public RChannel(String name, boolean password,
-                    String topic, RChUser[] rChUsers) {
+    public RcChannel(String name, boolean password,
+                     String topic, RcChUser[] rcChUsers) {
         this.name = name;
         this.password = password;
         this.topic = topic;
-        this.rChUsers = rChUsers;
+        this.rcChUsers = rcChUsers;
     }
 
-    protected RChannel() {
+    protected RcChannel() {
         this.name = null;
         this.password = false;
         this.topic = null;
-        this.rChUsers = null;
+        this.rcChUsers = null;
     }
 
     public String getName() {
@@ -49,15 +49,15 @@ public class RChannel implements Serializable {
         return topic;
     }
 
-    public RChUser[] getRChUsers() {
-        return rChUsers;
+    public RcChUser[] getRChUsers() {
+        return rcChUsers;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RChannel channel = (RChannel) o;
+        RcChannel channel = (RcChannel) o;
         return Objects.equal(name, channel.name);
     }
 
@@ -73,8 +73,8 @@ public class RChannel implements Serializable {
                 .add("password", password)
                 .add("topic", topic)
                 .add("rChUsers", Stream.of(
-                        rChUsers != null ? rChUsers : new RChUser[0]
-                ).map(RChUser::getUsername))
+                        rcChUsers != null ? rcChUsers : new RcChUser[0]
+                ).map(RcChUser::getUsername))
                 .toString();
     }
 }

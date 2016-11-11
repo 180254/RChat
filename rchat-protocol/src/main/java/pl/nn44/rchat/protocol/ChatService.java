@@ -8,9 +8,9 @@ public interface ChatService {
 
     Response<?> logout(String session) throws ChatException;
 
-    Response<RChannel[]> channels(String session) throws ChatException;
+    Response<RcChannel[]> channels(String session) throws ChatException;
 
-    Response<RChannel> join(String session, String channel, @Nullable String password) throws ChatException;
+    Response<RcChannel> join(String session, String channel, @Nullable String password) throws ChatException;
 
     Response<?> part(String session, String channel) throws ChatException;
 

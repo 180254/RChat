@@ -36,8 +36,8 @@ public class BestChatService implements ChatService {
     private final Pattern nameValidator = Pattern.compile("[a-zA-Z0-9_.-]{1,10}");
 
     private final ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, User> sessionToUser = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, Channel> channelByName = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SeUser> sessionToUser = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, SeChannel> channelByName = new ConcurrentHashMap<>();
 
     private final Striped<Lock> stripedLocks = Striped.lazyWeakLock(100);
 
@@ -45,8 +45,8 @@ public class BestChatService implements ChatService {
         accounts.put("admin", "admin");
         accounts.put("student", "student");
 
-        channelByName.put("standard", new Channel("standard", null));
-        channelByName.put("admins", new Channel("admins", "admins"));
+        channelByName.put("standard", new SeChannel("standard", null));
+        channelByName.put("admins", new SeChannel("admins", "admins"));
 
         channelByName.get("standard").getAdmins().add("admin");
         channelByName.get("standard").getAdmins().add("student");
@@ -61,7 +61,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(null, null, username);
 
         try {
-            if (sessionToUser.containsValue(User.Dummy(username))) {
+            if (sessionToUser.containsValue(SeUser.Dummy(username))) {
                 throw new ChatException(Reason.ALREADY_LOGGED_IN);
             }
 
@@ -74,7 +74,7 @@ public class BestChatService implements ChatService {
             }
 
             String session = idGenerator.next();
-            User exUser = new User(session, username);
+            SeUser exUser = new SeUser(session, username);
             sessionToUser.put(session, exUser);
             return Response.Ok(session);
 
@@ -91,7 +91,7 @@ public class BestChatService implements ChatService {
         try {
             Params params = params(session, null, null, false);
 
-            for (Channel channel : params.caller.getChannels()) {
+            for (SeChannel channel : params.caller.getChannels()) {
                 // double lock is safe operation:
                 // "If the current thread already holds the lock
                 // then the hold count is incremented by one and the method returns immediately."
@@ -109,21 +109,21 @@ public class BestChatService implements ChatService {
 
     @Override
     @CeReason({GIVEN_BAD_SESSION})
-    public Response<RChannel[]> channels(String session) throws ChatException {
+    public Response<RcChannel[]> channels(String session) throws ChatException {
         Locks locks = locks(session, null, null);
 
         try {
             //  side-effect used: verify session
             params(session, null, null, false);
 
-            RChannel[] rChannels = channelByName.values().stream()
-                    .map(c -> new RChannel(
+            RcChannel[] rcChannels = channelByName.values().stream()
+                    .map(c -> new RcChannel(
                             c.getName(),
                             c.getPassword() != null
                     ))
-                    .toArray(RChannel[]::new);
+                    .toArray(RcChannel[]::new);
 
-            return Response.Ok(rChannels);
+            return Response.Ok(rcChannels);
 
         } finally {
             locks.unlock();
@@ -132,7 +132,7 @@ public class BestChatService implements ChatService {
 
     @Override
     @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_PASSWORD, UNWELCOME_BANNED})
-    public Response<RChannel> join(String session, String channel, @Nullable String password) throws ChatException {
+    public Response<RcChannel> join(String session, String channel, @Nullable String password) throws ChatException {
         Locks locks = locks(session, channel, null);
 
         try {
@@ -169,7 +169,7 @@ public class BestChatService implements ChatService {
                         params.caller.getUsername()
                 );
 
-                for (User cu : params.channel.getUsers()) {
+                for (SeUser cu : params.channel.getUsers()) {
                     cu.getNews().offer(whatsUp);
                 }
             }
@@ -183,14 +183,14 @@ public class BestChatService implements ChatService {
                         "ON"
                 );
 
-                for (User cu : params.channel.getUsers()) {
+                for (SeUser cu : params.channel.getUsers()) {
                     cu.getNews().offer(whatsUp);
                 }
             }
 
-            RChUser[] rChUsers = params.channel.getUsers()
+            RcChUser[] rcChUsers = params.channel.getUsers()
                     .stream()
-                    .map(cUser -> new RChUser(
+                    .map(cUser -> new RcChUser(
                             params.channel.getName(),
                             cUser.getUsername(),
                             accounts.containsKey(cUser.getUsername()),
@@ -198,16 +198,16 @@ public class BestChatService implements ChatService {
                             params.channel.getAdmins().contains(cUser.getUsername()),
                             params.channel.getBanned().contains(cUser.getUsername())
                     ))
-                    .toArray(RChUser[]::new);
+                    .toArray(RcChUser[]::new);
 
-            RChannel rChannel = new RChannel(
+            RcChannel rcChannel = new RcChannel(
                     params.channel.getName(),
                     params.channel.getPassword() != null,
                     params.channel.getTopic(),
-                    rChUsers
+                    rcChUsers
             );
 
-            return Response.Ok(rChannel);
+            return Response.Ok(rcChannel);
 
         } finally {
             locks.unlock();
@@ -236,7 +236,7 @@ public class BestChatService implements ChatService {
                         params.caller.getUsername()
                 );
 
-                for (User cu : params.channel.getUsers()) {
+                for (SeUser cu : params.channel.getUsers()) {
                     cu.getNews().offer(whatsUp);
                 }
             }
@@ -268,7 +268,7 @@ public class BestChatService implements ChatService {
                         text
                 );
 
-                for (User cu : params.channel.getUsers()) {
+                for (SeUser cu : params.channel.getUsers()) {
                     cu.getNews().offer(whatsUp);
                 }
             }
@@ -303,7 +303,7 @@ public class BestChatService implements ChatService {
                         params.caller.getUsername()
                 );
 
-                for (User cu : params.channel.getUsers()) {
+                for (SeUser cu : params.channel.getUsers()) {
                     cu.getNews().offer(whatsUp);
                 }
             }
@@ -336,7 +336,7 @@ public class BestChatService implements ChatService {
                         state ? "ON" : "OFF"
                 );
 
-                for (User cu : params.channel.getUsers()) {
+                for (SeUser cu : params.channel.getUsers()) {
                     cu.getNews().offer(whatsUp);
                 }
             }
@@ -369,7 +369,7 @@ public class BestChatService implements ChatService {
                         state ? "ON" : "OFF"
                 );
 
-                for (User cu : params.channel.getUsers()) {
+                for (SeUser cu : params.channel.getUsers()) {
                     cu.getNews().offer(whatsUp);
                 }
             }
@@ -458,7 +458,7 @@ public class BestChatService implements ChatService {
                     text
             );
 
-            for (User cu : params.channel.getUsers()) {
+            for (SeUser cu : params.channel.getUsers()) {
                 boolean ignore = cu.getIgnored().contains(params.caller);
 
                 if (!ignore) {
@@ -521,7 +521,7 @@ public class BestChatService implements ChatService {
     public int sessionCleanup() {
         LocalDateTime now = LocalDateTime.now();
 
-        List<Map.Entry<String, User>> ghosts =
+        List<Map.Entry<String, SeUser>> ghosts =
                 sessionToUser
                         .entrySet().stream()
                         .filter(se -> ChronoUnit.MINUTES.between(se.getValue().getLastSync(), now) >= 3)
@@ -569,9 +569,9 @@ public class BestChatService implements ChatService {
 
     private class Params {
 
-        public User caller;
-        public Channel channel;
-        public User affUser;
+        public SeUser caller;
+        public SeChannel channel;
+        public SeUser affUser;
 
         Params(String session,
                String channel,
@@ -600,7 +600,7 @@ public class BestChatService implements ChatService {
             }
 
             if (username != null && this.channel != null) {
-                User dummyAffUser = User.Dummy(username);
+                SeUser dummyAffUser = SeUser.Dummy(username);
 
                 this.affUser = this.channel.getUsers().stream()
                         .filter(u -> u.equals(dummyAffUser))
@@ -653,7 +653,7 @@ public class BestChatService implements ChatService {
                 throws ChatException {
 
             if (session != null) {
-                User user = sessionToUser.get(session);
+                SeUser user = sessionToUser.get(session);
 
                 if (user == null) {
                     throw new ChatException(Reason.GIVEN_BAD_SESSION);

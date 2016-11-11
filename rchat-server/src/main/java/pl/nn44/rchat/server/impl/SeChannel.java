@@ -5,17 +5,17 @@ import com.google.common.base.Objects;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Channel {
+public class SeChannel {
 
     private final String name;
     private final String password;
     private String topic;
 
-    private final CopyOnWriteArrayList<User> users = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<SeUser> users = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<String> admins = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<String> banned = new CopyOnWriteArrayList<>();
 
-    public Channel(String name, String password) {
+    public SeChannel(String name, String password) {
         this.name = name;
         this.password = password;
         this.topic = "";
@@ -33,7 +33,7 @@ public class Channel {
         return topic;
     }
 
-    public CopyOnWriteArrayList<User> getUsers() {
+    public CopyOnWriteArrayList<SeUser> getUsers() {
         return users;
     }
 
@@ -53,7 +53,7 @@ public class Channel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Channel channel = (Channel) o;
+        SeChannel channel = (SeChannel) o;
         return Objects.equal(name, channel.name);
     }
 
@@ -67,7 +67,7 @@ public class Channel {
         return MoreObjects.toStringHelper(this)
                 .add("name", name)
                 .add("password", password)
-                .add("users", users.stream().map(User::getUsername))
+                .add("users", users.stream().map(SeUser::getUsername))
                 .add("admins", admins)
                 .add("banned", banned)
                 .toString();

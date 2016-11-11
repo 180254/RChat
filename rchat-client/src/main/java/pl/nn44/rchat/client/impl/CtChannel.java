@@ -1,33 +1,33 @@
-package pl.nn44.rchat.client.model;
+package pl.nn44.rchat.client.impl;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.SimpleBooleanProperty;
-import pl.nn44.rchat.protocol.RChannel;
+import pl.nn44.rchat.protocol.RcChannel;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CChannel implements Observable {
+public class CtChannel implements Observable {
 
     private List<InvalidationListener> aa = new ArrayList<>();
-    private RChannel rChannel;
+    private RcChannel rcChannel;
     private final SimpleBooleanProperty join;
 
-    public CChannel(RChannel rChannel) {
-        this.rChannel = rChannel;
+    public CtChannel(RcChannel rcChannel) {
+        this.rcChannel = rcChannel;
         this.join = new SimpleBooleanProperty();
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public RChannel getRChannel() {
-        return rChannel;
+    public RcChannel getRChannel() {
+        return rcChannel;
     }
 
-    public void setRChannel(RChannel rChannel) {
-        this.rChannel = rChannel;
+    public void setRChannel(RcChannel rcChannel) {
+        this.rcChannel = rcChannel;
     }
 
     public boolean isJoin() {
@@ -46,7 +46,7 @@ public class CChannel implements Observable {
         String join = this.join.get() ? "[+]" : "[-]";
 
         String modes = "(";
-        modes += rChannel.isPassword() ? "p" : "";
+        modes += rcChannel.isPassword() ? "p" : "";
         modes += ")";
 
         modes = modes.length() > 2 ? modes : "";
@@ -54,7 +54,7 @@ public class CChannel implements Observable {
         return MessageFormat.format(
                 "{0} {1} {2}",
                 join,
-                rChannel.getName(),
+                rcChannel.getName(),
                 modes
         ).trim();
     }

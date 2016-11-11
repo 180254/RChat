@@ -15,10 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
 import pl.nn44.rchat.client.impl.CsHandler;
-import pl.nn44.rchat.client.model.CChannel;
-import pl.nn44.rchat.client.model.CUser;
+import pl.nn44.rchat.client.impl.CtChannel;
+import pl.nn44.rchat.client.impl.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
-import pl.nn44.rchat.protocol.RChannel;
+import pl.nn44.rchat.protocol.RcChannel;
 import pl.nn44.rchat.protocol.Response;
 
 import java.net.URL;
@@ -42,11 +42,11 @@ public class MainController implements Initializable {
     @FXML public TextField message;
     @FXML public Button send;
     @FXML public TextField topic;
-    @FXML public ListView<CChannel> channels;
-    @FXML public ListView<CUser> users;
+    @FXML public ListView<CtChannel> channels;
+    @FXML public ListView<CtUser> users;
 
-    private RefreshableListViewSkin<CChannel> channelsSkin;
-    private RefreshableListViewSkin<CUser> usersSkin;
+    private RefreshableListViewSkin<CtChannel> channelsSkin;
+    private RefreshableListViewSkin<CtUser> usersSkin;
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -75,9 +75,9 @@ public class MainController implements Initializable {
             });
 
             try {
-                Response<RChannel[]> channels = csh.cs().channels(csh.token());
-                for (RChannel rChannel : channels.getPayload()) {
-                    CChannel channelEx = new CChannel(rChannel);
+                Response<RcChannel[]> channels = csh.cs().channels(csh.token());
+                for (RcChannel rcChannel : channels.getPayload()) {
+                    CtChannel channelEx = new CtChannel(rcChannel);
                     this.channels.getItems().add(channelEx);
                 }
 
@@ -92,7 +92,7 @@ public class MainController implements Initializable {
 
     @FXML
     public void onMouseClickedChannels(MouseEvent ev) {
-        CChannel selected = channels.getSelectionModel().getSelectedItem();
+        CtChannel selected = channels.getSelectionModel().getSelectedItem();
 
         if (ev.getClickCount() == 1) {
             onSingleClickedChannels(ev, selected);
@@ -103,18 +103,18 @@ public class MainController implements Initializable {
     }
 
 
-    public void onSingleClickedChannels(MouseEvent ev, CChannel selected) {
+    public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
         if (!selected.isJoin()) {
             runAsync(() -> {
                 try {
-                    Response<RChannel> rChannel = csh.cs().join(
+                    Response<RcChannel> rChannel = csh.cs().join(
                             csh.token(),
                             selected.getRChannel().getName(),
                             null
                     );
-                    ObservableList<CUser> orChUsers = FXCollections.observableArrayList(
-                            Stream.of(rChannel.getPayload().getrChUsers())
-                                    .map(CUser::new)
+                    ObservableList<CtUser> orChUsers = FXCollections.observableArrayList(
+                            Stream.of(rChannel.getPayload().getRChUsers())
+                                    .map(CtUser::new)
                                     .collect(Collectors.toList())
                     );
 
@@ -132,7 +132,7 @@ public class MainController implements Initializable {
         }
     }
 
-    public void onDoubleClickedChannels(MouseEvent ev, CChannel selected) {
+    public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
 
     }
 
