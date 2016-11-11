@@ -21,6 +21,12 @@ public class SeChannel {
         this.topic = "";
     }
 
+    public SeChannel(String name, String password, String topic) {
+        this.name = name;
+        this.password = password;
+        this.topic = topic;
+    }
+
     // ---------------------------------------------------------------------------------------------------------------
 
     public String getName() {

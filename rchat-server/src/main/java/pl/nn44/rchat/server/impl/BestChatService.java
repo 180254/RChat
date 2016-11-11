@@ -45,23 +45,17 @@ public class BestChatService implements ChatService {
         accounts.put("admin", "admin");
         accounts.put("student", "student");
 
-        channelByName.put("anybody", new SeChannel("anybody", null));
-        channelByName.put("python", new SeChannel("python", null));
-        channelByName.put("cars", new SeChannel("cars", null));
-        channelByName.put("students", new SeChannel("students", null));
-        channelByName.put("admins", new SeChannel("admins", "admins"));
-
-        channelByName.get("anybody").setTopic("");
-        channelByName.get("python").setTopic("python lovers");
-        channelByName.get("cars").setTopic("no bike");
-        channelByName.get("students").setTopic("trust me, i'm an engineer");
-        channelByName.get("admins").setTopic("keep silence");
+        channelByName.put("anybody", new SeChannel("anybody", null, ""));
+        channelByName.put("python", new SeChannel("python", null, "python lovers"));
+        channelByName.put("cars", new SeChannel("cars", null, "no bike"));
+        channelByName.put("students", new SeChannel("students", null, "trust me, i'm an engineer"));
+        channelByName.put("admins", new SeChannel("admins", "admins", "keep silence"));
 
         channelByName.get("anybody").getAdmins().add("admin");
         channelByName.get("python").getAdmins().add("admin");
         channelByName.get("cars").getAdmins().add("admin");
+        channelByName.get("students").getAdmins().add("admin");
         channelByName.get("students").getAdmins().add("student");
-        channelByName.get("admins").getAdmins().add("student");
         channelByName.get("admins").getAdmins().add("admin");
 
         LOG.info("{} instance created.", getClass().getSimpleName());
@@ -523,6 +517,7 @@ public class BestChatService implements ChatService {
         ghosts.forEach(se -> {
             try {
                 logout(se.getKey());
+
             } catch (ChatException e) {
                 LOG.warn("sessionCleanup assertion error", e);
                 throw new AssertionError(e);

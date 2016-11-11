@@ -55,6 +55,8 @@ public class SeUser {
         return news;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public void updateLastSync() {
         this.lastSync = LocalDateTime.now();
     }
