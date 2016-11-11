@@ -4,11 +4,11 @@ import pl.nn44.rchat.protocol.RChUser;
 
 import java.text.MessageFormat;
 
-public class UserEx {
+public class CUser {
 
     public final RChUser rChUser;
 
-    public UserEx(RChUser rChUser) {
+    public CUser(RChUser rChUser) {
         this.rChUser = rChUser;
     }
 

@@ -43,8 +43,16 @@ public class LocaleHelper {
         }
     }
 
+    public String mapError2(String map, Exception e) {
+        return mapError(map, e).replaceAll("\n", " ");
+    }
+
     public String get(String key) {
         return res.getString(key);
+    }
+
+    public String get2(String key) {
+        return get(key).replaceAll("\n", " ");
     }
 
     public void setRes(ResourceBundle res) {
