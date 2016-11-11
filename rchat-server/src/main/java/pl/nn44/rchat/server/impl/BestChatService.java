@@ -463,42 +463,36 @@ public class BestChatService implements ChatService {
 
     @Override
     public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException {
-        Locks locks = locks(session, null, null);
+        Params params = params(session, null, null, false);
 
-        try {
-            Params params = params(session, null, null, false);
+        List<WhatsUp> news = new LinkedList<>();
 
-            List<WhatsUp> news = new LinkedList<>();
+        while (news.size() < MAX_NEWS_PER_REQUEST) {
+            WhatsUp poll = params.caller.getNews().poll();
 
-            while (news.size() < MAX_NEWS_PER_REQUEST) {
-                WhatsUp poll = params.caller.getNews().poll();
+            if (poll != null) {
+                news.add(poll);
 
-                if (poll != null) {
-                    news.add(poll);
-
-                } else if (news.size() == 0) {
-                    try {
-                        poll = params.caller.getNews().poll(longPoolingTimeoutMs, TimeUnit.MILLISECONDS);
-                        if (poll != null) {
-                            news.add(poll);
-                        }
-                    } catch (InterruptedException e) {
-                        LOG.warn("whatsUp assertion error", e);
-                        throw new AssertionError(e);
+            } else if (news.size() == 0) {
+                try {
+                    poll = params.caller.getNews().poll(longPoolingTimeoutMs, TimeUnit.MILLISECONDS);
+                    if (poll != null) {
+                        news.add(poll);
                     }
-
-                    break;
-
-                } else {
-                    break;
+                } catch (InterruptedException e) {
+                    LOG.warn("whatsUp assertion error", e);
+                    throw new AssertionError(e);
                 }
+
+                break;
+
+            } else {
+                break;
             }
-
-            return Response.Ok(news.toArray(new WhatsUp[news.size()]));
-
-        } finally {
-            locks.unlock();
         }
+
+        WhatsUp[] newsArray = news.toArray(new WhatsUp[news.size()]);
+        return Response.Ok(newsArray);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
