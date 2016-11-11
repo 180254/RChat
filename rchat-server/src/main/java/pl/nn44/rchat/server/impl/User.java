@@ -62,12 +62,15 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equal(username, user.username);
+        return Objects.equal(
+                username.toLowerCase(),
+                user.username.toLowerCase()
+        );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(username);
+        return Objects.hashCode(username.toLowerCase());
     }
 
     @Override
