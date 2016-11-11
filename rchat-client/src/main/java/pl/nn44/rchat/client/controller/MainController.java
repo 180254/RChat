@@ -271,7 +271,7 @@ public class MainController implements Initializable {
             runLater(() -> status.setText(text));
 
             try {
-                Thread.sleep(1500);
+                Thread.sleep(2500);
             } catch (InterruptedException e) {
                 LOG.warn("fleetingStatus interrupted", e);
                 throw new AssertionError(e);
