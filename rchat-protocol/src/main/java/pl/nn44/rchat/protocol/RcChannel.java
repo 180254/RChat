@@ -22,7 +22,7 @@ public class RcChannel implements Serializable {
         this.name = name;
         this.password = password;
         this.topic = null;
-        this.rcChUsers = null;
+        this.rcChUsers = new RcChUser[0];
     }
 
     public RcChannel(String name,
@@ -82,9 +82,9 @@ public class RcChannel implements Serializable {
                 .add("name", name)
                 .add("password", password)
                 .add("topic", topic)
-                .add("rcChUsers", Stream.of(
-                        rcChUsers != null ? rcChUsers : new RcChUser[0]
-                ).map(RcChUser::getUsername).collect(Collectors.toList()))
+                .add("rcChUsers", Stream.of(rcChUsers)
+                        .map(RcChUser::getUsername)
+                        .collect(Collectors.toList()))
                 .toString();
     }
 }
