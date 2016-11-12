@@ -15,8 +15,8 @@ public class BigIdGenerator implements Iterator<String> {
 
     private static final Logger LOG = LoggerFactory.getLogger(BigIdGenerator.class);
 
-    private static final int NUMBER_BASE = 32;
-    private static final int BIT_PER_CHAR = IntMath.log2(NUMBER_BASE, RoundingMode.UNNECESSARY);
+    public static final int NUMBER_BASE = 32;
+    public static final int BIT_PER_CHAR = IntMath.log2(NUMBER_BASE, RoundingMode.UNNECESSARY);
 
     private final Random random;
     private final int chars;

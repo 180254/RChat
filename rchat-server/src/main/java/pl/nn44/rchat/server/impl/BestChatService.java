@@ -29,17 +29,20 @@ import java.util.stream.Collectors;
 public class BestChatService implements ChatService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BestChatService.class);
-    private static final int MAX_NEWS_PER_REQUEST = 10;
+
+    public static int MAX_NEWS_PER_REQUEST = 8;
+    public static int ID_RANDOM_BITS = 8 * BigIdGenerator.BIT_PER_CHAR;
+    public static int STRIPED_LOCKS = 32;
 
     private final Random random = new SecureRandom();
-    private final Iterator<String> idGenerator = BigIdGenerator.chars(random, 8);
+    private final Iterator<String> idGenerator = BigIdGenerator.chars(random, ID_RANDOM_BITS);
     private final Pattern nameValidator = Pattern.compile("[a-zA-Z0-9_.-]{1,10}");
 
     private final ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, SeUser> sessionToUser = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, SeChannel> channelByName = new ConcurrentHashMap<>();
 
-    private final Striped<Lock> stripedLocks = Striped.lazyWeakLock(32);
+    private final Striped<Lock> stripedLocks = Striped.lazyWeakLock(STRIPED_LOCKS);
 
     public BestChatService() {
         accounts.put("admin", "admin");
