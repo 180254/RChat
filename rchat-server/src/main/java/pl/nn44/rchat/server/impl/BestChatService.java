@@ -32,14 +32,14 @@ public class BestChatService implements ChatService {
     private static final int MAX_NEWS_PER_REQUEST = 10;
 
     private final Random random = new SecureRandom();
-    private final Iterator<String> idGenerator = BigIdGenerator.chars(random, 6);
+    private final Iterator<String> idGenerator = BigIdGenerator.chars(random, 8);
     private final Pattern nameValidator = Pattern.compile("[a-zA-Z0-9_.-]{1,10}");
 
     private final ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, SeUser> sessionToUser = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, SeChannel> channelByName = new ConcurrentHashMap<>();
 
-    private final Striped<Lock> stripedLocks = Striped.lazyWeakLock(100);
+    private final Striped<Lock> stripedLocks = Striped.lazyWeakLock(32);
 
     public BestChatService() {
         accounts.put("admin", "admin");
@@ -57,6 +57,8 @@ public class BestChatService implements ChatService {
         channelByName.get("students").getAdmins().add("admin");
         channelByName.get("students").getAdmins().add("student");
         channelByName.get("admins").getAdmins().add("admin");
+
+        channelByName.get("python").getBanned().add("java");
 
         LOG.info("{} instance created.", getClass().getSimpleName());
     }
