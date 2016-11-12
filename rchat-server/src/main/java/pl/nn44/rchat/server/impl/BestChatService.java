@@ -35,7 +35,7 @@ public class BestChatService implements ChatService {
     public static int STRIPED_LOCKS = 32;
 
     private final Random random = new SecureRandom();
-    private final Iterator<String> idGenerator = BigIdGenerator.chars(random, ID_RANDOM_BITS);
+    private final Iterator<String> idGenerator = BigIdGenerator.bits(random, ID_RANDOM_BITS);
     private final Pattern nameValidator = Pattern.compile("[a-zA-Z0-9_.-]{1,10}");
 
     private final ConcurrentMap<String, String> accounts/*username/password*/ = new ConcurrentHashMap<>();
@@ -488,15 +488,17 @@ public class BestChatService implements ChatService {
             } else if (news.size() == 0) {
                 try {
                     poll = params.caller.getNews().poll(longPoolingTimeoutMs, TimeUnit.MILLISECONDS);
+
                     if (poll != null) {
                         news.add(poll);
+                    } else {
+                        break;
                     }
+
                 } catch (InterruptedException e) {
                     LOG.warn("whatsUp assertion error", e);
                     throw new AssertionError(e);
                 }
-
-                break;
 
             } else {
                 break;
