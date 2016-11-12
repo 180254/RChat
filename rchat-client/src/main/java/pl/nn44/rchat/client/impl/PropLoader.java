@@ -1,5 +1,6 @@
 package pl.nn44.rchat.client.impl;
 
+import com.google.common.base.MoreObjects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,18 @@ public class PropLoader {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             InputStream stream = loader.getResourceAsStream("prop/app.properties");
             prop.load(stream);
+
+            // may be overridden by system properties
+            prop.forEach((key, value) -> {
+                String _key = (String) key;
+
+                prop.setProperty(_key,
+                        MoreObjects.firstNonNull(
+                                System.getProperty(_key),
+                                prop.getProperty(_key)
+                        )
+                );
+            });
 
             LOG.debug("Loaded properties. {}", prop);
             return prop;
