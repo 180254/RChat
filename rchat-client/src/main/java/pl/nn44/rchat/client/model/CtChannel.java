@@ -13,11 +13,13 @@ public class CtChannel {
     private boolean password;
     private String topic;
     private ObservableList<CtUser> users;
+    private ObservableList<CtMessage> messages;
     private boolean join;
 
     public CtChannel(RcChannel channel) {
         this.name = channel.getName();
         update(channel);
+        this.messages = FXCollections.observableArrayList();
         this.join = false;
     }
 
@@ -27,15 +29,16 @@ public class CtChannel {
         this.password = channel.isPassword();
         this.topic = channel.getTopic();
 
-        users = FXCollections.observableArrayList();
+        this.users = FXCollections.observableArrayList();
         for (RcChUser user : channel.getRcChUsers()) {
-            users.add(new CtUser(user));
+            this.users.add(new CtUser(user));
         }
     }
 
     public void clear() {
         this.topic = "";
         this.users.clear();
+        this.messages.clear();
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -66,6 +69,14 @@ public class CtChannel {
 
     public void setUsers(ObservableList<CtUser> users) {
         this.users = users;
+    }
+
+    public ObservableList<CtMessage> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(ObservableList<CtMessage> messages) {
+        this.messages = messages;
     }
 
     public boolean isJoin() {
