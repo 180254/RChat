@@ -84,8 +84,10 @@ public class ClientApp extends Application {
     @Override
     public void stop() {
         executor.shutdownNow();
-        runAsync(csHandler::logout);
         Platform.exit();
+
+        runAsync(csHandler::logout)
+                .thenRun(() -> System.exit(0));
     }
 
     public static void main(String[] args) {
