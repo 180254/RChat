@@ -14,6 +14,19 @@
 
     <packaging>jar</packaging>
 
+    <properties>
+        <start-class>pl.nn44.rchat.client.ClientApp</start-class>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- rchat protocol -->
         <dependency>
