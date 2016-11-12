@@ -16,7 +16,7 @@ public class BigIdGenerator implements Iterator<String> {
     private static final Logger LOG = LoggerFactory.getLogger(BigIdGenerator.class);
 
     public static final int NUMBER_BASE = 32;
-    public static final int BIT_PER_CHAR = IntMath.log2(NUMBER_BASE, RoundingMode.UNNECESSARY);
+    public static final int BITS_PER_CHAR = IntMath.log2(NUMBER_BASE, RoundingMode.UNNECESSARY);
 
     private final Random random;
     private final int chars;
@@ -25,7 +25,7 @@ public class BigIdGenerator implements Iterator<String> {
     private BigIdGenerator(Random random, int chars) {
         this.random = random;
         this.chars = chars;
-        this.bits = chars * BIT_PER_CHAR;
+        this.bits = chars * BITS_PER_CHAR;
 
         LOG.info("{} instance created: chars={}, bits={}.", getClass().getSimpleName(), chars, bits);
     }
@@ -35,7 +35,7 @@ public class BigIdGenerator implements Iterator<String> {
     }
 
     public static BigIdGenerator bits(Random random, int bits) {
-        int chars = (bits + BIT_PER_CHAR - 1) / BIT_PER_CHAR;
+        int chars = (bits + BITS_PER_CHAR - 1) / BITS_PER_CHAR;
         return new BigIdGenerator(random, chars);
     }
 

@@ -31,7 +31,7 @@ public class BestChatService implements ChatService {
     private static final Logger LOG = LoggerFactory.getLogger(BestChatService.class);
 
     public static int MAX_NEWS_PER_REQUEST = 8;
-    public static int ID_RANDOM_BITS = 8 * BigIdGenerator.BIT_PER_CHAR;
+    public static int ID_RANDOM_BITS = 8 * BigIdGenerator.BITS_PER_CHAR;
     public static int STRIPED_LOCKS = 32;
 
     private final Random random = new SecureRandom();
@@ -497,7 +497,7 @@ public class BestChatService implements ChatService {
 
                 } catch (InterruptedException e) {
                     LOG.warn("whatsUp assertion error", e);
-                    throw new AssertionError(e);
+                    break;
                 }
 
             } else {
