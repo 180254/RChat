@@ -356,15 +356,19 @@ public class MainController implements Initializable {
         message.setText(channel.getCurrentMsg());
         topic.setText(channel.getTopic());
 
-        messagesSource.removeListener(messageTake);
-        messagesSource = channel.getMessages();
-        messagesModel.setAll(messagesSource);
-        messagesSource.addListener(messageTake);
+        if (messagesSource != channel.getMessages()) {
+            messagesSource.removeListener(messageTake);
+            messagesSource = channel.getMessages();
+            messagesModel.setAll(messagesSource);
+            messagesSource.addListener(messageTake);
+        }
 
-        usersSource.removeListener(usersTake);
-        usersSource = channel.getUsers();
-        usersModel.setAll(usersSource);
-        usersSource.addListener(usersTake);
+        if (usersSource != channel.getUsers()) {
+            usersSource.removeListener(usersTake);
+            usersSource = channel.getUsers();
+            usersModel.setAll(usersSource);
+            usersSource.addListener(usersTake);
+        }
 
         usersSkin.refresh();
         channelsSkin.refresh();
