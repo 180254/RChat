@@ -6,7 +6,7 @@ import static pl.nn44.rchat.protocol.ChatException.Reason.*;
 
 public interface ChatService {
 
-    @CeReason({ALREADY_LOGGED_IN, GIVEN_BAD_PASSWORD, GIVEN_BAD_USERNAME})
+    @CeReason({ALREADY_LOGGED_IN, GIVEN_BAD_USERNAME, GIVEN_BAD_PASSWORD})
     Response<String> login(String username, @Nullable String password) throws ChatException;
 
     @CeReason({GIVEN_BAD_SESSION})
