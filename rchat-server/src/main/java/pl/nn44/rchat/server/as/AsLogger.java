@@ -28,22 +28,24 @@ public class AsLogger {
                     .put(Level.ERROR, (log) -> log::error)
                     .build();
 
-    @Around("execution(public * (@AsLoggable *).*(..))"
-            + " && !execution(String *.toString())"
-            + " && !execution(int *.hashCode())"
-            + " && !execution(boolean *.equals(Object))")
-    public Object aClass(ProceedingJoinPoint point) throws Throwable {
-        LOG.trace("{}.{}", getClass().getSimpleName(), "aClass");
-        return around(point);
-    }
-
-    @Around("execution(* *(..)) && @annotation(AsLoggable))")
-    public Object aMethod(ProceedingJoinPoint point) throws Throwable {
-        LOG.trace("{}.{}", getClass().getSimpleName(), "aMethod");
-        return around(point);
-    }
-
+    @Around(
+            "" +
+                    /* class */
+                    "(" +
+                        "execution(public * (@AsLoggable *).*(..))" +
+                        " && !execution(String *.toString())" +
+                        " && !execution(int *.hashCode())" +
+                        " && !execution(boolean *.equals(Object))" +
+                    ")" +
+                    "||" +
+                    /* method*/
+                    "(" +
+                        "execution(* *(..))" +
+                        " && @annotation(AsLoggable)" +
+                    ")"
+    )
     public Object around(ProceedingJoinPoint point) throws Throwable {
+        LOG.trace("AROUND" + point.toString());
         Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
         Class<?> clazz = method.getDeclaringClass();
 
