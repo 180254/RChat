@@ -38,6 +38,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -68,7 +69,7 @@ public class MainController implements Initializable {
     private boolean fatalFail =
             false;
 
-    private Map<What, Consumer<WhatsUp>> whatsUpMap =
+    private final Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
                     .put(What.MESSAGE, this::onSomeMessage)
                     .put(What.PRIVY, this::onSomePrivy)
@@ -79,6 +80,17 @@ public class MainController implements Initializable {
                     .put(What.BAN, this::onSomeBan)
                     .put(What.ADMIN, this::onSomeAdmin)
                     .put(What.IGNORE, this::onSomeIgnore)
+                    .build();
+
+    private final Map<String, BiConsumer<String[], CtChannel>> commandsMap =
+            ImmutableMap.<String, BiConsumer<String[], CtChannel>>builder()
+                    .put("/join", this::onCmdJoin)
+                    .put("/part", this::onCmdPart)
+                    .put("/topic", this::onCmdTopic)
+                    .put("/kick", this::onCmdKick)
+                    .put("/ban", this::onCmdBan)
+                    .put("/admin", this::onCmdAdmin)
+                    .put("/ignore", this::commandIgnore)
                     .build();
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -534,14 +546,64 @@ public class MainController implements Initializable {
 
         CtChannel channel = this.channels.getSelectionModel().getSelectedItem();
 
-        exs.submit(() -> {
-            try {
-                csh.cs().message(csh.token(), channel.getName(), message);
-            } catch (ChatException e) {
-                submitFleetingStatus(r(i18n.mapError("message", e)));
-            }
-        });
+
+        if (message.startsWith("/")) {
+            exs.submit(() -> processCommand(message, channel));
+
+        } else {
+            exs.submit(() -> {
+                try {
+                    csh.cs().message(csh.token(), channel.getName(), message);
+                } catch (ChatException e) {
+                    submitFleetingStatus(r(i18n.mapError("message", e)));
+                }
+            });
+        }
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public void processCommand(String message, CtChannel channel) {
+        String[] tokens = message.split(" ");
+
+        BiConsumer<String[], CtChannel> cmdConsumer = commandsMap.get(tokens[0]);
+        if (cmdConsumer == null) {
+            submitFleetingStatus(r(i18n.get("cmd.UNKNOWN")));
+        } else {
+            cmdConsumer.accept(tokens, channel);
+        }
+    }
+
+    public void onCmdTopic(String[] message, CtChannel channel) {
+
+    }
+
+
+    public void onCmdJoin(String[] message, CtChannel channel) {
+
+    }
+
+    public void onCmdPart(String[] message, CtChannel channel) {
+
+    }
+
+    public void onCmdKick(String[] message, CtChannel channel) {
+
+    }
+
+    public void onCmdBan(String[] message, CtChannel channel) {
+
+    }
+
+
+    public void onCmdAdmin(String[] message, CtChannel channel) {
+
+    }
+
+    public void commandIgnore(String[] message, CtChannel channel) {
+
+    }
+
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -556,7 +618,7 @@ public class MainController implements Initializable {
             try {
                 Thread.sleep(3500);
             } catch (InterruptedException e) {
-                LOG.warn("fleetingStatus interrupted", e);
+                LOG.debug("submitFleetingStatus: InterruptedException");
             }
 
             runLater(() -> status.setText(""));
