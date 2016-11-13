@@ -1,8 +1,6 @@
 package pl.nn44.rchat.client.controller;
 
 import com.google.common.collect.ImmutableMap;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -48,8 +46,8 @@ public class MainController implements Initializable {
     private final LocaleHelper i18n;
 
     @FXML public Label status;
-    @FXML public TextFlow text;
-    @FXML public ScrollPane textScroll;
+    @FXML public TextFlow messages;
+    @FXML public ScrollPane scroll;
     @FXML public TextField message;
     @FXML public Button send;
     @FXML public TextField topic;
@@ -97,18 +95,8 @@ public class MainController implements Initializable {
         usersSkin = new RefreshableListViewSkin<>(users);
 
         initChannelChangeListener();
-        text.heightProperty().addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                double vvalue = textScroll.getVvalue();
-                textScroll.getVvalue();
-                textScroll.getHmax();
-                boolean isScolled = vvalue > 0.90 || vvalue < 0.10;
-                if ((newValue.longValue() - oldValue.longValue()) < 15L || vvalue < 0.1) {
-                    textScroll.setVvalue(1.0);
-                }
-            }
-        });
+        initMessagesScrollListener();
+
         exs.submit(() -> {
             runLater(() -> {
                 message.requestFocus();
@@ -177,15 +165,11 @@ public class MainController implements Initializable {
         CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.getMessages().addAll(ctMessage.toNodes());
 
-
         runLater(() -> {
             CtChannel selChannel = channels.getSelectionModel().getSelectedItem();
 
-
             if (selChannel.equals(ctChannel)) {
-
-                text.getChildren().addAll(ctMessage.toNodes());
-
+                messages.getChildren().addAll(ctMessage.toNodes());
             }
         });
     }
@@ -226,7 +210,8 @@ public class MainController implements Initializable {
 
     public void initChannelChangeListener() {
         channels.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> onSingleClickedChannels(newValue)
+                (observable, oldValue, newValue)
+                        -> onSingleClickedChannels(newValue)
         );
     }
 
@@ -261,13 +246,11 @@ public class MainController implements Initializable {
         }
     }
 
-
     public void onSingleClickedChannels(CtChannel channel) {
         send.setDisable(!fatalFail && !(channel.isJoin()));
 
         message.setText(channel.getCurrentMsg());
-        text.getChildren().setAll(channel.getMessages());
-
+        messages.getChildren().setAll(channel.getMessages());
 
         topic.setText(channel.getTopic());
         users.setItems(channel.getUsers());
@@ -312,7 +295,7 @@ public class MainController implements Initializable {
 
                     runLater(() -> {
                         channel.clear();
-                        text.getChildren().clear();
+                        messages.getChildren().clear();
                         onSingleClickedChannels(channel);
                     });
 
@@ -321,6 +304,19 @@ public class MainController implements Initializable {
                 }
             });
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private void initMessagesScrollListener() {
+        messages.heightProperty().addListener((observable, oldValue, newValue) -> {
+            boolean oneLineAdded = newValue.longValue() - oldValue.longValue() < 15L;
+            boolean topScroll = scroll.getVvalue() < 0.1;
+
+            if (oneLineAdded || topScroll) {
+                scroll.setVvalue(1.0);
+            }
+        });
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -334,19 +330,23 @@ public class MainController implements Initializable {
         }
 
         if (ev.getCode() == KeyCode.ENTER) {
-            sendClicked(null);
+            onSendAction(null);
         }
     }
 
     @FXML
-    public void sendClicked(ActionEvent ev) {
+    public void onSendAction(ActionEvent ev) {
         if (send.isDisabled()) {
             return;
         }
 
         String message = this.message.getText().trim();
-        CtChannel channel = this.channels.getSelectionModel().getSelectedItem();
+        if (message.isEmpty()) {
+            return;
+        }
         this.message.setText("");
+
+        CtChannel channel = this.channels.getSelectionModel().getSelectedItem();
 
         exs.submit(() -> {
             try {

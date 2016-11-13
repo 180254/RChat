@@ -35,8 +35,8 @@
                 </VBox.margin>
             </TextField>
 
-            <ScrollPane fx:id="textScroll" VBox.vgrow="ALWAYS">
-                <TextFlow fx:id="text">
+            <ScrollPane fx:id="scroll" VBox.vgrow="ALWAYS">
+                <TextFlow fx:id="messages">
                     <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </padding>
@@ -52,7 +52,7 @@
             <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
         </padding>
         <TextField fx:id="message" onKeyPressed="#onKeyMessagePressed" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="send" focusTraversable="false" mnemonicParsing="false" onAction="#sendClicked"
+        <Button fx:id="send" focusTraversable="false" mnemonicParsing="false" onAction="#onSendAction"
                 text="%fxml.main.send"/>
     </HBox>
 </VBox>
