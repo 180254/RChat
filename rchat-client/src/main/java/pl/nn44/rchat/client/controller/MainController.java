@@ -434,7 +434,7 @@ public class MainController implements Initializable {
         send.setDisable(!fatalFail && !(channel.isJoin()));
 
         message.setText(channel.getCurrentMsg());
-        topic.setText(channel.getTopic());
+        topic.textProperty().bind(channel.getTopic());
 
         if (messagesSource != channel.getMessages()) {
             messagesSource.removeListener(messageTake);

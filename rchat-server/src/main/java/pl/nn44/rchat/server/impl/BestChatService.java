@@ -246,7 +246,7 @@ public class BestChatService implements ChatService {
 
     @Override
     public Response<?> topic(String session, String channel, String text) throws ChatException {
-        Locks locks = new Locks(session, channel, null);
+        Locks locks = locks(session, channel, null);
 
         try {
             Params params = params(session, channel, null, true);

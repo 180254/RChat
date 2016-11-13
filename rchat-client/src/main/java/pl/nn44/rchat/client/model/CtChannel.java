@@ -1,5 +1,6 @@
 package pl.nn44.rchat.client.model;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.text.Text;
@@ -12,7 +13,7 @@ public class CtChannel {
 
     private final String name;
     private boolean password;
-    private String topic;
+    private SimpleStringProperty topic;
     private ObservableList<CtUser> users;
     private ObservableList<Text> messages;
     private boolean join;
@@ -20,6 +21,7 @@ public class CtChannel {
 
     public CtChannel(RcChannel channel) {
         this.name = channel.getName();
+        this.topic = new SimpleStringProperty();
         this.users = FXCollections.observableArrayList();
         this.messages = FXCollections.observableArrayList();
         this.join = false;
@@ -32,7 +34,7 @@ public class CtChannel {
 
     public void update(RcChannel channel) {
         this.password = channel.isPassword();
-        this.topic = channel.getTopic();
+        this.topic.setValue(channel.getTopic());
 
         this.users.clear();
         for (RcChUser user : channel.getRcChUsers()) {
@@ -41,7 +43,7 @@ public class CtChannel {
     }
 
     public void clear() {
-        this.topic = "";
+        this.topic.setValue("");
         this.users.clear();
         this.messages.clear();
     }
@@ -62,12 +64,12 @@ public class CtChannel {
     }
     */
 
-    public String getTopic() {
+    public SimpleStringProperty getTopic() {
         return topic;
     }
 
     public void setTopic(String topic) {
-        this.topic = topic;
+        this.topic.setValue(topic);
     }
 
     public ObservableList<CtUser> getUsers() {
