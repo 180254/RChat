@@ -56,9 +56,11 @@ public class CtChannel {
         return password;
     }
 
+    /*
     public void setPassword(boolean password) {
         this.password = password;
     }
+    */
 
     public String getTopic() {
         return topic;
@@ -72,17 +74,21 @@ public class CtChannel {
         return users;
     }
 
+    /*
     public void setUsers(ObservableList<CtUser> users) {
         this.users = users;
     }
+    */
 
     public ObservableList<Text> getMessages() {
         return messages;
     }
 
+    /*
     public void setMessages(ObservableList<Text> messages) {
         this.messages = messages;
     }
+    */
 
     public boolean isJoin() {
         return join;

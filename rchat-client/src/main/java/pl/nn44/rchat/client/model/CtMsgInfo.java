@@ -11,11 +11,12 @@ import java.util.List;
 public class CtMsgInfo {
 
     private final LocaleHelper i18n;
-    private LocalDateTime time;
+    private final LocalDateTime time;
     private final String resKey;
     private final Object[] arguments;
 
-    public CtMsgInfo(LocaleHelper locHelper, LocalDateTime time,
+    public CtMsgInfo(LocaleHelper locHelper,
+                     LocalDateTime time,
                      String resKey, Object... resArgs) {
 
         this.i18n = locHelper;

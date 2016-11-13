@@ -31,6 +31,7 @@ import pl.nn44.rchat.protocol.WhatsUp.What;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -93,7 +94,7 @@ public class MainController implements Initializable {
     private ObservableList<CtUser> usersSource =
             FXCollections.emptyObservableList();
 
-    private ListChangeListener<CtUser> usersTake =
+    private final ListChangeListener<CtUser> usersTake =
             new ListChangeListener<CtUser>() {
                 @Override
                 public void onChanged(Change<? extends CtUser> c) {
@@ -116,7 +117,7 @@ public class MainController implements Initializable {
     private ObservableList<Text> messagesSource =
             FXCollections.emptyObservableList();
 
-    private ListChangeListener<Text> messageTake =
+    private final ListChangeListener<Text> messageTake =
             new ListChangeListener<Text>() {
                 @Override
                 public void onChanged(Change<? extends Text> c) {
@@ -175,6 +176,9 @@ public class MainController implements Initializable {
                     channelsMap.put(rcChannel.getName(), ctChannel);
                 }
 
+                // channel cannot be removed or added dynamically
+                channelsMap = Collections.unmodifiableMap(channelsMap);
+
                 runLater(() -> status.setText(""));
                 exs.submit(this::listenWhatHappens);
 
@@ -183,7 +187,6 @@ public class MainController implements Initializable {
                 runLater(() -> status.setText(r(i18n.mapError("channels", e))));
             }
         });
-
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -247,11 +250,11 @@ public class MainController implements Initializable {
         String someText = whatsUp.getParams()[2];
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time,
-                "whats-up.TOPIC", channel, whoChanged, someText
+                i18n, time, "whats-up.TOPIC", channel, whoChanged, someText
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.setTopic(someText);
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
@@ -260,16 +263,15 @@ public class MainController implements Initializable {
 
         LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
-        String whoJoin = whatsUp.getParams()[1];
-        boolean isAuth = Boolean.parseBoolean(whatsUp.getParams()[2]);
-        boolean isAdmin = Boolean.parseBoolean(whatsUp.getParams()[3]);
+        String whoJoined = whatsUp.getParams()[1];
+        boolean auth = Boolean.parseBoolean(whatsUp.getParams()[2]);
+        boolean admin = Boolean.parseBoolean(whatsUp.getParams()[3]);
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time,
-                "whats-up.JOIN", channel, whoJoin
+                i18n, time, "whats-up.JOIN", channel, whoJoined
         );
 
-        RcChUser rcChUser = new RcChUser(channel, whoJoin, isAuth, false, isAdmin, false);
+        RcChUser rcChUser = new RcChUser(channel, whoJoined, auth, false, admin, false);
         CtUser ctUser = new CtUser(rcChUser);
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -285,8 +287,7 @@ public class MainController implements Initializable {
         String whoPart = whatsUp.getParams()[1];
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time,
-                "whats-up.PART", channel, whoPart
+                i18n, time, "whats-up.PART", channel, whoPart
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -303,8 +304,7 @@ public class MainController implements Initializable {
         String whoKickedBy = whatsUp.getParams()[1];
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time,
-                "whats-up.KICK", channel, whoKicked, whoKickedBy
+                i18n, time, "whats-up.KICK", channel, whoKicked, whoKickedBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -321,15 +321,18 @@ public class MainController implements Initializable {
         String whoBannedBy = whatsUp.getParams()[2];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        String code = state ? "1" : "2";
+        String code = state ? "1" : "0";
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time,
-                "whats-up.BAN." + code, channel, whoBanned, whoBannedBy
+                i18n, time, "whats-up.BAN." + code, channel, whoBanned, whoBannedBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getUsers().stream().filter(u -> u.getUsername().equals(whoBanned)).forEach(u -> u.setBanned(state));
+        ctChannel.getUsers().stream()
+                .filter(u -> u.getUsername().equals(whoBanned))
+                .forEach(u -> u.setBanned(state));
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
+
+        runLater(() -> usersSkin.refresh());
     }
 
     public void onSomeAdmin(WhatsUp whatsUp) {
@@ -341,20 +344,22 @@ public class MainController implements Initializable {
         String whoAdminBy = whatsUp.getParams()[2];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        String code = state ? "1" : "2";
+        String code = state ? "1" : "0";
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time,
-                "whats-up.ADMIN." + code, channel, whoAdmin, whoAdminBy
+                i18n, time, "whats-up.ADMIN." + code, channel, whoAdmin, whoAdminBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getUsers().stream().filter(u -> u.getUsername().equals(whoAdmin)).forEach(u -> u.setBanned(state));
+        ctChannel.getUsers().stream().
+                filter(u -> u.getUsername().equals(whoAdmin))
+                .forEach(u -> u.setAdmin(state));
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
+
+        runLater(() -> usersSkin.refresh());
     }
 
     public void onSomeIgnore(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeIgnore", whatsUp);
-
 
         LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
@@ -362,15 +367,18 @@ public class MainController implements Initializable {
         String whoIgnoredBy = whatsUp.getParams()[2];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        String code = state ? "1" : "2";
+        String code = state ? "1" : "0";
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time,
-                "whats-up.IGNORE." + code, channel, whoIgnored, whoIgnoredBy
+                i18n, time, "whats-up.IGNORE." + code, channel, whoIgnored, whoIgnoredBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getUsers().stream().filter(u -> u.getUsername().equals(whoIgnored)).forEach(u -> u.setBanned(state));
+        ctChannel.getUsers().stream()
+                .filter(u -> u.getUsername().equals(whoIgnored))
+                .forEach(u -> u.setIgnored(state));
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
+
+        runLater(() -> usersSkin.refresh());
     }
 
     // ---------------------------------------------------------------------------------------------------------------
