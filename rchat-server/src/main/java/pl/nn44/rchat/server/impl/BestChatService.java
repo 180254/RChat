@@ -163,37 +163,26 @@ public class BestChatService implements ChatService {
 
             boolean addC = params.channel.getUsers().addIfAbsent(params.caller);
             boolean addU = params.caller.getChannels().addIfAbsent(params.channel);
-            boolean admin = params.channel.getAdmins().contains(params.caller.getUsername());
 
             if (addC ^ addU) {
                 LOG.warn("join(): addC ^ addU is true, but it should not");
             }
 
             if (addC) {
+                boolean auth = accounts.containsKey(params.caller.getUsername());
+                boolean admin = params.channel.getAdmins().contains(params.caller.getUsername());
+
                 WhatsUp whatsUp = new WhatsUp(
                         What.JOIN,
                         params.channel.getName(),
-                        params.caller.getUsername()
-                );
-
-                params.channel.getUsers().stream()
-                        .filter(cu -> !cu.equals(params.caller))
-                        .forEach(cu -> cu.getNews().offer(whatsUp));
-            }
-
-            if (addC && admin) {
-                WhatsUp whatsUp = new WhatsUp(
-                        What.ADMIN,
-                        params.channel.getName(),
                         params.caller.getUsername(),
-                        null,
-                        "ON"
+                        Boolean.toString(admin),
+                        Boolean.toString(auth)
                 );
 
                 params.channel.getUsers().stream()
                         .filter(cu -> !cu.equals(params.caller))
                         .forEach(cu -> cu.getNews().offer(whatsUp));
-
             }
 
             RcChUser[] rcChUsers = params.channel.getUsers()
