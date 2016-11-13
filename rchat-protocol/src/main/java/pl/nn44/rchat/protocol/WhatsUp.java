@@ -71,8 +71,6 @@ public class WhatsUp implements Serializable {
         MESSAGE, // MESSAGE $channel $username(who-msg) some-text
         PRIVY, // MESSAGE $null $username(who-msg-to) username-who-msg-by some-text
 
-        TOPIC, // TOPIC $channel $username(who-changed) some-text
-
         JOIN, // JOIN $channel $username(who-join) is-auth is-admin
         PART, // PART $channel $username(who-part)
         KICK, // KICK $channel $username(who-kicked) username-kicked-by
@@ -80,5 +78,7 @@ public class WhatsUp implements Serializable {
 
         ADMIN, // ADMIN $channel $username(who-admin) username-admin-by ON/OFF
         IGNORE, // IGNORE $channel $username(who-ignored) username-who-ignored-by ON/OFF
+
+        TOPIC, // TOPIC $channel $username(who-changed) some-text
     }
 }
