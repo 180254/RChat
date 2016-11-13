@@ -38,26 +38,21 @@ public class CtMessage {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private Text text(String value, String cssClass) {
+    public static Text text(String value, String... cssClasses) {
         Text text = new Text(value);
-        text.getStyleClass().add("c-ct-message");
-
-        if (cssClass != null) {
-            text.getStyleClass().add(cssClass);
-        }
-
+        text.getStyleClass().addAll(cssClasses);
         return text;
     }
 
     public List<Text> toNodes() {
         List<Text> ret = new ArrayList<>();
 
-        ret.add(text(dtf.format(time), null));
-        ret.add(text(" <", null));
-        ret.add(text(user, "c-ct-message-user"));
-        ret.add(text("> ", null));
-        ret.add(text(message, null));
-        ret.add(text("\n", null));
+        ret.add(text(dtf.format(time), "c-ct-message"));
+        ret.add(text(" <", "c-ct-message"));
+        ret.add(text(user, "c-ct-message", "c-ct-message-user"));
+        ret.add(text("> ", "c-ct-message"));
+        ret.add(text(message, "c-ct-message"));
+        ret.add(text("\n", "c-ct-message"));
 
         return ret;
     }

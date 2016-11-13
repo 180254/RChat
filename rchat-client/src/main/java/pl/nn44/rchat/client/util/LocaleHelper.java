@@ -43,8 +43,11 @@ public class LocaleHelper {
         }
     }
 
-    public String get(String key) {
-        return res.getString(key);
+    public String get(String key, Object... values) {
+        String resText = res.getString(key);
+        return values.length > 0
+                ? MessageFormat.format(resText, values)
+                : resText;
     }
 
     public void setRes(ResourceBundle res) {

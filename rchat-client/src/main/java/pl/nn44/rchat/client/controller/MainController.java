@@ -1,6 +1,9 @@
 package pl.nn44.rchat.client.controller;
 
 import com.google.common.collect.ImmutableMap;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -8,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +61,8 @@ public class MainController implements Initializable {
     public RefreshableListViewSkin<CtChannel> channelsSkin;
     public RefreshableListViewSkin<CtUser> usersSkin;
 
-    private boolean fatalFail = false;
+    private boolean fatalFail =
+            false;
 
     private Map<String, CtChannel> channelsMap =
             new HashMap<>();
@@ -74,6 +79,25 @@ public class MainController implements Initializable {
                     .put(What.ADMIN, this::onSomeAdmin)
                     .put(What.IGNORE, this::onSomeIgnore)
                     .build();
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private ObservableList<Text> messageSource =
+            FXCollections.emptyObservableList();
+
+    private ListChangeListener<Text> takeMassage =
+            new ListChangeListener<Text>() {
+                @Override
+                public void onChanged(Change<? extends Text> c) {
+                    while (c.next()) {
+                        if (c.wasAdded()) {
+                            runLater(() -> messages.getChildren().addAll(c.getAddedSubList()));
+                        } else {
+                            throw new AssertionError("takeMassage #0: " + c.toString());
+                        }
+                    }
+                }
+            };
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -161,29 +185,33 @@ public class MainController implements Initializable {
         String whoMsg = whatsUp.getParams()[1];
         String someText = whatsUp.getParams()[2];
 
-        CtMessage ctMessage = new CtMessage(whoMsg, time, someText);
         CtChannel ctChannel = channelsMap.get(channel);
+        CtMessage ctMessage = new CtMessage(whoMsg, time, someText);
         ctChannel.getMessages().addAll(ctMessage.toNodes());
-
-        runLater(() -> {
-            CtChannel selChannel = channels.getSelectionModel().getSelectedItem();
-
-            if (selChannel.equals(ctChannel)) {
-                messages.getChildren().addAll(ctMessage.toNodes());
-            }
-        });
     }
 
     public void onSomePrivy(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePrivy", whatsUp);
 
         String whoMsgTo = whatsUp.getParams()[0];
-        String whoMyBy = whatsUp.getParams()[0];
-        String someTex = whatsUp.getParams()[2];
+        String whoMsgBy = whatsUp.getParams()[0];
+        String someText = whatsUp.getParams()[2];
     }
 
     public void onSomeTopic(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeTopic", whatsUp);
+
+        String channel = whatsUp.getParams()[0];
+        String whoChanged = whatsUp.getParams()[0];
+        String someText = whatsUp.getParams()[2];
+
+        CtChannel ctChannel = channelsMap.get(channel);
+
+        String info = i18n.get("whats-up.TOPIC", channel, whoChanged, someText);
+        Text text = CtMessage.text(info, "c-ct-message-info");
+
+        ctChannel.setTopic(someText);
+        ctChannel.getMessages().addAll(text);
     }
 
     public void onSomeJoin(WhatsUp whatsUp) {
@@ -254,7 +282,11 @@ public class MainController implements Initializable {
         send.setDisable(!fatalFail && !(channel.isJoin()));
 
         message.setText(channel.getCurrentMsg());
-        messages.getChildren().setAll(channel.getMessages());
+
+        messageSource.removeListener(takeMassage);
+        messageSource = channel.getMessages();
+        messages.getChildren().setAll(messageSource);
+        messageSource.addListener(takeMassage);
 
         topic.setText(channel.getTopic());
         users.setItems(channel.getUsers());
@@ -329,13 +361,14 @@ public class MainController implements Initializable {
     public void onKeyMessagePressed(KeyEvent ev) {
         CtChannel channel = channels.getSelectionModel().getSelectedItem();
 
+        if (ev.getCode() == KeyCode.ENTER) {
+            onSendAction(null);
+        }
+
         if (channel != null) {
             channel.setCurrentMsg(message.getText());
         }
 
-        if (ev.getCode() == KeyCode.ENTER) {
-            onSendAction(null);
-        }
     }
 
     @FXML
