@@ -160,7 +160,7 @@ public class MainController implements Initializable {
 
         CtMessage ctMessage = new CtMessage(whoMsg, time, someText);
         CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getMessages().addAll(ctMessage);
+        ctChannel.getMessages().addAll(ctMessage.toNodes());
 
         runLater(() -> {
             CtChannel selChannel = channels.getSelectionModel().getSelectedItem();
@@ -247,6 +247,7 @@ public class MainController implements Initializable {
         send.setDisable(!fatalFail && !(channel.isJoin()));
 
         message.setText(channel.getCurrentMsg());
+        text.getChildren().setAll(channel.getMessages());
 
         topic.setText(channel.getTopic());
         users.setItems(channel.getUsers());
@@ -291,6 +292,7 @@ public class MainController implements Initializable {
 
                     runLater(() -> {
                         channel.clear();
+                        text.getChildren().clear();
                         onSingleClickedChannels(channel);
                     });
 

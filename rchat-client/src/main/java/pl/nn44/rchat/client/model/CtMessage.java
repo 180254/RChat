@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CtMessage extends Text {
+public class CtMessage {
 
     public static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:MM:SS");
 

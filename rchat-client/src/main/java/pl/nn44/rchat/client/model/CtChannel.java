@@ -2,6 +2,7 @@ package pl.nn44.rchat.client.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.text.Text;
 import pl.nn44.rchat.protocol.RcChUser;
 import pl.nn44.rchat.protocol.RcChannel;
 
@@ -13,7 +14,7 @@ public class CtChannel {
     private boolean password;
     private String topic;
     private ObservableList<CtUser> users;
-    private ObservableList<CtMessage> messages;
+    private ObservableList<Text> messages;
     private boolean join;
     private String currentMsg;
 
@@ -75,11 +76,11 @@ public class CtChannel {
         this.users = users;
     }
 
-    public ObservableList<CtMessage> getMessages() {
+    public ObservableList<Text> getMessages() {
         return messages;
     }
 
-    public void setMessages(ObservableList<CtMessage> messages) {
+    public void setMessages(ObservableList<Text> messages) {
         this.messages = messages;
     }
 
