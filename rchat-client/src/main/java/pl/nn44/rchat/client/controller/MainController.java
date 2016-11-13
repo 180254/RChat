@@ -157,9 +157,9 @@ public class MainController implements Initializable {
         LOG.info("{} {}", "onSomeMessage", whatsUp);
 
         LocalDateTime time = whatsUp.getTime();
-        String channel = whatsUp.getChannel();
-        String whoMsg = whatsUp.getUsername();
-        String someText = whatsUp.getParams()[0];
+        String channel = whatsUp.getParams()[0];
+        String whoMsg = whatsUp.getParams()[1];
+        String someText = whatsUp.getParams()[2];
 
         CtMessage ctMessage = new CtMessage(whoMsg, time, someText);
         CtChannel ctChannel = channelsMap.get(channel);
@@ -177,9 +177,9 @@ public class MainController implements Initializable {
     public void onSomePrivy(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePrivy", whatsUp);
 
-        String whoMsgTo = whatsUp.getUsername();
+        String whoMsgTo = whatsUp.getParams()[0];
         String whoMyBy = whatsUp.getParams()[0];
-        String someTex = whatsUp.getParams()[1];
+        String someTex = whatsUp.getParams()[2];
     }
 
     public void onSomeTopic(WhatsUp whatsUp) {

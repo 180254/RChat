@@ -14,28 +14,20 @@ public class WhatsUp implements Serializable {
 
     private final String isoTime;
     private final What what;
-    private final String channel;
-    private final String username;
     private final String[] params;
 
     public WhatsUp(What what,
-                   String channel,
-                   String username,
                    String... params) {
 
         // LocalDateTime and long are not supported by xml-rpc
         this.isoTime = LocalDateTime.now().format(dtf);
         this.what = what;
-        this.channel = channel;
-        this.username = username;
         this.params = params;
     }
 
     protected WhatsUp() {
         this.isoTime = null;
         this.what = null;
-        this.channel = null;
-        this.username = null;
         this.params = null;
     }
 
@@ -45,14 +37,6 @@ public class WhatsUp implements Serializable {
 
     public What getWhat() {
         return what;
-    }
-
-    public String getChannel() {
-        return channel;
-    }
-
-    public String getUsername() {
-        return username;
     }
 
     public String[] getParams() {
@@ -66,14 +50,12 @@ public class WhatsUp implements Serializable {
         WhatsUp whatsUp = (WhatsUp) o;
         return Objects.equal(isoTime, whatsUp.isoTime) &&
                 what == whatsUp.what &&
-                Objects.equal(channel, whatsUp.channel) &&
-                Objects.equal(username, whatsUp.username) &&
                 Objects.equal(params, whatsUp.params);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(isoTime, what, channel, username, params);
+        return Objects.hashCode(isoTime, what, params);
     }
 
     @Override
@@ -81,8 +63,6 @@ public class WhatsUp implements Serializable {
         return MoreObjects.toStringHelper(this)
                 .add("isoTime", isoTime)
                 .add("what", what)
-                .add("channel", channel)
-                .add("username", username)
                 .add("params", params)
                 .toString();
     }
