@@ -82,6 +82,29 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private ObservableList<CtUser> userSource =
+            FXCollections.emptyObservableList();
+
+    private ListChangeListener<CtUser> takeUser =
+            new ListChangeListener<CtUser>() {
+                @Override
+                public void onChanged(Change<? extends CtUser> c) {
+                    while (c.next()) {
+                        if (c.wasAdded()) {
+                            runLater(() -> users.getItems().addAll(c.getAddedSubList()));
+                        } else if (c.wasRemoved()) {
+                            runLater(() -> users.getItems().removeAll(c.getRemoved()));
+                        } else {
+                            throw new AssertionError("takeUser #0: " + c.toString());
+                        }
+                    }
+
+                    runLater(() -> usersSkin.refresh());
+                }
+            };
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     private ObservableList<Text> messageSource =
             FXCollections.emptyObservableList();
 
@@ -185,8 +208,9 @@ public class MainController implements Initializable {
         String whoMsg = whatsUp.getParams()[1];
         String someText = whatsUp.getParams()[2];
 
-        CtChannel ctChannel = channelsMap.get(channel);
         CtMessage ctMessage = new CtMessage(whoMsg, time, someText);
+
+        CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.getMessages().addAll(ctMessage.toNodes());
     }
 
@@ -196,6 +220,8 @@ public class MainController implements Initializable {
         String whoMsgTo = whatsUp.getParams()[0];
         String whoMsgBy = whatsUp.getParams()[0];
         String someText = whatsUp.getParams()[2];
+
+        LOG.info("? {} {} {}", whoMsgTo, whoMsgBy, someText);
     }
 
     public void onSomeTopic(WhatsUp whatsUp) {
@@ -205,21 +231,36 @@ public class MainController implements Initializable {
         String whoChanged = whatsUp.getParams()[0];
         String someText = whatsUp.getParams()[2];
 
-        CtChannel ctChannel = channelsMap.get(channel);
-
         String info = i18n.get("whats-up.TOPIC", channel, whoChanged, someText);
         Text text = CtMessage.text(info, "c-ct-message-info");
 
+        CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.setTopic(someText);
         ctChannel.getMessages().addAll(text);
     }
 
     public void onSomeJoin(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeJoin", whatsUp);
+
+        String channel = whatsUp.getParams()[0];
+        String whoJoin = whatsUp.getParams()[1];
+        boolean isAuth = Boolean.parseBoolean(whatsUp.getParams()[2]);
+        boolean isAdmin = Boolean.parseBoolean(whatsUp.getParams()[3]);
+
+        CtUser ctUser = new CtUser(whoJoin, isAuth, isAdmin);
+
+        CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getUsers().add(ctUser);
     }
 
     public void onSomePart(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePart", whatsUp);
+
+        String channel = whatsUp.getParams()[0];
+        String whoPart = whatsUp.getParams()[1];
+
+        CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoPart));
     }
 
     public void onSomeKick(WhatsUp whatsUp) {
@@ -282,14 +323,17 @@ public class MainController implements Initializable {
         send.setDisable(!fatalFail && !(channel.isJoin()));
 
         message.setText(channel.getCurrentMsg());
+        topic.setText(channel.getTopic());
 
         messageSource.removeListener(takeMassage);
         messageSource = channel.getMessages();
         messages.getChildren().setAll(messageSource);
         messageSource.addListener(takeMassage);
 
-        topic.setText(channel.getTopic());
-        users.setItems(channel.getUsers());
+        userSource.removeListener(takeUser);
+        userSource = channel.getUsers();
+        users.getItems().setAll(userSource);
+        userSource.addListener(takeUser);
 
         usersSkin.refresh();
         channelsSkin.refresh();
