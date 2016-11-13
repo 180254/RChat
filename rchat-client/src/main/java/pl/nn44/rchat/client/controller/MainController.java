@@ -23,6 +23,8 @@ import pl.nn44.rchat.client.model.CtMsgInfo;
 import pl.nn44.rchat.client.model.CtMsgUser;
 import pl.nn44.rchat.client.model.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
+import pl.nn44.rchat.client.util.SimpleCommand;
+import pl.nn44.rchat.client.util.StateCommand;
 import pl.nn44.rchat.protocol.ChatException;
 import pl.nn44.rchat.protocol.RcChUser;
 import pl.nn44.rchat.protocol.RcChannel;
@@ -82,8 +84,8 @@ public class MainController implements Initializable {
                     .put(What.IGNORE, this::onSomeIgnore)
                     .build();
 
-    private final Map<String, BiConsumer<String[], CtChannel>> commandsMap =
-            ImmutableMap.<String, BiConsumer<String[], CtChannel>>builder()
+    private final Map<String, BiConsumer<String[], String>> commandsMap =
+            ImmutableMap.<String, BiConsumer<String[], String>>builder()
                     .put("/join", this::onCmdJoin)
                     .put("/part", this::onCmdPart)
                     .put("/topic", this::onCmdTopic)
@@ -262,7 +264,7 @@ public class MainController implements Initializable {
         String someText = whatsUp.getParams()[2];
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time, "whats-up.TOPIC", channel, whoChanged, someText
+                i18n, time, "whats-up.topic", channel, whoChanged, someText
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -280,7 +282,7 @@ public class MainController implements Initializable {
         boolean admin = Boolean.parseBoolean(whatsUp.getParams()[3]);
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time, "whats-up.JOIN", channel, whoJoined
+                i18n, time, "whats-up.join", channel, whoJoined
         );
 
         RcChUser rcChUser = new RcChUser(channel, whoJoined, auth, false, admin, false);
@@ -299,7 +301,7 @@ public class MainController implements Initializable {
         String whoPart = whatsUp.getParams()[1];
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time, "whats-up.PART", channel, whoPart
+                i18n, time, "whats-up.part", channel, whoPart
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -316,7 +318,7 @@ public class MainController implements Initializable {
         String whoKickedBy = whatsUp.getParams()[1];
 
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time, "whats-up.KICK", channel, whoKicked, whoKickedBy
+                i18n, time, "whats-up.kick", channel, whoKicked, whoKickedBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -335,7 +337,7 @@ public class MainController implements Initializable {
 
         String code = state ? "1" : "0";
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time, "whats-up.BAN." + code, channel, whoBanned, whoBannedBy
+                i18n, time, "whats-up.ban." + code, channel, whoBanned, whoBannedBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -358,7 +360,7 @@ public class MainController implements Initializable {
 
         String code = state ? "1" : "0";
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time, "whats-up.ADMIN." + code, channel, whoAdmin, whoAdminBy
+                i18n, time, "whats-up.admin." + code, channel, whoAdmin, whoAdminBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -381,7 +383,7 @@ public class MainController implements Initializable {
 
         String code = state ? "1" : "0";
         CtMsgInfo ctMsgInfo = new CtMsgInfo(
-                i18n, time, "whats-up.IGNORE." + code, channel, whoIgnored, whoIgnoredBy
+                i18n, time, "whats-up.ignore." + code, channel, whoIgnored, whoIgnoredBy
         );
 
         CtChannel ctChannel = channelsMap.get(channel);
@@ -548,7 +550,7 @@ public class MainController implements Initializable {
 
 
         if (message.startsWith("/")) {
-            exs.submit(() -> processCommand(message, channel));
+            exs.submit(() -> onAnyCmd(message, channel.getName()));
 
         } else {
             exs.submit(() -> {
@@ -563,10 +565,10 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public void processCommand(String message, CtChannel channel) {
+    public void onAnyCmd(String message, String channel) {
         String[] tokens = message.split(" ");
 
-        BiConsumer<String[], CtChannel> cmdConsumer = commandsMap.get(tokens[0]);
+        BiConsumer<String[], String> cmdConsumer = commandsMap.get(tokens[0]);
         if (cmdConsumer == null) {
             submitFleetingStatus(r(i18n.get("cmd.UNKNOWN")));
         } else {
@@ -574,36 +576,72 @@ public class MainController implements Initializable {
         }
     }
 
-    public void onCmdTopic(String[] message, CtChannel channel) {
+    public void onSimpleCommand(String[] tokens, String channel, String locMap, SimpleCommand sc) {
+        if (tokens.length < 2) {
+            submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
+            return;
+        }
+        try {
+            sc.cmd(csh.token(), channel, tokens[1]);
+
+        } catch (Exception e) {
+            submitFleetingStatus(r(i18n.mapError(locMap, e)));
+        }
+    }
+
+    public void onStateCommand(String[] tokens, String channel, String locMap, StateCommand sc) {
+        if (tokens.length < 3) {
+            submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
+            return;
+        }
+
+        if (!(tokens[2].equals("on") || tokens[2].equals("off"))) {
+            submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
+            return;
+        }
+
+        try {
+            sc.cmd(csh.token(), channel, tokens[1], tokens[2].equals("on"));
+        } catch (Exception e) {
+            submitFleetingStatus(r(i18n.mapError(locMap, e)));
+        }
 
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
 
-    public void onCmdJoin(String[] message, CtChannel channel) {
-
+    public void onCmdTopic(String[] tokens, String channel) {
+        LOG.info("{} {} {}", "onCmdTopic", channel, tokens);
+        onSimpleCommand(tokens, channel, "topic", (a, b, c) -> csh.cs().topic(a, b, c));
     }
 
-    public void onCmdPart(String[] message, CtChannel channel) {
-
+    public void onCmdJoin(String[] tokens, String channel) {
+        LOG.info("{} {} {}", "onCmdJoin", channel, tokens);
     }
 
-    public void onCmdKick(String[] message, CtChannel channel) {
-
+    public void onCmdPart(String[] tokens, String channel) {
+        LOG.info("{} {} {}", "onCmdPart", channel, tokens);
     }
 
-    public void onCmdBan(String[] message, CtChannel channel) {
-
+    public void onCmdKick(String[] tokens, String channel) {
+        LOG.info("{} {} {}", "onCmdKick", channel, tokens);
+        onSimpleCommand(tokens, channel, "kick", (a, b, c) -> csh.cs().kick(a, b, c));
     }
 
-
-    public void onCmdAdmin(String[] message, CtChannel channel) {
-
+    public void onCmdBan(String[] tokens, String channel) {
+        LOG.info("{} {} {}", "onCmdBan", channel, tokens);
+        onStateCommand(tokens, channel, "ban", (a, b, c, d) -> csh.cs().ban(a, b, c, d));
     }
 
-    public void commandIgnore(String[] message, CtChannel channel) {
-
+    public void onCmdAdmin(String[] tokens, String channel) {
+        LOG.info("{} {} {}", "onCmdAdmin", channel, tokens);
+        onStateCommand(tokens, channel, "admin", (a, b, c, d) -> csh.cs().admin(a, b, c, d));
     }
 
+    public void commandIgnore(String[] tokens, String channel) {
+        LOG.info("{} {} {}", "commandIgnore", channel, tokens);
+        //  onStateCommand(tokens, channel, "ignore", (a, b, c, d) -> csh.cs().ignore(a, b, c, d));
+    }
 
     // ---------------------------------------------------------------------------------------------------------------
 
