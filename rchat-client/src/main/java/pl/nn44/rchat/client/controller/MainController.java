@@ -295,19 +295,82 @@ public class MainController implements Initializable {
     }
 
     public void onSomeKick(WhatsUp whatsUp) {
-        LOG.info("{} {}", "onSomeKick", whatsUp);
+        LOG.info("{} {}", "onSomePart", whatsUp);
+
+        LocalDateTime time = whatsUp.getTime();
+        String channel = whatsUp.getParams()[0];
+        String whoKicked = whatsUp.getParams()[1];
+        String whoKickedBy = whatsUp.getParams()[1];
+
+        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+                i18n, time,
+                "whats-up.KICK", channel, whoKicked, whoKickedBy
+        );
+
+        CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoKicked));
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
     public void onSomeBan(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeBan", whatsUp);
+
+        LocalDateTime time = whatsUp.getTime();
+        String channel = whatsUp.getParams()[0];
+        String whoBanned = whatsUp.getParams()[1];
+        String whoBannedBy = whatsUp.getParams()[2];
+        boolean state = whatsUp.getParams()[3].equals("ON");
+
+        String code = state ? "1" : "2";
+        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+                i18n, time,
+                "whats-up.BAN." + code, channel, whoBanned, whoBannedBy
+        );
+
+        CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getUsers().stream().filter(u -> u.getUsername().equals(whoBanned)).forEach(u -> u.setBanned(state));
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
     public void onSomeAdmin(WhatsUp whatsUp) {
-        LOG.info("{} {}", "onSomeAdmin", whatsUp);
+        LOG.info("{} {}", "onSomeBan", whatsUp);
+
+        LocalDateTime time = whatsUp.getTime();
+        String channel = whatsUp.getParams()[0];
+        String whoAdmin = whatsUp.getParams()[1];
+        String whoAdminBy = whatsUp.getParams()[2];
+        boolean state = whatsUp.getParams()[3].equals("ON");
+
+        String code = state ? "1" : "2";
+        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+                i18n, time,
+                "whats-up.ADMIN." + code, channel, whoAdmin, whoAdminBy
+        );
+
+        CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getUsers().stream().filter(u -> u.getUsername().equals(whoAdmin)).forEach(u -> u.setBanned(state));
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
     public void onSomeIgnore(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeIgnore", whatsUp);
+
+
+        LocalDateTime time = whatsUp.getTime();
+        String channel = whatsUp.getParams()[0];
+        String whoIgnored = whatsUp.getParams()[1];
+        String whoIgnoredBy = whatsUp.getParams()[2];
+        boolean state = whatsUp.getParams()[3].equals("ON");
+
+        String code = state ? "1" : "2";
+        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+                i18n, time,
+                "whats-up.IGNORE." + code, channel, whoIgnored, whoIgnoredBy
+        );
+
+        CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getUsers().stream().filter(u -> u.getUsername().equals(whoIgnored)).forEach(u -> u.setBanned(state));
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
     // ---------------------------------------------------------------------------------------------------------------
