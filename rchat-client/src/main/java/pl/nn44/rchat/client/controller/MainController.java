@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -18,10 +19,12 @@ import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.model.CtChannel;
-import pl.nn44.rchat.client.model.CtMessage;
+import pl.nn44.rchat.client.model.CtMsgInfo;
+import pl.nn44.rchat.client.model.CtMsgUser;
 import pl.nn44.rchat.client.model.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.ChatException;
+import pl.nn44.rchat.protocol.RcChUser;
 import pl.nn44.rchat.protocol.RcChannel;
 import pl.nn44.rchat.protocol.WhatsUp;
 import pl.nn44.rchat.protocol.WhatsUp.What;
@@ -64,9 +67,6 @@ public class MainController implements Initializable {
     private boolean fatalFail =
             false;
 
-    private Map<String, CtChannel> channelsMap =
-            new HashMap<>();
-
     private Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
                     .put(What.MESSAGE, this::onSomeMessage)
@@ -82,41 +82,51 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private ObservableList<CtUser> userSource =
+    private Map<String, CtChannel> channelsMap =
+            new HashMap<>();
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+
+    private ObservableList<CtUser> usersModel;
+
+    private ObservableList<CtUser> usersSource =
             FXCollections.emptyObservableList();
 
-    private ListChangeListener<CtUser> takeUser =
+    private ListChangeListener<CtUser> usersTake =
             new ListChangeListener<CtUser>() {
                 @Override
                 public void onChanged(Change<? extends CtUser> c) {
                     while (c.next()) {
                         if (c.wasAdded()) {
-                            runLater(() -> users.getItems().addAll(c.getAddedSubList()));
+                            runLater(() -> usersModel.addAll(c.getAddedSubList()));
                         } else if (c.wasRemoved()) {
-                            runLater(() -> users.getItems().removeAll(c.getRemoved()));
+                            runLater(() -> usersModel.removeAll(c.getRemoved()));
                         } else {
-                            throw new AssertionError("takeUser #0: " + c.toString());
+                            throw new AssertionError("usersTake #0: " + c.toString());
                         }
                     }
-
-                    runLater(() -> usersSkin.refresh());
                 }
             };
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private ObservableList<Text> messageSource =
+    private ObservableList<Node> messagesModel;
+
+    private ObservableList<Text> messagesSource =
             FXCollections.emptyObservableList();
 
-    private ListChangeListener<Text> takeMassage =
+    private ListChangeListener<Text> messageTake =
             new ListChangeListener<Text>() {
                 @Override
                 public void onChanged(Change<? extends Text> c) {
                     while (c.next()) {
                         if (c.wasAdded()) {
-                            runLater(() -> messages.getChildren().addAll(c.getAddedSubList()));
+                            runLater(() -> messagesModel.addAll(c.getAddedSubList()));
+                        } else if (c.wasRemoved()) {
+                            runLater(() -> messagesModel.removeAll(c.getRemoved()));
                         } else {
-                            throw new AssertionError("takeMassage #0: " + c.toString());
+                            throw new AssertionError("messageTake #0: " + c.toString());
                         }
                     }
                 }
@@ -140,6 +150,9 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         channelsSkin = new RefreshableListViewSkin<>(channels);
         usersSkin = new RefreshableListViewSkin<>(users);
+
+        usersModel = users.getItems();
+        messagesModel = messages.getChildren();
 
         initChannelChangeListener();
         initMessagesScrollListener();
@@ -208,59 +221,77 @@ public class MainController implements Initializable {
         String whoMsg = whatsUp.getParams()[1];
         String someText = whatsUp.getParams()[2];
 
-        CtMessage ctMessage = new CtMessage(whoMsg, time, someText);
+        CtMsgUser ctMsgUser = new CtMsgUser(whoMsg, time, someText);
 
         CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getMessages().addAll(ctMessage.toNodes());
+        ctChannel.getMessages().addAll(ctMsgUser.toNodes());
     }
 
     public void onSomePrivy(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePrivy", whatsUp);
 
+        LocalDateTime time = whatsUp.getTime();
         String whoMsgTo = whatsUp.getParams()[0];
         String whoMsgBy = whatsUp.getParams()[0];
         String someText = whatsUp.getParams()[2];
 
-        LOG.info("? {} {} {}", whoMsgTo, whoMsgBy, someText);
+        LOG.info("?", time, whoMsgTo, whoMsgBy, someText);
     }
 
     public void onSomeTopic(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeTopic", whatsUp);
 
+        LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
-        String whoChanged = whatsUp.getParams()[0];
+        String whoChanged = whatsUp.getParams()[1];
         String someText = whatsUp.getParams()[2];
 
-        String info = i18n.get("whats-up.TOPIC", channel, whoChanged, someText);
-        Text text = CtMessage.text(info, "c-ct-message-info");
+        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+                i18n, time,
+                "whats-up.TOPIC", channel, whoChanged, someText
+        );
 
         CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.setTopic(someText);
-        ctChannel.getMessages().addAll(text);
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
     public void onSomeJoin(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeJoin", whatsUp);
 
+        LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
         String whoJoin = whatsUp.getParams()[1];
         boolean isAuth = Boolean.parseBoolean(whatsUp.getParams()[2]);
         boolean isAdmin = Boolean.parseBoolean(whatsUp.getParams()[3]);
 
-        CtUser ctUser = new CtUser(whoJoin, isAuth, isAdmin);
+        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+                i18n, time,
+                "whats-up.JOIN", channel, whoJoin
+        );
+
+        RcChUser rcChUser = new RcChUser(channel, whoJoin, isAuth, false, isAdmin, false);
+        CtUser ctUser = new CtUser(rcChUser);
 
         CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().add(ctUser);
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
     public void onSomePart(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePart", whatsUp);
 
+        LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
         String whoPart = whatsUp.getParams()[1];
 
+        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+                i18n, time,
+                "whats-up.PART", channel, whoPart
+        );
+
         CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoPart));
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
     public void onSomeKick(WhatsUp whatsUp) {
@@ -325,15 +356,15 @@ public class MainController implements Initializable {
         message.setText(channel.getCurrentMsg());
         topic.setText(channel.getTopic());
 
-        messageSource.removeListener(takeMassage);
-        messageSource = channel.getMessages();
-        messages.getChildren().setAll(messageSource);
-        messageSource.addListener(takeMassage);
+        messagesSource.removeListener(messageTake);
+        messagesSource = channel.getMessages();
+        messagesModel.setAll(messagesSource);
+        messagesSource.addListener(messageTake);
 
-        userSource.removeListener(takeUser);
-        userSource = channel.getUsers();
-        users.getItems().setAll(userSource);
-        userSource.addListener(takeUser);
+        usersSource.removeListener(usersTake);
+        usersSource = channel.getUsers();
+        usersModel.setAll(usersSource);
+        usersSource.addListener(usersTake);
 
         usersSkin.refresh();
         channelsSkin.refresh();
@@ -375,7 +406,6 @@ public class MainController implements Initializable {
 
                     runLater(() -> {
                         channel.clear();
-                        messages.getChildren().clear();
                         onSingleClickedChannels(channel);
                     });
 

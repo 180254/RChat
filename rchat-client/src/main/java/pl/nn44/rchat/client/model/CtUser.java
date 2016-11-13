@@ -20,14 +20,6 @@ public class CtUser {
         this.banned = user.isBanned();
     }
 
-    public CtUser(String username, boolean authorized, boolean admin) {
-        this.username = username;
-        this.authorized = authorized;
-        this.ignored = false;
-        this.admin = admin;
-        this.banned = false;
-    }
-
     // ---------------------------------------------------------------------------------------------------------------
 
     public String getUsername() {
