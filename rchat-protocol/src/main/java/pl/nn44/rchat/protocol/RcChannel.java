@@ -4,7 +4,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import java.io.Serializable;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RcChannel implements Serializable {
@@ -82,9 +81,7 @@ public class RcChannel implements Serializable {
                 .add("name", name)
                 .add("password", password)
                 .add("topic", topic)
-                .add("rcChUsers", Stream.of(rcChUsers)
-                        .map(RcChUser::getUsername)
-                        .collect(Collectors.toList()))
+                .add("rcChUsers", Stream.of(rcChUsers).map(RcChUser::getUsername).toArray())
                 .toString();
     }
 }

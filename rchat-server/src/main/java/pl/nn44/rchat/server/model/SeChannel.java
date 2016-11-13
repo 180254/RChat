@@ -77,7 +77,7 @@ public class SeChannel {
         return MoreObjects.toStringHelper(this)
                 .add("name", name)
                 .add("password", password)
-                .add("users", users.stream().map(SeUser::getUsername))
+                .add("users", users.stream().map(SeUser::getUsername).toArray())
                 .add("admins", admins)
                 .add("banned", banned)
                 .toString();

@@ -68,15 +68,12 @@ public class SeUser {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SeUser user = (SeUser) o;
-        return Objects.equal(
-                username.toLowerCase(),
-                user.username.toLowerCase()
-        );
+        return Objects.equal(username, user.username);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(username.toLowerCase());
+        return Objects.hashCode(username);
     }
 
     @Override
@@ -85,8 +82,8 @@ public class SeUser {
                 .add("session", session)
                 .add("username", username)
                 .add("lastSync", lastSync)
-                .add("channels", channels.stream().map(SeChannel::getName))
-                .add("ignored", ignored.stream().map(SeUser::getUsername))
+                .add("channels", channels.stream().map(SeChannel::getName).toArray())
+                .add("ignored", ignored.stream().map(SeUser::getUsername).toArray())
                 // .add("news", news)
                 .toString();
     }
