@@ -595,7 +595,7 @@ public class BestChatService implements ChatService {
             }
 
             if (needAdmin && this.channel != null && this.caller != null) {
-                if (this.channel.getAdmins().contains(this.caller.getUsername())) {
+                if (!this.channel.getAdmins().contains(this.caller.getUsername())) {
                     throw new ChatException(Reason.NO_PERMISSION);
                 }
             }
