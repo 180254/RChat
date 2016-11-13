@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.TextFlow;
@@ -20,7 +17,6 @@ import pl.nn44.rchat.client.model.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.ChatException;
 import pl.nn44.rchat.protocol.RcChannel;
-import pl.nn44.rchat.protocol.Response;
 import pl.nn44.rchat.protocol.WhatsUp;
 import pl.nn44.rchat.protocol.WhatsUp.What;
 
@@ -87,6 +83,8 @@ public class MainController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         channelsSkin = new RefreshableListViewSkin<>(channels);
         usersSkin = new RefreshableListViewSkin<>(users);
+
+        initChannelChangeListener();
 
         exs.submit(() -> {
             runLater(() -> {
@@ -178,25 +176,45 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    public void initChannelChangeListener() {
+        channels.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> onSingleClickedChannels(newValue)
+        );
+    }
+
     @FXML
     public void onMouseClickedChannels(MouseEvent ev) {
         CtChannel selected = channels.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            send.setDisable(true);
             return;
         }
 
-        if (ev.getClickCount() == 1) {
-            onSingleClickedChannels(ev, selected);
+        // maybe clicked empty field?
+        if (ev.getPickResult().getIntersectedNode() instanceof ListCell) {
+            return;
+        }
 
-        } else if (ev.getClickCount() == 2) {
-            onDoubleClickedChannels(ev, selected);
+        if (ev.getClickCount() % 2 == 0) {
+            onDoubleClickedChannels(selected);
+        }
+    }
+
+    @FXML
+    public void onKeyPressedChannels(KeyEvent ev) {
+        CtChannel selected = channels.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
+            return;
+        }
+
+        if ("\r\n ".contains(ev.getCharacter())) {
+            onDoubleClickedChannels(selected);
         }
     }
 
 
-    public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
+    public void onSingleClickedChannels(CtChannel selected) {
         send.setDisable(!selected.isJoin());
 
         message.setText(selected.getCurrentMsg());
@@ -208,7 +226,7 @@ public class MainController implements Initializable {
         channelsSkin.refresh();
     }
 
-    public void onDoubleClickedChannels(MouseEvent ev, CtChannel selected) {
+    public void onDoubleClickedChannels(CtChannel selected) {
         if (!selected.isJoin()) {
             // join
             exs.submit(() -> {
@@ -223,7 +241,7 @@ public class MainController implements Initializable {
 
                     runLater(() -> {
                         selected.update(rcChannel);
-                        onSingleClickedChannels(ev, selected);
+                        onSingleClickedChannels(selected);
                     });
 
                 } catch (Exception e) {
@@ -235,7 +253,7 @@ public class MainController implements Initializable {
             // part
             exs.submit(() -> {
                 try {
-                    Response<?> part = csh.cs().part(
+                    csh.cs().part(
                             csh.token(),
                             selected.getName()
                     );
@@ -244,7 +262,7 @@ public class MainController implements Initializable {
 
                     runLater(() -> {
                         selected.clear();
-                        onSingleClickedChannels(ev, selected);
+                        onSingleClickedChannels(selected);
                     });
 
                 } catch (Exception e) {
