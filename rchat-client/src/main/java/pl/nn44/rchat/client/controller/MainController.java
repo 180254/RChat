@@ -176,6 +176,10 @@ public class MainController implements Initializable {
 
     public void onSomePrivy(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePrivy", whatsUp);
+
+        String whoMsgTo = whatsUp.getUsername();
+        String whoMyBy = whatsUp.getParams()[0];
+        String someTex = whatsUp.getParams()[1];
     }
 
     public void onSomeTopic(WhatsUp whatsUp) {
