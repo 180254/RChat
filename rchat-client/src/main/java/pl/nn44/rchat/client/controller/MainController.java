@@ -8,7 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.InputMethodEvent;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.TextFlow;
 import org.slf4j.Logger;
@@ -199,6 +199,8 @@ public class MainController implements Initializable {
     public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
         send.setDisable(!selected.isJoin());
 
+        message.setText(selected.getCurrentMsg());
+
         topic.setText(selected.getTopic());
         users.setItems(selected.getUsers());
 
@@ -255,8 +257,11 @@ public class MainController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     @FXML
-    public void onInputChanged(InputMethodEvent rv) {
-
+    public void onKeyPressed(KeyEvent ev) {
+        CtChannel channel = channels.getSelectionModel().getSelectedItem();
+        if (channel != null) {
+            channel.setCurrentMsg(message.getText());
+        }
     }
 
     @FXML

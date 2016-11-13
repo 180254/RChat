@@ -15,12 +15,14 @@ public class CtChannel {
     private ObservableList<CtUser> users;
     private ObservableList<CtMessage> messages;
     private boolean join;
+    private String currentMsg;
 
     public CtChannel(RcChannel channel) {
         this.name = channel.getName();
         this.users = FXCollections.observableArrayList();
         this.messages = FXCollections.observableArrayList();
         this.join = false;
+        this.currentMsg = "";
 
         update(channel);
     }
@@ -87,6 +89,14 @@ public class CtChannel {
 
     public void setJoin(boolean join) {
         this.join = join;
+    }
+
+    public String getCurrentMsg() {
+        return currentMsg;
+    }
+
+    public void setCurrentMsg(String currentMsg) {
+        this.currentMsg = currentMsg;
     }
 
     // ---------------------------------------------------------------------------------------------------------------

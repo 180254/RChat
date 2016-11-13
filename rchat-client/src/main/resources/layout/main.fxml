@@ -4,8 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="pl.nn44.rchat.client.controller.MainController" stylesheets="@style.css">
+<VBox prefHeight="600.0" prefWidth="900.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.60"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.nn44.rchat.client.controller.MainController">
 
     <fx:include source="menu.fxml"/>
 
@@ -18,7 +18,7 @@
                 <Insets left="5.0"/>
             </padding>
         </Label>
-        <Label fx:id="status" HBox.hgrow="ALWAYS" textFill="#da3407">
+        <Label fx:id="status" textFill="#da3407" HBox.hgrow="ALWAYS">
             <HBox.margin>
                 <Insets left="5.0"/>
             </HBox.margin>
@@ -43,7 +43,7 @@
         <padding>
             <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
         </padding>
-        <TextField fx:id="message" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="message" onKeyPressed="#onKeyPressed" HBox.hgrow="ALWAYS"/>
         <Button fx:id="send" mnemonicParsing="false" onAction="#sendClicked" text="%fxml.main.send"/>
     </HBox>
 </VBox>
