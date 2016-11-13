@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.TextFlow;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.model.CtChannel;
 import pl.nn44.rchat.client.model.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
+import pl.nn44.rchat.protocol.ChatException;
 import pl.nn44.rchat.protocol.RcChannel;
 import pl.nn44.rchat.protocol.Response;
 import pl.nn44.rchat.protocol.WhatsUp;
@@ -24,7 +26,6 @@ import pl.nn44.rchat.protocol.WhatsUp.What;
 
 import java.net.URL;
 import java.util.Map;
-import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -182,6 +183,7 @@ public class MainController implements Initializable {
         CtChannel selected = channels.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
+            send.setDisable(true);
             return;
         }
 
@@ -195,6 +197,8 @@ public class MainController implements Initializable {
 
 
     public void onSingleClickedChannels(MouseEvent ev, CtChannel selected) {
+        send.setDisable(!selected.isJoin());
+
         topic.setText(selected.getTopic());
         users.setItems(selected.getUsers());
 
@@ -213,10 +217,10 @@ public class MainController implements Initializable {
                             null
                     ).getPayload();
 
+                    selected.setJoin(true);
+
                     runLater(() -> {
                         selected.update(rcChannel);
-                        selected.setJoin(true);
-
                         onSingleClickedChannels(ev, selected);
                     });
 
@@ -234,10 +238,10 @@ public class MainController implements Initializable {
                             selected.getName()
                     );
 
+                    selected.setJoin(false);
+
                     runLater(() -> {
                         selected.clear();
-                        selected.setJoin(false);
-
                         onSingleClickedChannels(ev, selected);
                     });
 
@@ -251,9 +255,23 @@ public class MainController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     @FXML
+    public void onInputChanged(InputMethodEvent rv) {
+
+    }
+
+    @FXML
     public void sendClicked(ActionEvent ev) {
-        status.setText(Integer.toString(new Random().nextInt()));
-        channels.getSelectionModel().select(1);
+        String message = this.message.getText();
+        CtChannel channel = this.channels.getSelectionModel().getSelectedItem();
+        this.message.setText("");
+
+        exs.submit(() -> {
+            try {
+                csh.cs().message(csh.token(), channel.getName(), message);
+            } catch (ChatException e) {
+                submitFleetingStatus(r(i18n.mapError("message", e)));
+            }
+        });
     }
 
     // ---------------------------------------------------------------------------------------------------------------
