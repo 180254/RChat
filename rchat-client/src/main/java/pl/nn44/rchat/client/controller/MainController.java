@@ -1,10 +1,13 @@
 package pl.nn44.rchat.client.controller;
 
 import com.google.common.collect.ImmutableMap;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.TextFlow;
@@ -46,6 +49,7 @@ public class MainController implements Initializable {
 
     @FXML public Label status;
     @FXML public TextFlow text;
+    @FXML public ScrollPane textScroll;
     @FXML public TextField message;
     @FXML public Button send;
     @FXML public TextField topic;
@@ -93,7 +97,18 @@ public class MainController implements Initializable {
         usersSkin = new RefreshableListViewSkin<>(users);
 
         initChannelChangeListener();
-
+        text.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                double vvalue = textScroll.getVvalue();
+                textScroll.getVvalue();
+                textScroll.getHmax();
+                boolean isScolled = vvalue > 0.90 || vvalue < 0.10;
+                if ((newValue.longValue() - oldValue.longValue()) < 15L || vvalue < 0.1) {
+                    textScroll.setVvalue(1.0);
+                }
+            }
+        });
         exs.submit(() -> {
             runLater(() -> {
                 message.requestFocus();
@@ -162,11 +177,15 @@ public class MainController implements Initializable {
         CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.getMessages().addAll(ctMessage.toNodes());
 
+
         runLater(() -> {
             CtChannel selChannel = channels.getSelectionModel().getSelectedItem();
 
+
             if (selChannel.equals(ctChannel)) {
+
                 text.getChildren().addAll(ctMessage.toNodes());
+
             }
         });
     }
@@ -249,6 +268,7 @@ public class MainController implements Initializable {
         message.setText(channel.getCurrentMsg());
         text.getChildren().setAll(channel.getMessages());
 
+
         topic.setText(channel.getTopic());
         users.setItems(channel.getUsers());
 
@@ -306,17 +326,25 @@ public class MainController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     @FXML
-    public void onKeyPressed(KeyEvent ev) {
+    public void onKeyMessagePressed(KeyEvent ev) {
         CtChannel channel = channels.getSelectionModel().getSelectedItem();
 
         if (channel != null) {
             channel.setCurrentMsg(message.getText());
         }
+
+        if (ev.getCode() == KeyCode.ENTER) {
+            sendClicked(null);
+        }
     }
 
     @FXML
     public void sendClicked(ActionEvent ev) {
-        String message = this.message.getText();
+        if (send.isDisabled()) {
+            return;
+        }
+
+        String message = this.message.getText().trim();
         CtChannel channel = this.channels.getSelectionModel().getSelectedItem();
         this.message.setText("");
 
