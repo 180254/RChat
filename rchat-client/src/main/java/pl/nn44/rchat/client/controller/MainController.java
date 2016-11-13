@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.model.CtChannel;
+import pl.nn44.rchat.client.model.CtMessage;
 import pl.nn44.rchat.client.model.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.ChatException;
@@ -21,6 +22,8 @@ import pl.nn44.rchat.protocol.WhatsUp;
 import pl.nn44.rchat.protocol.WhatsUp.What;
 
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -53,6 +56,9 @@ public class MainController implements Initializable {
     public RefreshableListViewSkin<CtUser> usersSkin;
 
     private boolean fatalFail = false;
+
+    private Map<String, CtChannel> channelsMap =
+            new HashMap<>();
 
     private Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
@@ -101,8 +107,9 @@ public class MainController implements Initializable {
                         .getPayload();
 
                 for (RcChannel rcChannel : channels) {
-                    CtChannel channelEx = new CtChannel(rcChannel);
-                    this.channels.getItems().add(channelEx);
+                    CtChannel ctChannel = new CtChannel(rcChannel);
+                    this.channels.getItems().add(ctChannel);
+                    channelsMap.put(rcChannel.getName(), ctChannel);
                 }
 
                 runLater(() -> status.setText(""));
@@ -145,6 +152,23 @@ public class MainController implements Initializable {
 
     public void onSomeMessage(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeMessage", whatsUp);
+
+        LocalDateTime time = whatsUp.getTime();
+        String channel = whatsUp.getChannel();
+        String whoMsg = whatsUp.getUsername();
+        String someText = whatsUp.getParams()[0];
+
+        CtMessage ctMessage = new CtMessage(whoMsg, time, someText);
+        CtChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getMessages().addAll(ctMessage);
+
+        runLater(() -> {
+            CtChannel selChannel = channels.getSelectionModel().getSelectedItem();
+
+            if (selChannel.equals(ctChannel)) {
+                text.getChildren().addAll(ctMessage.toNodes());
+            }
+        });
     }
 
     public void onSomePrivy(WhatsUp whatsUp) {
@@ -317,7 +341,6 @@ public class MainController implements Initializable {
                 Thread.sleep(3500);
             } catch (InterruptedException e) {
                 LOG.warn("fleetingStatus interrupted", e);
-                throw new AssertionError(e);
             }
 
             runLater(() -> status.setText(""));

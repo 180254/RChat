@@ -1,10 +1,14 @@
 package pl.nn44.rchat.client.model;
 
+import javafx.scene.text.Text;
+
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CtMessage {
+public class CtMessage extends Text {
 
     public static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:MM:SS");
 
@@ -30,6 +34,39 @@ public class CtMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public List<Text> toNodes() {
+        List<Text> ret = new ArrayList<>();
+
+        Text text = new Text(dtf.format(time));
+        text.getStyleClass().add("c-ct-message");
+        ret.add(text);
+
+        text = new Text(" <");
+        text.getStyleClass().add("c-ct-message");
+        ret.add(text);
+
+        text = new Text(user);
+        text.getStyleClass().add("c-ct-message");
+        text.getStyleClass().add("c-ct-message-user");
+        ret.add(text);
+
+        text = new Text("> ");
+        text.getStyleClass().add("c-ct-message");
+        ret.add(text);
+
+        text = new Text(message);
+        text.getStyleClass().add("c-ct-message");
+        ret.add(text);
+
+        text = new Text("\n");
+        text.getStyleClass().add("c-ct-message");
+        ret.add(text);
+
+        return ret;
     }
 
     // ---------------------------------------------------------------------------------------------------------------

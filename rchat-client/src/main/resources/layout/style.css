@@ -2,3 +2,11 @@
     -fx-font-size: 10pt;
     -fx-font-family: "Lucida Console", Monaco, monospace;
 }
+
+.c-ct-message {
+    -fx-font-size: 10pt;
+    -fx-font-family: "Lucida Console", Monaco, monospace;
+}
+
+.c-ct-message-user {
+}
