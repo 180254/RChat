@@ -76,7 +76,7 @@ public class MainController implements Initializable {
 
         this.csh = csHandler;
         this.exs = executor;
-        i18n = localeHelper;
+        this.i18n = localeHelper;
 
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
@@ -85,15 +85,11 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         channelsSkin = new RefreshableListViewSkin<>(channels);
-        channels.setSkin(channelsSkin);
-
         usersSkin = new RefreshableListViewSkin<>(users);
-        users.setSkin(usersSkin);
-
-        message.requestFocus();
 
         exs.submit(() -> {
             runLater(() -> {
+                message.requestFocus();
                 status.setText(r(i18n.get("ctrl.main.initializing")));
                 send.setDisable(true);
             });
@@ -133,7 +129,7 @@ public class MainController implements Initializable {
             exs.submit(this::listenWhatHappens);
 
         } catch (RejectedExecutionException e) {
-            LOG.debug("listenWhatHappens was interrupted.");
+            LOG.debug("listenWhatHappens: RejectedExecutionException.");
 
         } catch (Exception e) {
             runLater(() -> {
@@ -271,7 +267,7 @@ public class MainController implements Initializable {
             runLater(() -> status.setText(text));
 
             try {
-                Thread.sleep(2500);
+                Thread.sleep(3500);
             } catch (InterruptedException e) {
                 LOG.warn("fleetingStatus interrupted", e);
                 throw new AssertionError(e);

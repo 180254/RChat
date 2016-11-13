@@ -15,6 +15,7 @@ public class RefreshableListViewSkin<T> extends ListViewSkin<T> {
 
     public RefreshableListViewSkin(ListView<T> listView) {
         super(listView);
+        listView.setSkin(this);
     }
 
     public void refresh() {

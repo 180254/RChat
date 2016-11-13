@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.SceneChanger;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.util.LocaleHelper;
-import pl.nn44.rchat.protocol.Response;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -42,8 +41,8 @@ public class LoginController implements Initializable {
                            LocaleHelper locHelper,
                            SceneChanger sceneChanger) {
 
-        this.csh = csHandler;
         this.exs = executor;
+        this.csh = csHandler;
         this.i18n = locHelper;
         this.sc = sceneChanger;
 
@@ -82,13 +81,13 @@ public class LoginController implements Initializable {
             });
 
             try {
-                Response<String> response =
+                String token =
                         csh.cs().login(
                                 username.getText(),
                                 Strings.emptyToNull(password.getText())
-                        );
+                        ).getPayload();
 
-                csh.setToken(response.getPayload());
+                csh.setToken(token);
 
                 runLater(() -> sc.accept("main"));
 

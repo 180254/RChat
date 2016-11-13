@@ -18,9 +18,11 @@ public class CtChannel {
 
     public CtChannel(RcChannel channel) {
         this.name = channel.getName();
-        update(channel);
+        this.users = FXCollections.observableArrayList();
         this.messages = FXCollections.observableArrayList();
         this.join = false;
+
+        update(channel);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -29,7 +31,7 @@ public class CtChannel {
         this.password = channel.isPassword();
         this.topic = channel.getTopic();
 
-        this.users = FXCollections.observableArrayList();
+        this.users.clear();
         for (RcChUser user : channel.getRcChUsers()) {
             this.users.add(new CtUser(user));
         }

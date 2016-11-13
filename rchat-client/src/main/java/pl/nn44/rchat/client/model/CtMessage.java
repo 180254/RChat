@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 public class CtMessage {
 
-    private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:MM:SS");
+    public static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:MM:SS");
 
     private final String user;
     private final LocalDateTime time;

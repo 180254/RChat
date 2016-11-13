@@ -23,11 +23,12 @@ public class PropLoader {
             // may be overridden by system properties
             prop.forEach((key, value) -> {
                 String _key = (String) key;
+                String _value = (String) value;
 
                 prop.setProperty(_key,
                         MoreObjects.firstNonNull(
                                 System.getProperty(_key),
-                                prop.getProperty(_key)
+                                _value
                         )
                 );
             });
