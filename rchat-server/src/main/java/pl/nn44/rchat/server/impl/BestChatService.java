@@ -104,7 +104,7 @@ public class BestChatService implements ChatService {
                 // double lock is safe operation:
                 // "If the current thread already holds the lock
                 // then the hold count is incremented by one and the method returns immediately."
-                part(session, channel.getName());
+                part(session, channel.getName(), "-");
             }
 
             sessionToUser.remove(session);
@@ -212,7 +212,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response<?> part(String session, String channel) throws ChatException {
+    public Response<?> part(String session, String channel, String unused) throws ChatException {
         Locks locks = locks(session, channel, null);
 
         try {
@@ -374,7 +374,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response<?> ignore(String session, String username, boolean state) throws ChatException {
+    public Response<?> ignore(String session, String unused, String username, boolean state) throws ChatException {
         Locks locks = locks(session, null, username);
 
         try {

@@ -21,7 +21,7 @@ public interface ChatService {
     Response<RcChannel> join(String session, String channel, @Nullable String password) throws ChatException;
 
     @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL})
-    Response<?> part(String session, String channel) throws ChatException;
+    Response<?> part(String session, String channel, String unused) throws ChatException;
 
     @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, NO_PERMISSION})
     Response<?> topic(String session, String channel, String text) throws ChatException;
@@ -38,7 +38,7 @@ public interface ChatService {
     Response<?> admin(String session, String channel, String username, boolean state) throws ChatException;
 
     @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
-    Response<?> ignore(String session, String username, boolean state) throws ChatException;
+    Response<?> ignore(String session, String unused, String username, boolean state) throws ChatException;
 
     // ---------------------------------------------------------------------------------------------------------------
 
