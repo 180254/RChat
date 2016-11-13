@@ -34,7 +34,7 @@ import static javafx.application.Platform.runLater;
 public class MainController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
-    private static final Pattern NL_PATTERN = Pattern.compile("\n");
+    private static final Pattern NL_PATTERN = Pattern.compile("\r?\n");
     private static final int WHATS_UP_LONG_POOLING = (int) TimeUnit.MINUTES.toMillis(1);
 
     private final ExecutorService exs;
@@ -51,6 +51,8 @@ public class MainController implements Initializable {
 
     public RefreshableListViewSkin<CtChannel> channelsSkin;
     public RefreshableListViewSkin<CtUser> usersSkin;
+
+    private boolean fatalFail = false;
 
     private Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
@@ -107,6 +109,7 @@ public class MainController implements Initializable {
                 exs.submit(this::listenWhatHappens);
 
             } catch (Exception e) {
+                fatalFail = true;
                 runLater(() -> status.setText(r(i18n.mapError("channels", e))));
             }
         });
@@ -131,6 +134,8 @@ public class MainController implements Initializable {
             LOG.debug("listenWhatHappens: RejectedExecutionException.");
 
         } catch (Exception e) {
+            fatalFail = true;
+
             runLater(() -> {
                 status.setText(r(i18n.mapError("whats-up", e)));
                 send.setDisable(true);
@@ -184,9 +189,9 @@ public class MainController implements Initializable {
 
     @FXML
     public void onMouseClickedChannels(MouseEvent ev) {
-        CtChannel selected = channels.getSelectionModel().getSelectedItem();
+        CtChannel channel = channels.getSelectionModel().getSelectedItem();
 
-        if (selected == null) {
+        if (channel == null) {
             return;
         }
 
@@ -196,52 +201,52 @@ public class MainController implements Initializable {
         }
 
         if (ev.getClickCount() % 2 == 0) {
-            onDoubleClickedChannels(selected);
+            onDoubleClickedChannels(channel);
         }
     }
 
     @FXML
     public void onKeyPressedChannels(KeyEvent ev) {
-        CtChannel selected = channels.getSelectionModel().getSelectedItem();
+        CtChannel channel = channels.getSelectionModel().getSelectedItem();
 
-        if (selected == null) {
+        if (channel == null) {
             return;
         }
 
         if ("\r\n ".contains(ev.getCharacter())) {
-            onDoubleClickedChannels(selected);
+            onDoubleClickedChannels(channel);
         }
     }
 
 
-    public void onSingleClickedChannels(CtChannel selected) {
-        send.setDisable(!selected.isJoin());
+    public void onSingleClickedChannels(CtChannel channel) {
+        send.setDisable(!fatalFail && !(channel.isJoin()));
 
-        message.setText(selected.getCurrentMsg());
+        message.setText(channel.getCurrentMsg());
 
-        topic.setText(selected.getTopic());
-        users.setItems(selected.getUsers());
+        topic.setText(channel.getTopic());
+        users.setItems(channel.getUsers());
 
         usersSkin.refresh();
         channelsSkin.refresh();
     }
 
-    public void onDoubleClickedChannels(CtChannel selected) {
-        if (!selected.isJoin()) {
+    public void onDoubleClickedChannels(CtChannel channel) {
+        if (!channel.isJoin()) {
             // join
             exs.submit(() -> {
                 try {
                     RcChannel rcChannel = csh.cs().join(
                             csh.token(),
-                            selected.getName(),
+                            channel.getName(),
                             null
                     ).getPayload();
 
-                    selected.setJoin(true);
+                    channel.setJoin(true);
 
                     runLater(() -> {
-                        selected.update(rcChannel);
-                        onSingleClickedChannels(selected);
+                        channel.update(rcChannel);
+                        onSingleClickedChannels(channel);
                     });
 
                 } catch (Exception e) {
@@ -255,14 +260,14 @@ public class MainController implements Initializable {
                 try {
                     csh.cs().part(
                             csh.token(),
-                            selected.getName()
+                            channel.getName()
                     );
 
-                    selected.setJoin(false);
+                    channel.setJoin(false);
 
                     runLater(() -> {
-                        selected.clear();
-                        onSingleClickedChannels(selected);
+                        channel.clear();
+                        onSingleClickedChannels(channel);
                     });
 
                 } catch (Exception e) {
@@ -277,6 +282,7 @@ public class MainController implements Initializable {
     @FXML
     public void onKeyPressed(KeyEvent ev) {
         CtChannel channel = channels.getSelectionModel().getSelectedItem();
+
         if (channel != null) {
             channel.setCurrentMsg(message.getText());
         }
