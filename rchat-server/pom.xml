@@ -65,18 +65,11 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
-        <!-- hessian -->
+        <!-- hessian, burlap -->
         <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
             <version>${version.hessian}</version>
-        </dependency>
-
-        <!-- burlap -->
-        <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>burlap</artifactId>
-            <version>${version.burlap}</version>
         </dependency>
 
         <!-- xml rpc -->
