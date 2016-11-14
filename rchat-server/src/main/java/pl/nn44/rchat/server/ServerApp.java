@@ -21,7 +21,6 @@ import pl.nn44.rchat.server.as.AsLogger;
 import pl.nn44.rchat.server.impl.BestChatService;
 import pl.nn44.rchat.server.page.MainPageController;
 import pl.nn44.rchat.server.page.PlainErrorController;
-import pl.nn44.xmlrpc.AnyTypeFactory;
 
 import javax.servlet.Filter;
 
@@ -73,7 +72,7 @@ public class ServerApp {
         server.setConfig(config);
         server.setErrorLogger(new XmlRpcErrorLogger());
         server.setHandlerMapping(handlerMapping);
-        server.setTypeFactory(new AnyTypeFactory(server));
+        // server.setTypeFactory(new AnyTypeFactory(server));
 
         return server::execute;
     }

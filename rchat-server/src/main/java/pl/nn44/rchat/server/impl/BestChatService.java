@@ -176,8 +176,9 @@ public class BestChatService implements ChatService {
                         What.JOIN,
                         params.channel.getName(),
                         params.caller.getUsername(),
-                        Boolean.toString(admin),
-                        Boolean.toString(auth)
+                        Boolean.toString(auth),
+                        Boolean.toString(admin)
+
                 );
 
                 params.channel.getUsers().stream()
@@ -374,11 +375,11 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response<?> ignore(String session, String unused, String username, boolean state) throws ChatException {
-        Locks locks = locks(session, null, username);
+    public Response<?> ignore(String session, String channel, String username, boolean state) throws ChatException {
+        Locks locks = locks(session, channel, username);
 
         try {
-            Params params = params(session, null, username, false);
+            Params params = params(session, channel, username, false);
 
             boolean change = state
                     ? params.caller.getIgnored().addIfAbsent(params.affUser)

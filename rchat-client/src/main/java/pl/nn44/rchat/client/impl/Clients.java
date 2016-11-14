@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.rchat.protocol.ChatService;
-import pl.nn44.xmlrpc.AnyTypeFactory;
 import pl.nn44.xmlrpc.ClientFactoryFix;
 
 import java.io.IOException;
@@ -106,7 +105,7 @@ public class Clients {
 
             XmlRpcClient client = new XmlRpcClient();
             client.setConfig(config);
-            client.setTypeFactory(new AnyTypeFactory(client));
+            // client.setTypeFactory(new AnyTypeFactory(client));
 
             ChatService chatService = (ChatService) ClientFactoryFix.newInstance(
                     Thread.currentThread().getContextClassLoader(),

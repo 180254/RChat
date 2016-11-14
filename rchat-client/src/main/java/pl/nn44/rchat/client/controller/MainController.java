@@ -28,7 +28,6 @@ import pl.nn44.rchat.protocol.WhatsUp.What;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -189,7 +188,7 @@ public class MainController implements Initializable {
                 }
 
                 // channel cannot be removed or added dynamically
-                channelsMap = Collections.unmodifiableMap(channelsMap);
+                // channelsMap = Collections.unmodifiableMap(channelsMap);
 
                 runLater(() -> status.setText(""));
                 exs.submit(this::listenWhatHappens);
@@ -255,6 +254,7 @@ public class MainController implements Initializable {
         CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
+
     // ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeMessage(WhatsUp whatsUp) {

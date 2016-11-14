@@ -22,8 +22,8 @@ public class CtChannel {
     public CtChannel(RcChannel channel) {
         this.name = channel.getName();
         this.topic = new SimpleStringProperty();
-        this.users = FXCollections.observableArrayList();
-        this.messages = FXCollections.observableArrayList();
+        this.users = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+        this.messages = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         this.join = false;
         this.currentMsg = "";
 

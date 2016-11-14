@@ -38,7 +38,7 @@ public interface ChatService {
     Response<?> admin(String session, String channel, String username, boolean state) throws ChatException;
 
     @CeReason({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
-    Response<?> ignore(String session, String unused, String username, boolean state) throws ChatException;
+    Response<?> ignore(String session, String channel, String username, boolean state) throws ChatException;
 
     // ---------------------------------------------------------------------------------------------------------------
 
