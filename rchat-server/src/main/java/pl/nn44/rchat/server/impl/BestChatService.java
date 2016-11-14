@@ -388,7 +388,7 @@ public class BestChatService implements ChatService {
             if (change) {
                 WhatsUp whatsUp = new WhatsUp(
                         What.IGNORE,
-                        null,
+                        params.channel.getName(),
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
                         state ? "ON" : "OFF"
