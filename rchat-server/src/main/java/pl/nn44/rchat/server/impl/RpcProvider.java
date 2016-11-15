@@ -13,14 +13,14 @@ import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.HttpRequestHandler;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 
-public class RpcProviders<T> {
+public class RpcProvider<T> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RpcProviders.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RpcProvider.class);
 
     private final T service;
     private final Class<T> clazz;
 
-    public RpcProviders(T service, Class<T> clazz) {
+    public RpcProvider(T service, Class<T> clazz) {
         this.service = service;
         this.clazz = clazz;
     }
