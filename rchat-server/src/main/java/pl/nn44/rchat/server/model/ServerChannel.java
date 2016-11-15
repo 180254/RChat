@@ -54,10 +54,10 @@ public class ServerChannel {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        ServerChannel channel = (ServerChannel) obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServerChannel channel = (ServerChannel) o;
         return Objects.equal(name, channel.name);
     }
 

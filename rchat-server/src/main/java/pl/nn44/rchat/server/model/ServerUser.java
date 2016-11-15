@@ -64,10 +64,10 @@ public class ServerUser {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        ServerUser user = (ServerUser) obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ServerUser user = (ServerUser) o;
         return Objects.equal(username, user.username);
     }
 
