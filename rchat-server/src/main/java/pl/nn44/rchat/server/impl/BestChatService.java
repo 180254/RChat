@@ -109,7 +109,7 @@ public class BestChatService implements ChatService {
                 // double lock is safe operation:
                 // "If the current thread already holds the lock
                 // then the hold count is incremented by one and the method returns immediately."
-                part(session, channel.getName(), "-");
+                part(session, channel.getName(), "unused");
             }
 
             sessionToUser.remove(session);
@@ -203,14 +203,14 @@ public class BestChatService implements ChatService {
                     ))
                     .toArray(User[]::new);
 
-            Channel rcChannel = new Channel(
+            Channel channel2 = new Channel(
                     params.channel.getName(),
                     params.channel.getPassword() != null,
                     params.channel.getTopic(),
                     users
             );
 
-            return Response.Ok(rcChannel);
+            return Response.Ok(channel2);
 
         } finally {
             locks.unlock();
@@ -238,8 +238,8 @@ public class BestChatService implements ChatService {
                         params.caller.getUsername()
                 );
 
-                for (ServerUser cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
+                for (ServerUser su : params.channel.getUsers()) {
+                    su.getNews().offer(whatsUp);
                 }
             }
 
@@ -269,8 +269,8 @@ public class BestChatService implements ChatService {
                         text
                 );
 
-                for (ServerUser cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
+                for (ServerUser su : params.channel.getUsers()) {
+                    su.getNews().offer(whatsUp);
                 }
             }
 
@@ -296,15 +296,22 @@ public class BestChatService implements ChatService {
             }
 
             if (removeC) {
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUpKick = new WhatsUp(
                         What.KICK,
                         params.channel.getName(),
                         params.affUser.getUsername(),
                         params.caller.getUsername()
                 );
 
-                for (ServerUser cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
+                WhatsUp whatsUpPart = new WhatsUp(
+                        What.PART,
+                        params.channel.getName(),
+                        params.affUser.getUsername()
+                );
+
+                for (ServerUser su : params.channel.getUsers()) {
+                    su.getNews().offer(whatsUpKick);
+                    su.getNews().offer(whatsUpPart);
                 }
             }
 
@@ -320,7 +327,8 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, username);
 
         try {
-            Params params = params(session, channel, username, true);
+            Params params = params(session, null, username, true);
+            params.channel = params(null, channel, null, false).channel; // do not verify if user is on channel
 
             boolean change = state
                     ? params.channel.getBanned().addIfAbsent(params.affUser.getUsername())
@@ -335,8 +343,8 @@ public class BestChatService implements ChatService {
                         state ? "ON" : "OFF"
                 );
 
-                for (ServerUser cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
+                for (ServerUser su : params.channel.getUsers()) {
+                    su.getNews().offer(whatsUp);
                 }
             }
 
@@ -352,7 +360,8 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, username);
 
         try {
-            Params params = params(session, channel, username, true);
+            Params params = params(session, null, username, true);
+            params.channel = params(null, channel, null, false).channel; // do not verify if user is on channel
 
             boolean change = state
                     ? params.channel.getAdmins().addIfAbsent(params.affUser.getUsername())
@@ -367,8 +376,8 @@ public class BestChatService implements ChatService {
                         state ? "ON" : "OFF"
                 );
 
-                for (ServerUser cu : params.channel.getUsers()) {
-                    cu.getNews().offer(whatsUp);
+                for (ServerUser su : params.channel.getUsers()) {
+                    su.getNews().offer(whatsUp);
                 }
             }
 
@@ -380,11 +389,11 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response<?> ignore(String session, String channel, String username, boolean state) throws ChatException {
-        Locks locks = locks(session, channel, username);
+    public Response<?> ignore(String session, String unused, String username, boolean state) throws ChatException {
+        Locks locks = locks(session, null, username);
 
         try {
-            Params params = params(session, channel, username, false);
+            Params params = params(session, null, username, false);
 
             boolean change = state
                     ? params.caller.getIgnored().addIfAbsent(params.affUser)
@@ -393,7 +402,7 @@ public class BestChatService implements ChatService {
             if (change) {
                 WhatsUp whatsUp = new WhatsUp(
                         What.IGNORE,
-                        params.channel.getName(),
+                        unused,
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
                         state ? "ON" : "OFF"
@@ -453,11 +462,11 @@ public class BestChatService implements ChatService {
                     text
             );
 
-            for (ServerUser cu : params.channel.getUsers()) {
-                boolean ignore = cu.getIgnored().contains(params.caller);
+            for (ServerUser su : params.channel.getUsers()) {
+                boolean ignore = su.getIgnored().contains(params.caller);
 
                 if (!ignore) {
-                    cu.getNews().offer(whatsUp);
+                    su.getNews().offer(whatsUp);
                 }
             }
 
