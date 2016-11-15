@@ -149,7 +149,7 @@ public class BestChatService implements ChatService {
 
         try {
             Params params = params(session, null, null, false);
-            // cannot get channel in one params request aspect then there is verified if user is on channel
+            // cannot get channel in one params request as then there is used verification if user is on channel
             params.channel = params(null, channel, null, false).channel;
 
             if (!Objects.equals(params.channel.getPassword(), password)) {
@@ -500,7 +500,7 @@ public class BestChatService implements ChatService {
                     }
 
                 } catch (InterruptedException e) {
-                    LOG.warn("whatsUp assertion error", e);
+                    LOG.warn("whatsUp InterruptedException", e);
                     break;
                 }
 

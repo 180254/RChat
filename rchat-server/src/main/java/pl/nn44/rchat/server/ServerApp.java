@@ -33,23 +33,22 @@ public class ServerApp {
     }
 
     @Bean
-    public RpcProviders rpcProviders(ChatService cs) {
-        return new RpcProviders(cs);
+    public RpcProviders<ChatService> rpcProviders(ChatService cs) {
+        return new RpcProviders<>(cs, ChatService.class);
     }
 
     @Bean(name = "/hessian")
-    public HttpRequestHandler hessianRpc(RpcProviders rp) {
+    public HttpRequestHandler hessianRpc(RpcProviders<ChatService> rp) {
         return rp.hessian();
     }
 
     @Bean(name = "/burlap")
-    public HttpRequestHandler burlapRpc(RpcProviders rp) {
+    public HttpRequestHandler burlapRpc(RpcProviders<ChatService> rp) {
         return rp.burlap();
     }
 
     @Bean(name = "/xml-rpc")
-    public HttpRequestHandler xmlRpcRpc(RpcProviders rp)
-            throws XmlRpcException {
+    public HttpRequestHandler xmlRpcRpc(RpcProviders<ChatService> rp) throws XmlRpcException {
         return rp.xmlRpc();
     }
 
