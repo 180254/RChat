@@ -1,7 +1,6 @@
 package pl.nn44.rchat.protocol.model;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -48,20 +47,7 @@ public class WhatsUp implements Serializable {
         return params.clone();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        WhatsUp whatsUp = (WhatsUp) obj;
-        return Objects.equal(isoTime, whatsUp.isoTime) &&
-                what == whatsUp.what &&
-                Objects.equal(params, whatsUp.params);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(isoTime, what, params);
-    }
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public String toString() {
