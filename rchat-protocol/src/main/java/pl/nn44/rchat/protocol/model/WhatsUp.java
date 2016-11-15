@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 public class WhatsUp implements Serializable {
 
     private static final long serialVersionUID = -2493165937560638279L;
-    private static final transient DateTimeFormatter dtf = DateTimeFormatter.ISO_DATE_TIME;
+    public static final transient DateTimeFormatter DTF = DateTimeFormatter.ISO_DATE_TIME;
 
     private final String isoTime;
     private final What what;
@@ -20,9 +20,9 @@ public class WhatsUp implements Serializable {
                    String... params) {
 
         // LocalDateTime and long are not supported by xml-rpc
-        this.isoTime = LocalDateTime.now().format(dtf);
+        this.isoTime = LocalDateTime.now().format(DTF);
         this.what = what;
-        this.params = params;
+        this.params = params.clone();
     }
 
     protected WhatsUp() {
@@ -32,7 +32,7 @@ public class WhatsUp implements Serializable {
     }
 
     public LocalDateTime getTime() {
-        return LocalDateTime.parse(this.isoTime, dtf);
+        return LocalDateTime.parse(this.isoTime, DTF);
     }
 
     public What getWhat() {
@@ -44,10 +44,10 @@ public class WhatsUp implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WhatsUp whatsUp = (WhatsUp) o;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        WhatsUp whatsUp = (WhatsUp) obj;
         return Objects.equal(isoTime, whatsUp.isoTime) &&
                 what == whatsUp.what &&
                 Objects.equal(params, whatsUp.params);

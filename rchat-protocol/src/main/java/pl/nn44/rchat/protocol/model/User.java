@@ -69,12 +69,12 @@ public class User implements Serializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User that = (User) o;
-        return Objects.equal(channel, that.channel) &&
-                Objects.equal(username, that.username);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        User user = (User) obj;
+        return Objects.equal(channel, user.channel) &&
+                Objects.equal(username, user.username);
     }
 
     @Override
