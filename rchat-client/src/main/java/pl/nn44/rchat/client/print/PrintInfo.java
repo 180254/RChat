@@ -1,6 +1,5 @@
 package pl.nn44.rchat.client.print;
 
-import javafx.scene.Node;
 import javafx.scene.text.Text;
 import pl.nn44.rchat.client.util.LocaleHelper;
 
@@ -29,11 +28,11 @@ public class PrintInfo implements Printable {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
-    public List<Node> toNodes() {
+    public List<Text> toNodes() {
         String info = i18n.get(resKey, arguments);
-        String info2 = MessageFormat.format("{0} {1}\n", Print.time(time), info);
+        String info2 = MessageFormat.format("{0} {1}\n", PrintUtil.time(time), info);
 
-        Text text = Print.txt(info2, "c-ct-message", "c-ct-message-info");
+        Text text = PrintUtil.txt(info2, "c-ct-message", "c-ct-message-info");
         return Collections.singletonList(text);
     }
 }

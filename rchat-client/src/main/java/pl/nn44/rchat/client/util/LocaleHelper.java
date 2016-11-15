@@ -9,10 +9,6 @@ import pl.nn44.rchat.protocol.exception.ChatException;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
-// org.springframework.remoting.RemoteAccessException
-// org.apache.xmlrpc.XmlRpcException
-// pl.nn44.rchat.protocol.exception.ChatException
-
 public class LocaleHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocaleHelper.class);
@@ -25,7 +21,7 @@ public class LocaleHelper {
 
     public String mapError(String map, Exception e) {
         if (e instanceof ChatException) {
-            LOG.warn("{}: ChatException {}", map, e);
+            LOG.warn("Exception {}: {}", map, e);
 
             ChatException ce = (ChatException) e;
             String resKey = MessageFormat.format("error.{0}.{1}", map, ce.getReason().name());
@@ -52,7 +48,7 @@ public class LocaleHelper {
                 : resText;
     }
 
-    public void setRes(ResourceBundle res) {
-        this.res = res;
+    public void setResources(ResourceBundle resources) {
+        this.res = resources;
     }
 }

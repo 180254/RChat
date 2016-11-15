@@ -12,18 +12,23 @@ import java.text.MessageFormat;
 public class ClientChannel {
 
     private final String name;
-    private boolean password;
-    private SimpleStringProperty topic;
-    private ObservableList<ClientUser> users;
-    private ObservableList<Text> messages;
+    private final boolean password;
+
+    private final SimpleStringProperty topic;
+    private final ObservableList<ClientUser> users;
+    private final ObservableList<Text> messages;
+
     private boolean join;
     private String currentMsg;
 
     public ClientChannel(Channel channel) {
         this.name = channel.getName();
+        this.password = channel.isPassword();
+
         this.topic = new SimpleStringProperty();
         this.users = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
         this.messages = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+
         this.join = false;
         this.currentMsg = "";
 
@@ -33,7 +38,6 @@ public class ClientChannel {
     // ---------------------------------------------------------------------------------------------------------------
 
     public void update(Channel channel) {
-        this.password = channel.isPassword();
         this.topic.setValue(channel.getTopic());
 
         this.users.clear();
@@ -58,11 +62,7 @@ public class ClientChannel {
         return password;
     }
 
-    /*
-    public void setPassword(boolean password) {
-        this.password = password;
-    }
-    */
+    // ---------------------------------------------------------------------------------------------------------------
 
     public SimpleStringProperty getTopic() {
         return topic;
@@ -76,21 +76,11 @@ public class ClientChannel {
         return users;
     }
 
-    /*
-    public void setUsers(ObservableList<ClientUser> users) {
-        this.users = users;
-    }
-    */
-
     public ObservableList<Text> getMessages() {
         return messages;
     }
 
-    /*
-    public void setMessages(ObservableList<Text> messages) {
-        this.messages = messages;
-    }
-    */
+    // ---------------------------------------------------------------------------------------------------------------
 
     public boolean isJoin() {
         return join;

@@ -5,9 +5,9 @@ import javafx.scene.text.Text;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class Print {
+public class PrintUtil {
 
-    public static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:MM:SS");
+    public static DateTimeFormatter DTF = DateTimeFormatter.ofPattern("HH:MM:SS");
 
     public static Text txt(String value, String... classes) {
         Text text = new Text(value);
@@ -16,6 +16,6 @@ public class Print {
     }
 
     public static String time(LocalDateTime time) {
-        return dtf.format(time);
+        return DTF.format(time);
     }
 }

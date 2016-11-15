@@ -3,9 +3,6 @@ package pl.nn44.rchat.client;
 import com.google.common.base.Supplier;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -17,8 +14,6 @@ import pl.nn44.rchat.client.fx.SceneChanger;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.util.LocaleHelper;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
@@ -27,6 +22,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
+
+// org.springframework.remoting.RemoteAccessException
+// org.apache.xmlrpc.XmlRpcException
+// pl.nn44.rchat.protocol.exception.ChatException
 
 public class ClientApp extends Application {
 
@@ -38,33 +37,17 @@ public class ClientApp extends Application {
     private final Map<Class<?>, Supplier<Object>> controllers = new HashMap<>();
 
     @Override
-    public void start(Stage stage) throws Exception {
-        stage.getIcons().add(new Image("layout/icon.png"));
+    public void start(Stage primaryStage) throws Exception {
+        primaryStage.getIcons().add(new Image("layout/icon.png"));
 
-        ResourceBundle res = PropertyResourceBundle.getBundle("prop/strings");
-        locHelper.setRes(res);
+        ResourceBundle resources = PropertyResourceBundle.getBundle("strings/strings");
+        locHelper.setResources(resources);
 
-        SceneChanger sceneChanger = (scene) -> {
-            try {
-                ClassLoader classLoader = getClass().getClassLoader();
-                URL fxmlResource = classLoader.getResource("layout/" + scene + ".fxml");
-                if (fxmlResource == null) {
-                    throw new IOException("no such scene: " + scene);
-                }
-
-                FXMLLoader loader = new FXMLLoader();
-                loader.setControllerFactory(clazz -> controllers.get(clazz).get());
-                loader.setLocation(fxmlResource);
-                loader.setResources(res);
-
-                Parent fxmlParent = loader.load();
-                stage.setScene(new Scene(fxmlParent));
-
-            } catch (IOException e) {
-                LOG.error("Unable to change scene.", e);
-                throw new AssertionError(e);
-            }
-        };
+        SceneChanger sceneChanger = new SceneChanger(
+                primaryStage,
+                clazz -> controllers.get(clazz).get(),
+                resources
+        );
 
         controllers.put(LoginController.class, () ->
                 new LoginController(executor, csHandler, locHelper, sceneChanger)
@@ -73,12 +56,12 @@ public class ClientApp extends Application {
                 new MainController(executor, csHandler, locHelper))
         ;
         controllers.put(MenuController.class, () ->
-                new MenuController(executor, csHandler, stage, sceneChanger)
+                new MenuController(executor, csHandler, primaryStage, sceneChanger)
         );
 
         sceneChanger.accept("login");
-        stage.setTitle("RChat");
-        stage.show();
+        primaryStage.setTitle("RChat");
+        primaryStage.show();
     }
 
     @Override
