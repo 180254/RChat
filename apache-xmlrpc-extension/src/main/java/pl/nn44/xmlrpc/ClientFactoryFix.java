@@ -85,8 +85,8 @@ public class ClientFactoryFix {
                         }
 
                         Class<?>[] exceptionTypes = method.getExceptionTypes();
-                        for (Class<?> c : exceptionTypes) {
-                            if (c.isAssignableFrom(t.getClass())) {
+                        for (Class<?> eClass : exceptionTypes) {
+                            if (eClass.isAssignableFrom(t.getClass())) {
                                 throw t;
                             }
                         }
