@@ -1,4 +1,4 @@
-package pl.nn44.rchat.server.as;
+package pl.nn44.rchat.server.aspect;
 
 import org.slf4j.event.Level;
 
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-public @interface AsLoggable {
+public @interface Loggable {
 
     Level level() default Level.INFO;
 

@@ -9,24 +9,24 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class SeUser {
+public class ServerUser {
 
     private final String session;
     private final String username;
     private LocalDateTime lastSync;
 
-    private final CopyOnWriteArrayList<SeChannel> channels = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<SeUser> ignored = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<ServerChannel> channels = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<ServerUser> ignored = new CopyOnWriteArrayList<>();
     private final BlockingQueue<WhatsUp> news = new LinkedBlockingQueue<>(); // offer(e), poll(), peek()
 
-    public SeUser(String session, String username) {
+    public ServerUser(String session, String username) {
         this.session = session;
         this.username = username;
         this.lastSync = LocalDateTime.now();
     }
 
-    public static SeUser Dummy(String username) {
-        return new SeUser(null, username);
+    public static ServerUser Dummy(String username) {
+        return new ServerUser(null, username);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -43,11 +43,11 @@ public class SeUser {
         return lastSync;
     }
 
-    public CopyOnWriteArrayList<SeChannel> getChannels() {
+    public CopyOnWriteArrayList<ServerChannel> getChannels() {
         return channels;
     }
 
-    public CopyOnWriteArrayList<SeUser> getIgnored() {
+    public CopyOnWriteArrayList<ServerUser> getIgnored() {
         return ignored;
     }
 
@@ -67,7 +67,7 @@ public class SeUser {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SeUser user = (SeUser) o;
+        ServerUser user = (ServerUser) o;
         return Objects.equal(username, user.username);
     }
 
@@ -82,8 +82,8 @@ public class SeUser {
                 .add("session", session)
                 .add("username", username)
                 .add("lastSync", lastSync)
-                .add("channels", channels.stream().map(SeChannel::getName).toArray())
-                .add("ignored", ignored.stream().map(SeUser::getUsername).toArray())
+                .add("channels", channels.stream().map(ServerChannel::getName).toArray())
+                .add("ignored", ignored.stream().map(ServerUser::getUsername).toArray())
                 // .add("news", news)
                 .toString();
     }

@@ -1,4 +1,4 @@
-package pl.nn44.rchat.server.as;
+package pl.nn44.rchat.server.aspect;
 
 import com.google.common.collect.ImmutableMap;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,8 +19,8 @@ public class AsLogger {
 
     private static final Logger LOG = LoggerFactory.getLogger(AsLogger.class);
 
-    private final Map<Level, Function<Logger, AsPrinter>> loggers =
-            new ImmutableMap.Builder<Level, Function<Logger, AsPrinter>>()
+    private final Map<Level, Function<Logger, Printer>> loggers =
+            new ImmutableMap.Builder<Level, Function<Logger, Printer>>()
                     .put(Level.TRACE, (log) -> log::trace)
                     .put(Level.DEBUG, (log) -> log::debug)
                     .put(Level.INFO, (log) -> log::info)
@@ -32,7 +32,7 @@ public class AsLogger {
             "" +
                     /* class */
                     "(" +
-                        "execution(public * (@AsLoggable *).*(..))" +
+                    "execution(public * (@pl.nn44.rchat.server.aspect.Loggable *).*(..))" +
                         " && !execution(String *.toString())" +
                         " && !execution(int *.hashCode())" +
                         " && !execution(boolean *.equals(Object))" +
@@ -41,17 +41,18 @@ public class AsLogger {
                     /* method*/
                     "(" +
                         "execution(* *(..))" +
-                        " && @annotation(AsLoggable)" +
+                    " && @annotation(pl.nn44.rchat.server.aspect.Loggable)" +
                     ")"
     )
     public Object around(ProceedingJoinPoint point) throws Throwable {
-        LOG.trace("AROUND" + point.toString());
+        LOG.trace("AROUND: {}", point);
+
         Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
         Class<?> clazz = method.getDeclaringClass();
 
-        AsLoggable annotation = method.getAnnotation(AsLoggable.class);
+        Loggable annotation = method.getAnnotation(Loggable.class);
         if (annotation == null) {
-            annotation = clazz.getAnnotation(AsLoggable.class);
+            annotation = clazz.getAnnotation(Loggable.class);
         }
 
         long start = System.currentTimeMillis();
@@ -65,7 +66,7 @@ public class AsLogger {
         long time = System.currentTimeMillis() - start;
 
         Logger logger = LoggerFactory.getLogger(clazz);
-        AsPrinter printer = loggers.get(annotation.level()).apply(logger);
+        Printer printer = loggers.get(annotation.level()).apply(logger);
         printer.log(
                 "#{}({}): {} ({}ms)",
                 MethodSignature.class.cast(point.getSignature()).getMethod().getName(),

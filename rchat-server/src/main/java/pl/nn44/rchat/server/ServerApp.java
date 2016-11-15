@@ -2,25 +2,19 @@ package pl.nn44.rchat.server;
 
 import ch.qos.logback.classic.helpers.MDCInsertingServletFilter;
 import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.metadata.XmlRpcSystemImpl;
-import org.apache.xmlrpc.server.PropertyHandlerMapping;
-import org.apache.xmlrpc.server.XmlRpcErrorLogger;
-import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
-import org.apache.xmlrpc.webserver.XmlRpcServletServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.remoting.caucho.BurlapServiceExporter;
-import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.HttpRequestHandler;
 import pl.nn44.rchat.protocol.ChatService;
-import pl.nn44.rchat.server.as.AsLogger;
+import pl.nn44.rchat.server.aspect.AsLogger;
 import pl.nn44.rchat.server.impl.BestChatService;
-import pl.nn44.rchat.server.page.MainPageController;
+import pl.nn44.rchat.server.impl.RpcProviders;
 import pl.nn44.rchat.server.page.PlainErrorController;
+import pl.nn44.rchat.server.page.PlainPageController;
 
 import javax.servlet.Filter;
 
@@ -38,57 +32,39 @@ public class ServerApp {
         return new BestChatService();
     }
 
+    @Bean
+    public RpcProviders rpcProviders(ChatService cs) {
+        return new RpcProviders(cs);
+    }
+
     @Bean(name = "/hessian")
-    public HttpRequestHandler hessianChatController() {
-        HessianServiceExporter exporter = new HessianServiceExporter();
-        exporter.setService(chatService());
-        exporter.setServiceInterface(ChatService.class);
-        return exporter;
+    public HttpRequestHandler hessianRpc(RpcProviders rp) {
+        return rp.hessian();
     }
 
     @Bean(name = "/burlap")
-    public HttpRequestHandler burlapChatController() {
-        // noinspection deprecation
-        BurlapServiceExporter exporter = new BurlapServiceExporter();
-        exporter.setService(chatService());
-        exporter.setServiceInterface(ChatService.class);
-        return exporter;
+    public HttpRequestHandler burlapRpc(RpcProviders rp) {
+        return rp.burlap();
     }
 
     @Bean(name = "/xml-rpc")
-    public HttpRequestHandler xmlRpcChatController() throws XmlRpcException {
-        XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
-        config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
-        config.setEnabledForExceptions(true);
-        config.setEnabledForExtensions(true); // required by enabledForExceptions
-        config.setKeepAliveEnabled(true);
-
-        PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
-        handlerMapping.setRequestProcessorFactoryFactory(pClass -> pRequest -> chatService());
-        handlerMapping.addHandler("ChatService", ChatService.class);
-        XmlRpcSystemImpl.addSystemHandler(handlerMapping);
-
-        XmlRpcServletServer server = new XmlRpcServletServer();
-        server.setConfig(config);
-        server.setErrorLogger(new XmlRpcErrorLogger());
-        server.setHandlerMapping(handlerMapping);
-        // server.setTypeFactory(new AnyTypeFactory(server));
-
-        return server::execute;
+    public HttpRequestHandler xmlRpcRpc(RpcProviders rp)
+            throws XmlRpcException {
+        return rp.xmlRpc();
     }
 
     @Bean
-    public MainPageController mainPageController() {
-        return new MainPageController();
+    public PlainPageController pageController() {
+        return new PlainPageController();
     }
 
     @Bean
-    public ErrorController errorPageController() {
+    public ErrorController errorController() {
         return new PlainErrorController();
     }
 
     @Bean
-    public AsLogger aspectLogger() {
+    public AsLogger asLogger() {
         return new AsLogger();
     }
 

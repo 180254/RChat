@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/")
-public class MainPageController {
+public class PlainPageController {
 
     @RequestMapping(value = "/", produces = {"text/plain"})
     public ResponseEntity<String> plainMain() {

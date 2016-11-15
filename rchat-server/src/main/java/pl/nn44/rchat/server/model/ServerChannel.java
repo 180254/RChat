@@ -5,23 +5,17 @@ import com.google.common.base.Objects;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class SeChannel {
+public class ServerChannel {
 
     private final String name;
     private final String password;
     private String topic;
 
-    private final CopyOnWriteArrayList<SeUser> users = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<ServerUser> users = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<String> admins = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<String> banned = new CopyOnWriteArrayList<>();
 
-    public SeChannel(String name, String password) {
-        this.name = name;
-        this.password = password;
-        this.topic = "";
-    }
-
-    public SeChannel(String name, String password, String topic) {
+    public ServerChannel(String name, String password, String topic) {
         this.name = name;
         this.password = password;
         this.topic = topic;
@@ -45,7 +39,7 @@ public class SeChannel {
         this.topic = topic;
     }
 
-    public CopyOnWriteArrayList<SeUser> getUsers() {
+    public CopyOnWriteArrayList<ServerUser> getUsers() {
         return users;
     }
 
@@ -63,7 +57,7 @@ public class SeChannel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SeChannel channel = (SeChannel) o;
+        ServerChannel channel = (ServerChannel) o;
         return Objects.equal(name, channel.name);
     }
 
@@ -77,7 +71,7 @@ public class SeChannel {
         return MoreObjects.toStringHelper(this)
                 .add("name", name)
                 .add("password", password)
-                .add("users", users.stream().map(SeUser::getUsername).toArray())
+                .add("users", users.stream().map(ServerUser::getUsername).toArray())
                 .add("admins", admins)
                 .add("banned", banned)
                 .toString();
