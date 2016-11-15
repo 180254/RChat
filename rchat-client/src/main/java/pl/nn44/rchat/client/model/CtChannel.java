@@ -4,8 +4,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.text.Text;
-import pl.nn44.rchat.protocol.RcChUser;
-import pl.nn44.rchat.protocol.RcChannel;
+import pl.nn44.rchat.protocol.model.Channel;
+import pl.nn44.rchat.protocol.model.User;
 
 import java.text.MessageFormat;
 
@@ -19,7 +19,7 @@ public class CtChannel {
     private boolean join;
     private String currentMsg;
 
-    public CtChannel(RcChannel channel) {
+    public CtChannel(Channel channel) {
         this.name = channel.getName();
         this.topic = new SimpleStringProperty();
         this.users = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -32,12 +32,12 @@ public class CtChannel {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public void update(RcChannel channel) {
+    public void update(Channel channel) {
         this.password = channel.isPassword();
         this.topic.setValue(channel.getTopic());
 
         this.users.clear();
-        for (RcChUser user : channel.getRcChUsers()) {
+        for (User user : channel.getUsers()) {
             this.users.add(new CtUser(user));
         }
     }

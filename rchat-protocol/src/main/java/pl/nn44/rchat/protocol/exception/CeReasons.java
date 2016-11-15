@@ -1,4 +1,4 @@
-package pl.nn44.rchat.protocol;
+package pl.nn44.rchat.protocol.exception;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD})
-public @interface CeReason {
+public @interface CeReasons {
 
     ChatException.Reason[] value();
 }

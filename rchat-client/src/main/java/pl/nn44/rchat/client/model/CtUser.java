@@ -1,6 +1,6 @@
 package pl.nn44.rchat.client.model;
 
-import pl.nn44.rchat.protocol.RcChUser;
+import pl.nn44.rchat.protocol.model.User;
 
 import java.text.MessageFormat;
 
@@ -12,7 +12,7 @@ public class CtUser {
     private boolean admin;
     private boolean banned;
 
-    public CtUser(RcChUser user) {
+    public CtUser(User user) {
         this.username = user.getUsername();
         this.authorized = user.isAuthorized();
         this.ignored = user.isIgnored();

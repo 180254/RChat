@@ -1,4 +1,4 @@
-package pl.nn44.rchat.protocol;
+package pl.nn44.rchat.protocol.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -6,40 +6,40 @@ import com.google.common.base.Objects;
 import java.io.Serializable;
 import java.util.stream.Stream;
 
-public class RcChannel implements Serializable {
+public class Channel implements Serializable {
 
     private static final long serialVersionUID = -868502509392109589L;
 
     private final String name;
     private final boolean password;
     private final String topic;
-    private final RcChUser[] rcChUsers;
+    private final User[] users;
 
-    public RcChannel(String name,
-                     boolean password) {
-
-        this.name = name;
-        this.password = password;
-        this.topic = null;
-        this.rcChUsers = new RcChUser[0];
-    }
-
-    public RcChannel(String name,
-                     boolean password,
-                     String topic,
-                     RcChUser[] rcChUsers) {
+    public Channel(String name,
+                   boolean password,
+                   String topic,
+                   User[] users) {
 
         this.name = name;
         this.password = password;
         this.topic = topic;
-        this.rcChUsers = rcChUsers.clone();
+        this.users = users.clone();
     }
 
-    protected RcChannel() {
+    public Channel(String name,
+                   boolean password) {
+
+        this.name = name;
+        this.password = password;
+        this.topic = "";
+        this.users = new User[0];
+    }
+
+    protected Channel() {
         this.name = null;
         this.password = false;
         this.topic = null;
-        this.rcChUsers = null;
+        this.users = null;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -56,8 +56,8 @@ public class RcChannel implements Serializable {
         return topic;
     }
 
-    public RcChUser[] getRcChUsers() {
-        return rcChUsers.clone();
+    public User[] getUsers() {
+        return users.clone();
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ public class RcChannel implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RcChannel channel = (RcChannel) o;
+        Channel channel = (Channel) o;
         return Objects.equal(name, channel.name);
     }
 
@@ -81,7 +81,7 @@ public class RcChannel implements Serializable {
                 .add("name", name)
                 .add("password", password)
                 .add("topic", topic)
-                .add("rcChUsers", Stream.of(rcChUsers).map(RcChUser::getUsername).toArray())
+                .add("users", Stream.of(users).map(User::getUsername).toArray())
                 .toString();
     }
 }

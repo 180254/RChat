@@ -2,9 +2,9 @@ package pl.nn44.rchat.client.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.nn44.rchat.protocol.ChatException;
 import pl.nn44.rchat.protocol.ChatService;
-import pl.nn44.rchat.protocol.Response;
+import pl.nn44.rchat.protocol.exception.ChatException;
+import pl.nn44.rchat.protocol.model.Response;
 
 import java.util.Properties;
 

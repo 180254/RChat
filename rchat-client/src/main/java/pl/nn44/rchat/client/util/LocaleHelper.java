@@ -4,14 +4,14 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
-import pl.nn44.rchat.protocol.ChatException;
+import pl.nn44.rchat.protocol.exception.ChatException;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 // org.springframework.remoting.RemoteAccessException
 // org.apache.xmlrpc.XmlRpcException
-// pl.nn44.rchat.protocol.ChatException
+// pl.nn44.rchat.protocol.exception.ChatException
 
 public class LocaleHelper {
 

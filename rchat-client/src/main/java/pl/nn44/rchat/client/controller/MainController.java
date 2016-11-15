@@ -23,8 +23,14 @@ import pl.nn44.rchat.client.model.CtMsgInfo;
 import pl.nn44.rchat.client.model.CtMsgUser;
 import pl.nn44.rchat.client.model.CtUser;
 import pl.nn44.rchat.client.util.LocaleHelper;
-import pl.nn44.rchat.protocol.*;
-import pl.nn44.rchat.protocol.WhatsUp.What;
+import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.rchat.protocol.SimpleCommand;
+import pl.nn44.rchat.protocol.StatefulCommand;
+import pl.nn44.rchat.protocol.exception.ChatException;
+import pl.nn44.rchat.protocol.model.Channel;
+import pl.nn44.rchat.protocol.model.User;
+import pl.nn44.rchat.protocol.model.WhatsUp;
+import pl.nn44.rchat.protocol.model.WhatsUp.What;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -177,14 +183,14 @@ public class MainController implements Initializable {
             });
 
             try {
-                RcChannel[] channels = csh.cs()
+                Channel[] channels = csh.cs()
                         .channels(csh.token())
                         .getPayload();
 
-                for (RcChannel rcChannel : channels) {
-                    CtChannel ctChannel = new CtChannel(rcChannel);
+                for (Channel channel : channels) {
+                    CtChannel ctChannel = new CtChannel(channel);
                     this.channels.getItems().add(ctChannel);
-                    channelsMap.put(rcChannel.getName(), ctChannel);
+                    channelsMap.put(channel.getName(), ctChannel);
                 }
 
                 // channel cannot be removed or added dynamically
@@ -294,8 +300,8 @@ public class MainController implements Initializable {
         boolean auth = Boolean.parseBoolean(whatsUp.getParams()[2]);
         boolean admin = Boolean.parseBoolean(whatsUp.getParams()[3]);
 
-        RcChUser rcChUser = new RcChUser(channel, whoJoined, auth, false, admin, false);
-        CtUser ctUser = new CtUser(rcChUser);
+        User user = new User(channel, whoJoined, auth, false, admin, false);
+        CtUser ctUser = new CtUser(user);
 
         CtChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().add(ctUser);
@@ -459,7 +465,7 @@ public class MainController implements Initializable {
             // join
             exs.submit(() -> {
                 try {
-                    RcChannel rcChannel =
+                    Channel rcChannel =
                             csh.cs().join(csh.token(), channel.getName(), null).getPayload();
 
                     channel.setJoin(true);
@@ -564,7 +570,7 @@ public class MainController implements Initializable {
         }
     }
 
-    public void onSimpleCommand(String channel, String[] tokens, String locMap, SimpleCmd sc) {
+    public void onSimpleCommand(String channel, String[] tokens, String locMap, SimpleCommand sc) {
         if (tokens.length < 2) {
             submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
             return;
@@ -579,7 +585,7 @@ public class MainController implements Initializable {
         }
     }
 
-    public void onStateCommand(String channel, String[] tokens, String locMap, StatefulCmd sc) {
+    public void onStateCommand(String channel, String[] tokens, String locMap, StatefulCommand sc) {
         if (tokens.length < 3) {
             submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
             return;

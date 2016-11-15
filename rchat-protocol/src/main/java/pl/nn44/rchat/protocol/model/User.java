@@ -1,11 +1,11 @@
-package pl.nn44.rchat.protocol;
+package pl.nn44.rchat.protocol.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 import java.io.Serializable;
 
-public class RcChUser implements Serializable {
+public class User implements Serializable {
 
     private static final long serialVersionUID = -5068302409312104587L;
 
@@ -16,12 +16,12 @@ public class RcChUser implements Serializable {
     private final boolean admin;
     private final boolean banned;
 
-    public RcChUser(String channel,
-                    String username,
-                    boolean authorized,
-                    boolean ignored,
-                    boolean admin,
-                    boolean banned) {
+    public User(String channel,
+                String username,
+                boolean authorized,
+                boolean ignored,
+                boolean admin,
+                boolean banned) {
 
         this.channel = channel;
         this.username = username;
@@ -31,7 +31,7 @@ public class RcChUser implements Serializable {
         this.banned = banned;
     }
 
-    protected RcChUser() {
+    protected User() {
         this.channel = null;
         this.username = null;
         this.authorized = false;
@@ -72,7 +72,7 @@ public class RcChUser implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RcChUser that = (RcChUser) o;
+        User that = (User) o;
         return Objects.equal(channel, that.channel) &&
                 Objects.equal(username, that.username);
     }

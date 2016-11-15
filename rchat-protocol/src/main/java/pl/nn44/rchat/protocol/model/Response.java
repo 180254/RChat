@@ -1,4 +1,4 @@
-package pl.nn44.rchat.protocol;
+package pl.nn44.rchat.protocol.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;

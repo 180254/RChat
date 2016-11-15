@@ -1,4 +1,4 @@
-package pl.nn44.rchat.protocol;
+package pl.nn44.rchat.protocol.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -68,17 +68,17 @@ public class WhatsUp implements Serializable {
     }
 
     public enum What {
-        MESSAGE, // MESSAGE $channel $username(who-msg) some-text
-        PRIVY, // MESSAGE $null $username(who-msg-to) username-who-msg-by some-text
+        MESSAGE, // MESSAGE channel who-msg some-text
+        PRIVY, // MESSAGE null who-msg-to who-msg-by some-text
 
-        JOIN, // JOIN $channel $username(who-join) is-auth is-admin
-        PART, // PART $channel $username(who-part)
-        KICK, // KICK $channel $username(who-kicked) username-kicked-by
-        BAN, // BAN $channel $username(who-banned) username-banned-by ON/OFF
+        JOIN, // JOIN channel who-join is-auth is-admin
+        PART, // PART channel who-part
+        KICK, // KICK channel who-kicked who-kicked-by
+        BAN, // BAN channel who-banned who-banned-by ON/OFF
 
-        ADMIN, // ADMIN $channel $username(who-admin) username-admin-by ON/OFF
-        IGNORE, // IGNORE $channel $username(who-ignored) username-who-ignored-by ON/OFF
+        ADMIN, // ADMIN channel who-admin username-admin-by ON/OFF
+        IGNORE, // IGNORE null who-ignored username-who-ignored-by ON/OFF
 
-        TOPIC, // TOPIC $channel $username(who-changed) some-text
+        TOPIC, // TOPIC channel who-changed some-text
     }
 }

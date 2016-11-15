@@ -2,7 +2,7 @@ package pl.nn44.rchat.server.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import pl.nn44.rchat.protocol.WhatsUp;
+import pl.nn44.rchat.protocol.model.WhatsUp;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.BlockingQueue;

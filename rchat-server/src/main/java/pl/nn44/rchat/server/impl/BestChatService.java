@@ -6,9 +6,14 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import pl.nn44.rchat.protocol.*;
-import pl.nn44.rchat.protocol.ChatException.Reason;
-import pl.nn44.rchat.protocol.WhatsUp.What;
+import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.rchat.protocol.exception.ChatException;
+import pl.nn44.rchat.protocol.exception.ChatException.Reason;
+import pl.nn44.rchat.protocol.model.Channel;
+import pl.nn44.rchat.protocol.model.Response;
+import pl.nn44.rchat.protocol.model.User;
+import pl.nn44.rchat.protocol.model.WhatsUp;
+import pl.nn44.rchat.protocol.model.WhatsUp.What;
 import pl.nn44.rchat.server.as.AsLoggable;
 import pl.nn44.rchat.server.model.SeChannel;
 import pl.nn44.rchat.server.model.SeUser;
@@ -117,21 +122,21 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response<RcChannel[]> channels(String session) throws ChatException {
+    public Response<Channel[]> channels(String session) throws ChatException {
         Locks locks = locks(session, null, null);
 
         try {
             //  side-effect used: verify session
             params(session, null, null, false);
 
-            RcChannel[] rcChannels = channelByName.values().stream()
-                    .map(c -> new RcChannel(
+            Channel[] channels = channelByName.values().stream()
+                    .map(c -> new Channel(
                             c.getName(),
                             c.getPassword() != null
                     ))
-                    .toArray(RcChannel[]::new);
+                    .toArray(Channel[]::new);
 
-            return Response.Ok(rcChannels);
+            return Response.Ok(channels);
 
         } finally {
             locks.unlock();
@@ -139,7 +144,7 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response<RcChannel> join(String session, String channel, @Nullable String password) throws ChatException {
+    public Response<Channel> join(String session, String channel, @Nullable String password) throws ChatException {
         Locks locks = locks(session, channel, null);
 
         try {
@@ -186,9 +191,9 @@ public class BestChatService implements ChatService {
                         .forEach(cu -> cu.getNews().offer(whatsUp));
             }
 
-            RcChUser[] rcChUsers = params.channel.getUsers()
+            User[] users = params.channel.getUsers()
                     .stream()
-                    .map(cUser -> new RcChUser(
+                    .map(cUser -> new User(
                             params.channel.getName(),
                             cUser.getUsername(),
                             accounts.containsKey(cUser.getUsername()),
@@ -196,13 +201,13 @@ public class BestChatService implements ChatService {
                             params.channel.getAdmins().contains(cUser.getUsername()),
                             params.channel.getBanned().contains(cUser.getUsername())
                     ))
-                    .toArray(RcChUser[]::new);
+                    .toArray(User[]::new);
 
-            RcChannel rcChannel = new RcChannel(
+            Channel rcChannel = new Channel(
                     params.channel.getName(),
                     params.channel.getPassword() != null,
                     params.channel.getTopic(),
-                    rcChUsers
+                    users
             );
 
             return Response.Ok(rcChannel);
