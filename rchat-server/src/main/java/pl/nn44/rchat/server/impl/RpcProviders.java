@@ -18,7 +18,7 @@ public class RpcProviders<T> {
     private static final Logger LOG = LoggerFactory.getLogger(RpcProviders.class);
 
     private final T service;
-    private Class<T> clazz;
+    private final Class<T> clazz;
 
     public RpcProviders(T service, Class<T> clazz) {
         this.service = service;

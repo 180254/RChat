@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class PlainPageController {
 
     @RequestMapping(value = "/", produces = {"text/plain"})
-    public ResponseEntity<String> plainMain() {
+    public ResponseEntity<String> index() {
 
         return new ResponseEntity<>("", HttpStatus.OK);
     }

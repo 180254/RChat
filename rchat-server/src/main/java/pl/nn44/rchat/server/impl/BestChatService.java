@@ -35,9 +35,9 @@ public class BestChatService implements ChatService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BestChatService.class);
 
-    public static int MAX_NEWS_PER_REQUEST = 8;
-    public static int ID_RANDOM_BITS = 8 * BigIdGenerator.BITS_PER_CHAR;
-    public static int STRIPED_LOCKS = 32;
+    public static final int MAX_NEWS_PER_REQUEST = 8;
+    public static final int ID_RANDOM_BITS = 8 * BigIdGenerator.BITS_PER_CHAR;
+    public static final int STRIPED_LOCKS = 32;
 
     private final Random random = new SecureRandom();
     private final Iterator<String> idGenerator = BigIdGenerator.bits(random, ID_RANDOM_BITS);
@@ -76,7 +76,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(null, null, username);
 
         try {
-            if (sessionToUser.containsValue(ServerUser.Dummy(username))) {
+            if (sessionToUser.containsValue(ServerUser.dummyUser(username))) {
                 throw new ChatException(Reason.ALREADY_LOGGED_IN);
             }
 
@@ -89,9 +89,10 @@ public class BestChatService implements ChatService {
             }
 
             String session = idGenerator.next();
-            ServerUser exUser = new ServerUser(session, username);
-            sessionToUser.put(session, exUser);
-            return Response.Ok(session);
+            ServerUser user = new ServerUser(session, username);
+            sessionToUser.put(session, user);
+
+            return Response.Ok(user.getSession());
 
         } finally {
             locks.unlock();
@@ -130,9 +131,9 @@ public class BestChatService implements ChatService {
             params(session, null, null, false);
 
             Channel[] channels = channelByName.values().stream()
-                    .map(c -> new Channel(
-                            c.getName(),
-                            c.getPassword() != null
+                    .map(chan -> new Channel(
+                            chan.getName(),
+                            chan.getPassword() != null
                     ))
                     .toArray(Channel[]::new);
 
@@ -599,7 +600,7 @@ public class BestChatService implements ChatService {
             }
 
             if (username != null && this.channel != null) {
-                ServerUser dummyAffUser = ServerUser.Dummy(username);
+                ServerUser dummyAffUser = ServerUser.dummyUser(username);
 
                 this.affUser = this.channel.getUsers().stream()
                         .filter(u -> u.equals(dummyAffUser))
@@ -642,9 +643,9 @@ public class BestChatService implements ChatService {
 
     private class Locks {
 
-        Lock lock$caller;
-        Lock lock$channel;
-        Lock lock$affUser;
+        Lock lockCaller;
+        Lock lockChannel;
+        Lock lockAffUser;
 
         Locks(String session,
               String channel,
@@ -658,37 +659,37 @@ public class BestChatService implements ChatService {
                     throw new ChatException(Reason.GIVEN_BAD_SESSION);
                 }
 
-                this.lock$caller = stripedLocks.get("U$" + user.getUsername());
+                this.lockCaller = stripedLocks.get("U$" + user.getUsername());
             }
             if (username != null) {
-                this.lock$affUser = stripedLocks.get("U$" + username);
+                this.lockAffUser = stripedLocks.get("U$" + username);
             }
             if (channel != null) {
-                this.lock$channel = stripedLocks.get("C$" + channel);
+                this.lockChannel = stripedLocks.get("C$" + channel);
             }
         }
 
         void lock() {
-            if (this.lock$channel != null) {
-                this.lock$channel.lock();
+            if (this.lockChannel != null) {
+                this.lockChannel.lock();
             }
-            if (this.lock$affUser != null) {
-                this.lock$affUser.lock();
+            if (this.lockAffUser != null) {
+                this.lockAffUser.lock();
             }
-            if (this.lock$caller != null) {
-                this.lock$caller.lock();
+            if (this.lockCaller != null) {
+                this.lockCaller.lock();
             }
         }
 
         void unlock() {
-            if (this.lock$channel != null) {
-                this.lock$channel.unlock();
+            if (this.lockChannel != null) {
+                this.lockChannel.unlock();
             }
-            if (this.lock$affUser != null) {
-                this.lock$affUser.unlock();
+            if (this.lockAffUser != null) {
+                this.lockAffUser.unlock();
             }
-            if (this.lock$caller != null) {
-                this.lock$caller.unlock();
+            if (this.lockCaller != null) {
+                this.lockCaller.unlock();
             }
         }
     }

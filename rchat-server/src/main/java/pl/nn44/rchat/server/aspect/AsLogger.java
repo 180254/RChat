@@ -1,5 +1,6 @@
 package pl.nn44.rchat.server.aspect;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -70,8 +71,8 @@ public class AsLogger {
         printer.log(
                 "#{}({}): {} ({}ms)",
                 MethodSignature.class.cast(point.getSignature()).getMethod().getName(),
-                annotation.params() ? removeFirstAndLastChar(Arrays.deepToString(point.getArgs())) : "_",
-                annotation.result() ? (throwable == null ? result : throwable) : "_",
+                annotation.params() ? arrayToString(point.getArgs()) : "_",
+                annotation.result() ? MoreObjects.firstNonNull(throwable, result) : "_",
                 time
         );
 
@@ -81,7 +82,8 @@ public class AsLogger {
         return result;
     }
 
-    public String removeFirstAndLastChar(String s) {
+    public String arrayToString(Object[] array) {
+        String s = Arrays.deepToString(array);
         return s.substring(1, s.length() - 1);
     }
 }

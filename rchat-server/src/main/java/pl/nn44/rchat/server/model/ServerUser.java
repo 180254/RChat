@@ -25,7 +25,7 @@ public class ServerUser {
         this.lastSync = LocalDateTime.now();
     }
 
-    public static ServerUser Dummy(String username) {
+    public static ServerUser dummyUser(String username) {
         return new ServerUser(null, username);
     }
 
@@ -64,10 +64,10 @@ public class ServerUser {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ServerUser user = (ServerUser) o;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ServerUser user = (ServerUser) obj;
         return Objects.equal(username, user.username);
     }
 
