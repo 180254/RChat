@@ -42,9 +42,8 @@ public class ClientFactoryFix {
     public static Object newInstance(
             ClassLoader classLoader,
             Class<?> clazz,
-            String remoteName,
-            ClientExecutor clientExecutor,
             String serverUrl,
+            ClientExecutor clientExecutor,
             TypeConverterFactory typeConverterFactory
     ) {
 
@@ -72,12 +71,8 @@ public class ClientFactoryFix {
                         }
                     }
 
-                    String methodName;
-                    if (remoteName == null || remoteName.length() == 0) {
-                        methodName = method.getName();
-                    } else {
-                        methodName = remoteName + "." + method.getName();
-                    }
+                    String remoteName = clazz.getSimpleName();
+                    String methodName = remoteName + "." + method.getName();
 
                     Object result;
                     try {
