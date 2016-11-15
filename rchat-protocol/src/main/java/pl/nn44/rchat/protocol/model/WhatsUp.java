@@ -10,14 +10,13 @@ import java.time.format.DateTimeFormatter;
 public class WhatsUp implements Serializable {
 
     private static final long serialVersionUID = -2493165937560638279L;
-    public static final transient DateTimeFormatter DTF = DateTimeFormatter.ISO_DATE_TIME;
+    private static final transient DateTimeFormatter DTF = DateTimeFormatter.ISO_DATE_TIME;
 
     private final String isoTime;
     private final What what;
     private final String[] params;
 
-    public WhatsUp(What what,
-                   String... params) {
+    public WhatsUp(What what, String[] params) {
 
         // LocalDateTime and long are not supported by xml-rpc
         this.isoTime = LocalDateTime.now().format(DTF);
@@ -25,11 +24,17 @@ public class WhatsUp implements Serializable {
         this.params = params.clone();
     }
 
+    public static WhatsUp create(What what, String... params) {
+        return new WhatsUp(what, params);
+    }
+
     protected WhatsUp() {
         this.isoTime = null;
         this.what = null;
         this.params = null;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public LocalDateTime getTime() {
         return LocalDateTime.parse(this.isoTime, DTF);

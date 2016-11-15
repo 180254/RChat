@@ -4,7 +4,7 @@ public class ChatException extends Exception {
 
     private static final long serialVersionUID = -781231732637496618L;
 
-    private Reason reason;
+    private final Reason reason;
 
     public ChatException(Reason reason) {
         super(reason.name());
