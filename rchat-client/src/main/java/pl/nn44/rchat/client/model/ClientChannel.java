@@ -9,17 +9,17 @@ import pl.nn44.rchat.protocol.model.User;
 
 import java.text.MessageFormat;
 
-public class CtChannel {
+public class ClientChannel {
 
     private final String name;
     private boolean password;
     private SimpleStringProperty topic;
-    private ObservableList<CtUser> users;
+    private ObservableList<ClientUser> users;
     private ObservableList<Text> messages;
     private boolean join;
     private String currentMsg;
 
-    public CtChannel(Channel channel) {
+    public ClientChannel(Channel channel) {
         this.name = channel.getName();
         this.topic = new SimpleStringProperty();
         this.users = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -38,7 +38,7 @@ public class CtChannel {
 
         this.users.clear();
         for (User user : channel.getUsers()) {
-            this.users.add(new CtUser(user));
+            this.users.add(new ClientUser(user));
         }
     }
 
@@ -72,12 +72,12 @@ public class CtChannel {
         this.topic.setValue(topic);
     }
 
-    public ObservableList<CtUser> getUsers() {
+    public ObservableList<ClientUser> getUsers() {
         return users;
     }
 
     /*
-    public void setUsers(ObservableList<CtUser> users) {
+    public void setUsers(ObservableList<ClientUser> users) {
         this.users = users;
     }
     */

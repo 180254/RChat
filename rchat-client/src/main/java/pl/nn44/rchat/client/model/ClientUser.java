@@ -4,7 +4,7 @@ import pl.nn44.rchat.protocol.model.User;
 
 import java.text.MessageFormat;
 
-public class CtUser {
+public class ClientUser {
 
     private final String username;
     private boolean authorized;
@@ -12,7 +12,7 @@ public class CtUser {
     private boolean admin;
     private boolean banned;
 
-    public CtUser(User user) {
+    public ClientUser(User user) {
         this.username = user.getUsername();
         this.authorized = user.isAuthorized();
         this.ignored = user.isIgnored();

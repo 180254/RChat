@@ -18,10 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
 import pl.nn44.rchat.client.impl.CsHandler;
-import pl.nn44.rchat.client.model.CtChannel;
-import pl.nn44.rchat.client.model.CtMsgInfo;
-import pl.nn44.rchat.client.model.CtMsgUser;
-import pl.nn44.rchat.client.model.CtUser;
+import pl.nn44.rchat.client.model.ClientChannel;
+import pl.nn44.rchat.client.model.ClientUser;
+import pl.nn44.rchat.client.print.PrintInfo;
+import pl.nn44.rchat.client.print.PrintMsg;
 import pl.nn44.rchat.client.util.LocaleHelper;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.protocol.SimpleCommand;
@@ -65,11 +65,11 @@ public class MainController implements Initializable {
     @FXML public TextField message;
     @FXML public Button send;
     @FXML public TextField topic;
-    @FXML public ListView<CtChannel> channels;
-    @FXML public ListView<CtUser> users;
+    @FXML public ListView<ClientChannel> channels;
+    @FXML public ListView<ClientUser> users;
 
-    public RefreshableListViewSkin<CtChannel> channelsSkin;
-    public RefreshableListViewSkin<CtUser> usersSkin;
+    public RefreshableListViewSkin<ClientChannel> channelsSkin;
+    public RefreshableListViewSkin<ClientUser> usersSkin;
 
     private boolean fatalFail =
             false;
@@ -100,21 +100,21 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private Map<String, CtChannel> channelsMap =
+    private Map<String, ClientChannel> channelsMap =
             new HashMap<>();
 
     // ---------------------------------------------------------------------------------------------------------------
 
 
-    private ObservableList<CtUser> usersModel;
+    private ObservableList<ClientUser> usersModel;
 
-    private ObservableList<CtUser> usersSource =
+    private ObservableList<ClientUser> usersSource =
             FXCollections.emptyObservableList();
 
-    private final ListChangeListener<CtUser> usersTake =
-            new ListChangeListener<CtUser>() {
+    private final ListChangeListener<ClientUser> usersTake =
+            new ListChangeListener<ClientUser>() {
                 @Override
-                public void onChanged(Change<? extends CtUser> c) {
+                public void onChanged(Change<? extends ClientUser> c) {
                     while (c.next()) {
                         if (c.wasAdded()) {
                             runLater(() -> usersModel.addAll(c.getAddedSubList()));
@@ -188,7 +188,7 @@ public class MainController implements Initializable {
                         .getPayload();
 
                 for (Channel channel : channels) {
-                    CtChannel ctChannel = new CtChannel(channel);
+                    ClientChannel ctChannel = new ClientChannel(channel);
                     this.channels.getItems().add(ctChannel);
                     channelsMap.put(channel.getName(), ctChannel);
                 }
@@ -239,11 +239,11 @@ public class MainController implements Initializable {
         LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
 
-        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+        PrintInfo ctMsgInfo = new PrintInfo(
                 i18n, time, "whats-up." + locMap, whatsUp.getParams()
         );
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
@@ -253,11 +253,11 @@ public class MainController implements Initializable {
         boolean state = whatsUp.getParams()[3].equals("ON");
         String code = state ? "1" : "0";
 
-        CtMsgInfo ctMsgInfo = new CtMsgInfo(
+        PrintInfo ctMsgInfo = new PrintInfo(
                 i18n, time, "whats-up." + locMap + "." + code, whatsUp.getParams()
         );
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
@@ -271,10 +271,10 @@ public class MainController implements Initializable {
         String whoMsg = whatsUp.getParams()[1];
         String someText = whatsUp.getParams()[2];
 
-        CtMsgUser ctMsgUser = new CtMsgUser(whoMsg, time, someText);
+        PrintMsg printMsg = new PrintMsg(whoMsg, time, someText);
 
-        CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getMessages().addAll(ctMsgUser.toNodes());
+        ClientChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getMessages().addAll(printMsg.toNodes());
     }
 
     public void onSomePrivy(WhatsUp whatsUp) {
@@ -301,10 +301,10 @@ public class MainController implements Initializable {
         boolean admin = Boolean.parseBoolean(whatsUp.getParams()[3]);
 
         User user = new User(channel, whoJoined, auth, false, admin, false);
-        CtUser ctUser = new CtUser(user);
+        ClientUser clientUser = new ClientUser(user);
 
-        CtChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getUsers().add(ctUser);
+        ClientChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getUsers().add(clientUser);
     }
 
     public void onSomePart(WhatsUp whatsUp) {
@@ -315,7 +315,7 @@ public class MainController implements Initializable {
         String channel = whatsUp.getParams()[0];
         String whoPart = whatsUp.getParams()[1];
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoPart));
     }
 
@@ -329,7 +329,7 @@ public class MainController implements Initializable {
         String channel = whatsUp.getParams()[0];
         String whoKicked = whatsUp.getParams()[1];
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoKicked));
     }
 
@@ -342,7 +342,7 @@ public class MainController implements Initializable {
         String whoBanned = whatsUp.getParams()[1];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().stream()
                 .filter(u -> u.getUsername().equals(whoBanned))
                 .forEach(u -> u.setBanned(state));
@@ -359,7 +359,7 @@ public class MainController implements Initializable {
         String whoAdmin = whatsUp.getParams()[1];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().stream()
                 .filter(u -> u.getUsername().equals(whoAdmin))
                 .forEach(u -> u.setAdmin(state));
@@ -376,7 +376,7 @@ public class MainController implements Initializable {
         String whoIgnored = whatsUp.getParams()[1];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().stream()
                 .filter(u -> u.getUsername().equals(whoIgnored))
                 .forEach(u -> u.setIgnored(state));
@@ -392,7 +392,7 @@ public class MainController implements Initializable {
         String channel = whatsUp.getParams()[0];
         String someText = whatsUp.getParams()[2];
 
-        CtChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.setTopic(someText);
     }
 
@@ -407,7 +407,7 @@ public class MainController implements Initializable {
 
     @FXML
     public void onMouseClickedChannels(MouseEvent ev) {
-        CtChannel channel = channels.getSelectionModel().getSelectedItem();
+        ClientChannel channel = channels.getSelectionModel().getSelectedItem();
 
         if (channel == null) {
             return;
@@ -425,7 +425,7 @@ public class MainController implements Initializable {
 
     @FXML
     public void onKeyPressedChannels(KeyEvent ev) {
-        CtChannel channel = channels.getSelectionModel().getSelectedItem();
+        ClientChannel channel = channels.getSelectionModel().getSelectedItem();
 
         if (channel == null) {
             return;
@@ -436,7 +436,7 @@ public class MainController implements Initializable {
         }
     }
 
-    public void onSingleClickedChannels(CtChannel channel) {
+    public void onSingleClickedChannels(ClientChannel channel) {
         send.setDisable(!fatalFail && !(channel.isJoin()));
 
         message.setText(channel.getCurrentMsg());
@@ -460,7 +460,7 @@ public class MainController implements Initializable {
         channelsSkin.refresh();
     }
 
-    public void onDoubleClickedChannels(CtChannel channel) {
+    public void onDoubleClickedChannels(ClientChannel channel) {
         if (!channel.isJoin()) {
             // join
             exs.submit(() -> {
@@ -517,7 +517,7 @@ public class MainController implements Initializable {
 
     @FXML
     public void onKeyMessagePressed(KeyEvent ev) {
-        CtChannel channel = channels.getSelectionModel().getSelectedItem();
+        ClientChannel channel = channels.getSelectionModel().getSelectedItem();
 
         if (ev.getCode() == KeyCode.ENTER) {
             onSendAction(null);
@@ -540,7 +540,7 @@ public class MainController implements Initializable {
         }
         this.message.setText("");
 
-        CtChannel channel = this.channels.getSelectionModel().getSelectedItem();
+        ClientChannel channel = this.channels.getSelectionModel().getSelectedItem();
 
         if (message.startsWith("/")) {
             exs.submit(() -> onAnyCmd(channel.getName(), message));

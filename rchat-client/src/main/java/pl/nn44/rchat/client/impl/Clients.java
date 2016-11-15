@@ -5,6 +5,7 @@ import com.caucho.hessian.client.HessianConnection;
 import com.caucho.hessian.client.HessianConnectionFactory;
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianURLConnectionFactory;
+import com.google.common.base.CharMatcher;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.common.TypeConverterFactoryImpl;
@@ -12,29 +13,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
-import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.xmlrpc.AnyTypeFactory;
 import pl.nn44.xmlrpc.ClientFactoryFix;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.MessageFormat;
 import java.util.Properties;
+import java.util.function.Function;
 
-public class Clients {
+public class Clients<T> {
 
     private static final Logger LOG = LoggerFactory.getLogger(Clients.class);
-    private final Properties prop;
 
-    public Clients(Properties prop) {
-        this.prop = prop;
+    private final Class<T> serviceInterface;
+    private final Function<String, String> url;
+
+    public Clients(Properties prop, Class<T> clazz) {
+        this.serviceInterface = clazz;
+
+        this.url = (resource) -> MessageFormat.format(
+                "http{0}://{1}:{2}/{3}",
+                Boolean.parseBoolean(prop.getProperty("server.ssl")) ? "s" : "",
+                prop.getProperty("server.ip"),
+                prop.getProperty("server.port"),
+                CharMatcher.is('/').trimLeadingFrom(prop.getProperty(resource))
+        );
+
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public ChatService hessianClient() {
-        String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.hessian");
+    public T hessian() {
+        String serviceUrl = url.apply("rpc.hessian");
 
         HessianProxyFactory hpf = new HessianProxyFactory();
         HessianConnectionFactory hcf = new HessianURLConnectionFactory() {
@@ -42,7 +56,7 @@ public class Clients {
             @Override
             public HessianConnection open(URL url) throws IOException {
                 HessianConnection hc = super.open(url);
-                hc.addHeader("User-Agent", "RC-Hessian");
+                hc.addHeader("User-Agent", "CT-Hessian");
                 return hc;
             }
         };
@@ -54,25 +68,26 @@ public class Clients {
         factory.setProxyFactory(hpf);
         factory.setConnectionFactory(hcf);
         factory.setServiceUrl(serviceUrl);
-        factory.setServiceInterface(ChatService.class);
+        factory.setServiceInterface(serviceInterface);
 
         factory.afterPropertiesSet();
-        ChatService chatService = (ChatService) factory.getObject();
+        Object proxy = factory.getObject();
+        T client = serviceInterface.cast(proxy);
 
         LOG.debug("HessianClient instance created.");
-        return chatService;
+        return client;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public ChatService burlapClient() {
-        String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.burlap");
+    public T burlap() {
+        String serviceUrl = url.apply("rpc.burlap");
 
         BurlapProxyFactory bpf = new BurlapProxyFactory() {
             @Override
             protected URLConnection openConnection(URL url) throws IOException {
                 URLConnection uc = super.openConnection(url);
-                uc.setRequestProperty("User-Agent", "RC-Burlap");
+                uc.setRequestProperty("User-Agent", "CT-Burlap");
                 return uc;
             }
         };
@@ -80,20 +95,22 @@ public class Clients {
         // noinspection deprecation
         BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
         factory.setServiceUrl(serviceUrl);
-        factory.setServiceInterface(ChatService.class);
+        factory.setServiceInterface(serviceInterface);
         factory.setProxyFactory(bpf);
 
         factory.afterPropertiesSet();
-        ChatService chatService = (ChatService) factory.getObject();
+        factory.afterPropertiesSet();
+        Object proxy = factory.getObject();
+        T client = serviceInterface.cast(proxy);
 
         LOG.debug("BurlapClient instance created.");
-        return chatService;
+        return client;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public ChatService xmlRpcClient() {
-        String serviceUrl = prop.getProperty("url.app") + prop.getProperty("url.xml-rpc");
+    public T xmlRpc() {
+        String serviceUrl = url.apply("rpc.xml-rpc");
 
         try {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
@@ -101,23 +118,24 @@ public class Clients {
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
             config.setEnabledForExceptions(true);
             config.setEnabledForExtensions(true); // required by enabledForExceptions
-            config.setUserAgent("RC-XmlRpc");
+            config.setUserAgent("CT-XmlRpc");
 
-            XmlRpcClient client = new XmlRpcClient();
-            client.setConfig(config);
-            // client.setTypeFactory(new AnyTypeFactory(client));
+            XmlRpcClient rpcClient = new XmlRpcClient();
+            rpcClient.setConfig(config);
+            rpcClient.setTypeFactory(new AnyTypeFactory(rpcClient));
 
-            ChatService chatService = (ChatService) ClientFactoryFix.newInstance(
+            Object proxy = ClientFactoryFix.newInstance(
                     Thread.currentThread().getContextClassLoader(),
-                    ChatService.class,
-                    "ChatService",
-                    client::execute,
+                    serviceInterface,
                     config.getServerURL().toString(),
+                    rpcClient::execute,
                     new TypeConverterFactoryImpl()
             );
 
+            T client = serviceInterface.cast(proxy);
+
             LOG.debug("XmlRpcClient instance created.");
-            return chatService;
+            return client;
 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

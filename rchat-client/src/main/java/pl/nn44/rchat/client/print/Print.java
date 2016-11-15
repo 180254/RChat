@@ -1,11 +1,11 @@
-package pl.nn44.rchat.client.model;
+package pl.nn44.rchat.client.print;
 
 import javafx.scene.text.Text;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class CtMsg {
+public class Print {
 
     public static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:MM:SS");
 

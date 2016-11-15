@@ -25,11 +25,11 @@ public class CsHandler {
 
     public void init() {
         Properties prop = PropLoader.get();
-        Clients clients = new Clients(prop);
+        Clients<ChatService> clients = new Clients<>(prop, ChatService.class);
 
-        this.chatServices[Clients.Cs.Hessian.i()] = clients.hessianClient();
-        this.chatServices[Clients.Cs.Burlap.i()] = clients.burlapClient();
-        this.chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpcClient();
+        this.chatServices[Clients.Cs.Hessian.i()] = clients.hessian();
+        this.chatServices[Clients.Cs.Burlap.i()] = clients.burlap();
+        this.chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc();
     }
 
     // ---------------------------------------------------------------------------------------------------------------
