@@ -29,11 +29,12 @@ public class AsLogger {
                     .put(Level.ERROR, (log) -> log::error)
                     .build();
 
+    // @formatter:off
     @Around(
             "" +
                     /* class */
                     "(" +
-                    "execution(public * (@pl.nn44.rchat.server.aspect.Loggable *).*(..))" +
+                        "execution(public * (@pl.nn44.rchat.server.aspect.Loggable *).*(..))" +
                         " && !execution(String *.toString())" +
                         " && !execution(int *.hashCode())" +
                         " && !execution(boolean *.equals(Object))" +
@@ -42,9 +43,10 @@ public class AsLogger {
                     /* method*/
                     "(" +
                         "execution(* *(..))" +
-                    " && @annotation(pl.nn44.rchat.server.aspect.Loggable)" +
+                        " && @annotation(pl.nn44.rchat.server.aspect.Loggable)" +
                     ")"
     )
+    // @formatter:on
     public Object around(ProceedingJoinPoint point) throws Throwable {
         LOG.trace("AROUND: {}", point);
 
@@ -56,7 +58,7 @@ public class AsLogger {
             annotation = clazz.getAnnotation(Loggable.class);
         }
 
-        long start = System.currentTimeMillis();
+        long startMs = System.currentTimeMillis();
         Object result = null;
         Throwable throwable = null;
         try {
@@ -64,7 +66,7 @@ public class AsLogger {
         } catch (Throwable ex) {
             throwable = ex;
         }
-        long time = System.currentTimeMillis() - start;
+        long timeMs = System.currentTimeMillis() - startMs;
 
         Logger logger = LoggerFactory.getLogger(clazz);
         Printer printer = loggers.get(annotation.level()).apply(logger);
@@ -73,7 +75,7 @@ public class AsLogger {
                 MethodSignature.class.cast(point.getSignature()).getMethod().getName(),
                 annotation.params() ? arrayToString(point.getArgs()) : "_",
                 annotation.result() ? MoreObjects.firstNonNull(throwable, result) : "_",
-                time
+                timeMs
         );
 
         if (throwable != null) {

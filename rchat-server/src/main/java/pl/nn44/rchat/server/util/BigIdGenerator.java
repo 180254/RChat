@@ -39,6 +39,8 @@ public class BigIdGenerator implements Iterator<String> {
         return new BigIdGenerator(random, chars);
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public int getChars() {
         return chars;
     }
@@ -46,6 +48,8 @@ public class BigIdGenerator implements Iterator<String> {
     public int getBits() {
         return bits;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public boolean hasNext() {
@@ -57,6 +61,8 @@ public class BigIdGenerator implements Iterator<String> {
         String nextId = new BigInteger(bits, random).toString(NUMBER_BASE);
         return Strings.padStart(nextId, chars, '0');
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public String toString() {

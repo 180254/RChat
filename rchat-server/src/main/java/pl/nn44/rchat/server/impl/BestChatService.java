@@ -39,6 +39,9 @@ public class BestChatService implements ChatService {
     public static final int ID_RANDOM_BITS = 8 * BigIdGenerator.BITS_PER_CHAR;
     public static final int STRIPED_LOCKS = 32;
 
+    public static final String SESSION_CLEANUP_CRON = "0 */5 * * * *";
+    public static final long SESSION_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(3L);
+
     private final Random random = new SecureRandom();
     private final Iterator<String> idGenerator = BigIdGenerator.bits(random, ID_RANDOM_BITS);
     private final Pattern nameValidator = Pattern.compile("[a-zA-Z0-9_.-]{1,10}");
@@ -76,16 +79,16 @@ public class BestChatService implements ChatService {
         Locks locks = locks(null, null, username);
 
         try {
-            if (sessionToUser.containsValue(ServerUser.dummyUser(username))) {
-                throw new ChatException(Reason.ALREADY_LOGGED_IN);
+            if (!nameValidator.matcher(username).matches()) {
+                throw new ChatException(Reason.GIVEN_BAD_USERNAME);
             }
 
             if (!Objects.equals(accounts.get(username), password)) {
                 throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
             }
 
-            if (!nameValidator.matcher(username).matches()) {
-                throw new ChatException(Reason.GIVEN_BAD_USERNAME);
+            if (sessionToUser.containsValue(ServerUser.dummyUser(username))) {
+                throw new ChatException(Reason.ALREADY_LOGGED_IN);
             }
 
             String session = idGenerator.next();
@@ -178,13 +181,12 @@ public class BestChatService implements ChatService {
                 boolean auth = accounts.containsKey(params.caller.getUsername());
                 boolean admin = params.channel.getAdmins().contains(params.caller.getUsername());
 
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUp = WhatsUp.create(
                         What.JOIN,
                         params.channel.getName(),
                         params.caller.getUsername(),
                         Boolean.toString(auth),
                         Boolean.toString(admin)
-
                 );
 
                 params.channel.getUsers().stream()
@@ -204,14 +206,14 @@ public class BestChatService implements ChatService {
                     ))
                     .toArray(User[]::new);
 
-            Channel channel2 = new Channel(
+            Channel pChannel = new Channel(
                     params.channel.getName(),
                     params.channel.getPassword() != null,
                     params.channel.getTopic(),
                     users
             );
 
-            return Response.Ok(channel2);
+            return Response.Ok(pChannel);
 
         } finally {
             locks.unlock();
@@ -233,7 +235,7 @@ public class BestChatService implements ChatService {
             }
 
             if (removeC) {
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUp = WhatsUp.create(
                         What.PART,
                         params.channel.getName(),
                         params.caller.getUsername()
@@ -263,7 +265,7 @@ public class BestChatService implements ChatService {
             if (change) {
                 params.channel.setTopic(text);
 
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUp = WhatsUp.create(
                         What.TOPIC,
                         params.channel.getName(),
                         params.caller.getUsername(),
@@ -297,22 +299,22 @@ public class BestChatService implements ChatService {
             }
 
             if (removeC) {
-                WhatsUp whatsUpKick = new WhatsUp(
+                WhatsUp wuKick = WhatsUp.create(
                         What.KICK,
                         params.channel.getName(),
                         params.affUser.getUsername(),
                         params.caller.getUsername()
                 );
 
-                WhatsUp whatsUpPart = new WhatsUp(
+                WhatsUp wuPart = WhatsUp.create(
                         What.PART,
                         params.channel.getName(),
                         params.affUser.getUsername()
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
-                    su.getNews().offer(whatsUpKick);
-                    su.getNews().offer(whatsUpPart);
+                    su.getNews().offer(wuKick);
+                    su.getNews().offer(wuPart);
                 }
             }
 
@@ -336,7 +338,7 @@ public class BestChatService implements ChatService {
                     : params.channel.getBanned().remove(params.affUser.getUsername());
 
             if (change) {
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUp = WhatsUp.create(
                         What.BAN,
                         params.channel.getName(),
                         params.affUser.getUsername(),
@@ -369,7 +371,7 @@ public class BestChatService implements ChatService {
                     : params.channel.getAdmins().remove(params.affUser.getUsername());
 
             if (change) {
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUp = WhatsUp.create(
                         What.ADMIN,
                         params.channel.getName(),
                         params.affUser.getUsername(),
@@ -401,7 +403,7 @@ public class BestChatService implements ChatService {
                     : params.caller.getIgnored().remove(params.affUser);
 
             if (change) {
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUp = WhatsUp.create(
                         What.IGNORE,
                         unused,
                         params.affUser.getUsername(),
@@ -430,7 +432,7 @@ public class BestChatService implements ChatService {
             boolean ignore = params.affUser.getIgnored().contains(params.caller);
 
             if (!ignore) {
-                WhatsUp whatsUp = new WhatsUp(
+                WhatsUp whatsUp = WhatsUp.create(
                         What.PRIVY,
                         null,
                         params.affUser.getUsername(),
@@ -456,7 +458,7 @@ public class BestChatService implements ChatService {
         try {
             Params params = params(session, channel, null, false);
 
-            WhatsUp whatsUp = new WhatsUp(
+            WhatsUp whatsUp = WhatsUp.create(
                     What.MESSAGE,
                     params.channel.getName(),
                     params.caller.getUsername(),
@@ -482,7 +484,7 @@ public class BestChatService implements ChatService {
     public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException {
         Params params = params(session, null, null, false);
 
-        List<WhatsUp> news = new LinkedList<>();
+        ArrayList<WhatsUp> news = new ArrayList<>(MAX_NEWS_PER_REQUEST / 2);
 
         while (news.size() < MAX_NEWS_PER_REQUEST) {
             WhatsUp poll = params.caller.getNews().poll();
@@ -510,20 +512,23 @@ public class BestChatService implements ChatService {
             }
         }
 
-        WhatsUp[] newsArray = news.toArray(new WhatsUp[news.size()]);
+        WhatsUp[] newsArray = new WhatsUp[news.size()];
+        newsArray = news.toArray(newsArray);
         return Response.Ok(newsArray);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = SESSION_CLEANUP_CRON)
     public int sessionCleanup() {
         LocalDateTime now = LocalDateTime.now();
 
         List<Map.Entry<String, ServerUser>> ghosts =
                 sessionToUser
                         .entrySet().stream()
-                        .filter(se -> ChronoUnit.MINUTES.between(se.getValue().getLastSync(), now) >= 3)
+                        .filter(se ->
+                                ChronoUnit.SECONDS.between(se.getValue().getLastSync(), now) >= SESSION_TIMEOUT_SECONDS
+                        )
                         .collect(Collectors.toList());
 
         ghosts.forEach(se -> {
@@ -558,8 +563,8 @@ public class BestChatService implements ChatService {
                                 .put("array-object", new Object[]{1, "2", What.BAN})
                                 .put("list", Arrays.asList(2, "3", What.JOIN))
                                 .put("map", ImmutableMap.<Object, Object>of("key", "value"))
-                                .put("whatsUp", new WhatsUp(What.TOPIC, "any", "topic"))
-                                .put("whatsUp-param", new WhatsUp(What.TOPIC, "any", "topic", "p1", "p2"))
+                                .put("whatsUp", WhatsUp.create(What.TOPIC, "any", "topic"))
+                                .put("whatsUp-param", WhatsUp.create(What.TOPIC, "any", "topic", "p1", "p2"))
                                 .build()
                 )
         );

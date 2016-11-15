@@ -27,10 +27,14 @@ public class ServerApp {
         SpringApplication.run(ServerApp.class, args);
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     @Bean
     public ChatService chatService() {
         return new BestChatService();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Bean
     public RpcProviders<ChatService> rpcProviders(ChatService cs) {
@@ -52,6 +56,8 @@ public class ServerApp {
         return rp.xmlRpc();
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     @Bean
     public PlainPageController pageController() {
         return new PlainPageController();
@@ -61,6 +67,8 @@ public class ServerApp {
     public ErrorController errorController() {
         return new PlainErrorController();
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Bean
     public AsLogger asLogger() {
