@@ -35,9 +35,6 @@ public class ServerChannel {
         return topic;
     }
 
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
 
     public CopyOnWriteArrayList<ServerUser> getUsers() {
         return users;
@@ -49,6 +46,12 @@ public class ServerChannel {
 
     public CopyOnWriteArrayList<String> getBanned() {
         return banned;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 
     // ---------------------------------------------------------------------------------------------------------------

@@ -12,7 +12,7 @@ import org.springframework.web.HttpRequestHandler;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.server.aspect.AsLogger;
 import pl.nn44.rchat.server.impl.BestChatService;
-import pl.nn44.rchat.server.impl.RpcProvider;
+import pl.nn44.rchat.server.impl.Endpoints;
 import pl.nn44.rchat.server.page.PlainErrorController;
 import pl.nn44.rchat.server.page.PlainPageController;
 
@@ -37,23 +37,23 @@ public class ServerApp {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Bean
-    public RpcProvider<ChatService> rpcProvider(ChatService cs) {
-        return new RpcProvider<>(cs, ChatService.class);
+    public Endpoints<ChatService> endpoints(ChatService cs) {
+        return new Endpoints<>(cs, ChatService.class);
     }
 
     @Bean(name = "/hessian")
-    public HttpRequestHandler hessianRpc(RpcProvider<?> rp) {
-        return rp.hessian();
+    public HttpRequestHandler hessianRpc(Endpoints<?> ep) {
+        return ep.hessian();
     }
 
     @Bean(name = "/burlap")
-    public HttpRequestHandler burlapRpc(RpcProvider<?> rp) {
-        return rp.burlap();
+    public HttpRequestHandler burlapRpc(Endpoints<?> ep) {
+        return ep.burlap();
     }
 
     @Bean(name = "/xml-rpc")
-    public HttpRequestHandler xmlRpcRpc(RpcProvider<?> rp) throws XmlRpcException {
-        return rp.xmlRpc();
+    public HttpRequestHandler xmlRpcRpc(Endpoints<?> ep) throws XmlRpcException {
+        return ep.xmlRpc();
     }
 
     // ---------------------------------------------------------------------------------------------------------------

@@ -555,7 +555,6 @@ public class BestChatService implements ChatService {
         return Response.Ok(
                 Response.Ok(
                         new ImmutableMap.Builder<>()
-                                .put("null", "null")
                                 .put("string", "xxx")
                                 .put("number", 999)
                                 .put("response", Response.Ok(10))
@@ -565,6 +564,8 @@ public class BestChatService implements ChatService {
                                 .put("map", ImmutableMap.<Object, Object>of("key", "value"))
                                 .put("whatsUp", WhatsUp.create(What.TOPIC, "any", "topic"))
                                 .put("whatsUp-param", WhatsUp.create(What.TOPIC, "any", "topic", "p1", "p2"))
+                                .put("empty-array", new WhatsUp[0])
+                                .put("empty-list", new ArrayList<WhatsUp>())
                                 .build()
                 )
         );

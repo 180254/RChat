@@ -13,14 +13,14 @@ import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.HttpRequestHandler;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 
-public class RpcProvider<T> {
+public class Endpoints<T> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RpcProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Endpoints.class);
 
     private final T service;
     private final Class<T> clazz;
 
-    public RpcProvider(T service, Class<T> clazz) {
+    public Endpoints(T service, Class<T> clazz) {
         this.service = service;
         this.clazz = clazz;
     }
@@ -30,7 +30,7 @@ public class RpcProvider<T> {
         exporter.setService(service);
         exporter.setServiceInterface(clazz);
 
-        LOG.info("hessian provider created.");
+        LOG.info("hessian endpoint created.");
         return exporter;
     }
 
@@ -40,7 +40,7 @@ public class RpcProvider<T> {
         exporter.setService(service);
         exporter.setServiceInterface(clazz);
 
-        LOG.info("burlap provider created.");
+        LOG.info("burlap endpoint created.");
         return exporter;
     }
 
@@ -62,7 +62,7 @@ public class RpcProvider<T> {
         server.setHandlerMapping(handlerMapping);
         server.setTypeFactory(new AnyTypeFactory(server));
 
-        LOG.info("xml-rpc provider created.");
+        LOG.info("xml-rpc endpoint created.");
         return server::execute;
     }
 }
