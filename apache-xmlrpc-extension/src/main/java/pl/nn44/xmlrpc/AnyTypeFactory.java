@@ -46,7 +46,7 @@ import java.util.*;
  *   entry=("type", "some.java.class.full.name")
  *   entry=("name", enum_key.name())
  *
- * - array are served as map:
+ * - arrays are served as map:
  *   entry=("__class__", "array")
  *   entry=("type", "some.java.class.full.name")
  *   entry=("values", struct_with_values)
