@@ -61,7 +61,8 @@ public class AnyTypeFactory extends TypeFactoryImpl {
         BASIC_CLASSES.add(Map.class);
 
         // Object[]
-        BASIC_CLASSES.add(Object[].class);
+        // Arrays are manually handled to keep types.
+        // BASIC_CLASSES.add(Object[].class);
 
         //  java.util.List
         BASIC_CLASSES.add(List.class);
@@ -152,6 +153,14 @@ public class AnyTypeFactory extends TypeFactoryImpl {
             return map;
         }
 
+        // special case: arrays
+        if (clazz.isArray()) {
+            map.put("__class__", "array");
+            map.put("type", clazz.getComponentType().getName());
+            map.put("values", Arrays.asList((Object[]) object));
+            return map;
+        }
+
         // any other class: map of (field-name, value)
         map.put("__class__", clazz.getName());
 
@@ -208,11 +217,22 @@ public class AnyTypeFactory extends TypeFactoryImpl {
             // or Enum.valueOf((Class<Enum>) enumType, keyName);
             // but then unchecked cast warning
             return Arrays.stream(enumType.getEnumConstants())
-                    .filter(ec -> ((Enum<?>) ec).name().equals(keyName))
+                    .map(ec -> (Enum<?>) ec)
+                    .filter(ec -> ec.name().equals(keyName))
                     .findFirst()
                     .orElseThrow(() -> new InstantiationException(
                             "enum=" + map.get("type") + ';' + map.get("name")
                     ));
+        }
+
+        // special case: array
+        if (__class__.equals("array")) {
+            Class<?> type = Class.forName(map.get("type").toString());
+            Object[] values = (Object[]) map.get("values");
+
+            Object[] newValues = (Object[]) Array.newInstance(type, values.length);
+            System.arraycopy(newValues, 0, newValues, 0, values.length);
+            return newValues;
         }
 
         Class<?> clazz = Class.forName(__class__.toString());
@@ -238,15 +258,6 @@ public class AnyTypeFactory extends TypeFactoryImpl {
             modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
             Object value = entry.getValue();
-
-            // special case: array
-            if (value != null && value.getClass().isArray()) {
-                Object[] oldValue = (Object[]) value;
-                Object[] newValue = (Object[]) Array.newInstance(field.getType().getComponentType(), oldValue.length);
-
-                System.arraycopy(oldValue, 0, newValue, 0, oldValue.length);
-                value = newValue;
-            }
 
             field.set(instance, value);
         }
