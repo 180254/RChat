@@ -152,7 +152,9 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, false, false);
+            Params params = params(session, null, null, false, false);
+            // cannot get channel in one params request as then there is used verification if user is on channel
+            params.channel = params(null, channel, null, false, false).channel;
 
             if (!Objects.equals(params.channel.getPassword(), password)) {
                 throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
@@ -578,8 +580,8 @@ public class BestChatService implements ChatService {
         Params(String session,
                String channel,
                String username,
-               boolean needAdmin,
-               boolean userOnChan)
+               boolean callerMustBeAdmin,
+               boolean affUserMustBeOnChan)
                 throws ChatException {
 
             if (session != null) {
@@ -602,7 +604,7 @@ public class BestChatService implements ChatService {
                 }
             }
 
-            if (username != null && this.channel != null && userOnChan) {
+            if (username != null && this.channel != null && affUserMustBeOnChan) {
                 ServerUser dummyAffUser = ServerUser.dummyUser(username);
 
                 this.affUser = this.channel.getUsers().stream()
@@ -613,7 +615,7 @@ public class BestChatService implements ChatService {
                 }
             }
 
-            if (needAdmin && this.channel != null && this.caller != null) {
+            if (callerMustBeAdmin && this.channel != null && this.caller != null) {
                 if (!this.channel.getAdmins().contains(this.caller.getUsername())) {
                     throw new ChatException(Reason.NO_PERMISSION);
                 }
@@ -626,21 +628,24 @@ public class BestChatService implements ChatService {
     }
 
     // checks if:
-    // - caller(session) is proper (GIVEN_BAD_SESSION)               [ if session != null ]
-    // - channel(channel) is proper (GIVEN_BAD_CHANNEL)              [ if channel != null ]
-    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)        [ if username,channel != null && userOnChan ]
-    // - caller is on channel (NO_PERMISSION)                        [ if session,channel != null ]
-    // - caller is admin on channel (NO_PERMISSION)                  [ if session,channel != null && needAdmin ]
+    // - caller(session) is proper (GIVEN_BAD_SESSION)           [ if session != null ]
+    // - channel(channel) is proper (GIVEN_BAD_CHANNEL)          [ if channel != null ]
+    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)    [ if username,channel != null && affUserMustBeOnChan ]
+    // - caller is on channel (NO_PERMISSION)                    [ if session,channel != null ]
+    // - caller is admin on channel (NO_PERMISSION)              [ if session,channel != null && callerMustBeAdmin ]
     // and:
     // - update caller last sync timestamp
     private Params params(String session,
                           String channel,
                           String username,
-                          boolean needAdmin,
-                          boolean userOnChan)
+                          boolean callerMustBeAdmin,
+                          boolean affUserMustBeOnChan)
             throws ChatException {
 
-        return new Params(session, channel, username, needAdmin, userOnChan);
+        return new Params(
+                session, channel, username,
+                callerMustBeAdmin, affUserMustBeOnChan
+        );
     }
 
     // ---------------------------------------------------------------------------------------------------------------
