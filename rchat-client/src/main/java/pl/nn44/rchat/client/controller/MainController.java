@@ -386,17 +386,29 @@ public class MainController implements Initializable {
     public void onSomeIgnore(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeIgnore", whatsUp);
 
-        infoAboutStatefulMsg(whatsUp, "ignore");
+        ClientChannel channel = channels.getSelectionModel().getSelectedItem();
+        if (channel != null) {
+            // replace param-channel with current channel
+            // in protocol, for this WhatsUp, channel field is unused
+            String[] newParams = whatsUp.getParams();
+            newParams[0] = channel.getName();
+
+            WhatsUp whatsUp2 = WhatsUp.create(whatsUp.getWhat(), newParams);
+            infoAboutStatefulMsg(whatsUp2, "ignore");
+        }
 
         String whoIgnored = whatsUp.getParams()[1];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        channelsMap.values().stream()
-                .flatMap(c -> c.getUsers().stream())
-                .filter(u -> u.getUsername().equals(whoIgnored))
-                .forEach(u -> u.setIgnored(state));
+        // if i ignored, not i am ignored set ignored flag
+        if (!whoIgnored.equals(csh.getUsername())) {
+            channelsMap.values().stream()
+                    .flatMap(c -> c.getUsers().stream())
+                    .filter(u -> u.getUsername().equals(whoIgnored))
+                    .forEach(u -> u.setIgnored(state));
 
-        runLater(() -> usersSkin.refresh());
+            runLater(() -> usersSkin.refresh());
+        }
     }
 
     public void onSomeTopic(WhatsUp whatsUp) {
