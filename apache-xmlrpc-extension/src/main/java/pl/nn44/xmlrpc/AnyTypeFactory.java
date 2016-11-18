@@ -252,7 +252,7 @@ public class AnyTypeFactory extends TypeFactoryImpl {
             Object[] values = (Object[]) map.get("values");
 
             Object[] newValues = (Object[]) Array.newInstance(type, values.length);
-            System.arraycopy(newValues, 0, newValues, 0, values.length);
+            System.arraycopy(values, 0, newValues, 0, values.length);
             return newValues;
         }
 
