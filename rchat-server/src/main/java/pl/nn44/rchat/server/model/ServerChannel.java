@@ -15,6 +15,8 @@ public class ServerChannel {
     private final CopyOnWriteArrayList<String> admins = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<String> banned = new CopyOnWriteArrayList<>();
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public ServerChannel(String name, String password, String topic) {
         this.name = name;
         this.password = password;

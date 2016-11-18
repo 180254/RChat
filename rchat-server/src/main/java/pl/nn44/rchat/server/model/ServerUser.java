@@ -19,6 +19,8 @@ public class ServerUser {
     private final CopyOnWriteArrayList<ServerUser> ignored = new CopyOnWriteArrayList<>();
     private final BlockingQueue<WhatsUp> news = new LinkedBlockingQueue<>(); // offer(e), poll(), peek()
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public ServerUser(String session, String username) {
         this.session = session;
         this.username = username;

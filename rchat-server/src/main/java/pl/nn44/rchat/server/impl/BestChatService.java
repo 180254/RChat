@@ -107,7 +107,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, null, null);
 
         try {
-            Params params = params(session, null, null, false);
+            Params params = params(session, null, null, false, true);
 
             for (ServerChannel channel : params.caller.getChannels()) {
                 // double lock is safe operation:
@@ -131,7 +131,7 @@ public class BestChatService implements ChatService {
 
         try {
             //  side-effect used: verify session
-            params(session, null, null, false);
+            params(session, null, null, false, true);
 
             Channel[] channels = channelByName.values().stream()
                     .map(chan -> new Channel(
@@ -152,9 +152,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, null, null, false);
-            // cannot get channel in one params request as then there is used verification if user is on channel
-            params.channel = params(null, channel, null, false).channel;
+            Params params = params(session, channel, null, false, false);
 
             if (!Objects.equals(params.channel.getPassword(), password)) {
                 throw new ChatException(Reason.GIVEN_BAD_PASSWORD);
@@ -225,7 +223,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, false);
+            Params params = params(session, channel, null, false, true);
 
             boolean removeC = params.channel.getUsers().remove(params.caller);
             boolean removeU = params.caller.getChannels().remove(params.channel);
@@ -258,7 +256,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, true);
+            Params params = params(session, channel, null, true, true);
 
             boolean change = !params.channel.getTopic().equals(text);
 
@@ -289,7 +287,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, username);
 
         try {
-            Params params = params(session, channel, username, true);
+            Params params = params(session, channel, username, true, true);
 
             boolean removeC = params.channel.getUsers().remove(params.affUser);
             boolean removeU = params.affUser.getChannels().remove(params.channel);
@@ -330,8 +328,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, username);
 
         try {
-            Params params = params(session, null, username, true);
-            params.channel = params(null, channel, null, false).channel; // do not verify if user is on channel
+            Params params = params(session, channel, username, true, false);
 
             boolean change = state
                     ? params.channel.getBanned().addIfAbsent(params.affUser.getUsername())
@@ -363,8 +360,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, username);
 
         try {
-            Params params = params(session, null, username, true);
-            params.channel = params(null, channel, null, false).channel; // do not verify if user is on channel
+            Params params = params(session, channel, username, true, false);
 
             boolean change = state
                     ? params.channel.getAdmins().addIfAbsent(params.affUser.getUsername())
@@ -396,7 +392,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, null, username);
 
         try {
-            Params params = params(session, null, username, false);
+            Params params = params(session, null, username, false, true);
 
             boolean change = state
                     ? params.caller.getIgnored().addIfAbsent(params.affUser)
@@ -427,7 +423,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, null, username);
 
         try {
-            Params params = params(session, null, username, false);
+            Params params = params(session, null, username, false, true);
 
             boolean ignore = params.affUser.getIgnored().contains(params.caller);
 
@@ -456,7 +452,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, false);
+            Params params = params(session, channel, null, false, true);
 
             WhatsUp whatsUp = WhatsUp.create(
                     What.MESSAGE,
@@ -482,7 +478,7 @@ public class BestChatService implements ChatService {
 
     @Override
     public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException {
-        Params params = params(session, null, null, false);
+        Params params = params(session, null, null, false, true);
 
         ArrayList<WhatsUp> news = new ArrayList<>(MAX_NEWS_PER_REQUEST / 2);
 
@@ -582,7 +578,8 @@ public class BestChatService implements ChatService {
         Params(String session,
                String channel,
                String username,
-               boolean needAdmin)
+               boolean needAdmin,
+               boolean userOnChan)
                 throws ChatException {
 
             if (session != null) {
@@ -605,7 +602,7 @@ public class BestChatService implements ChatService {
                 }
             }
 
-            if (username != null && this.channel != null) {
+            if (username != null && this.channel != null && userOnChan) {
                 ServerUser dummyAffUser = ServerUser.dummyUser(username);
 
                 this.affUser = this.channel.getUsers().stream()
@@ -629,20 +626,21 @@ public class BestChatService implements ChatService {
     }
 
     // checks if:
-    // - caller(session) is proper (GIVEN_BAD_SESSION)
-    // - channel(channel) is proper (GIVEN_BAD_CHANNEL)
-    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)
-    // - caller is on channel (NO_PERMISSION)
-    // - caller is admin on channel (NO_PERMISSION)
+    // - caller(session) is proper (GIVEN_BAD_SESSION)               [ if session != null ]
+    // - channel(channel) is proper (GIVEN_BAD_CHANNEL)              [ if channel != null ]
+    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)        [ if username,channel != null && userOnChan ]
+    // - caller is on channel (NO_PERMISSION)                        [ if session,channel != null ]
+    // - caller is admin on channel (NO_PERMISSION)                  [ if session,channel != null && needAdmin ]
     // and:
     // - update caller last sync timestamp
     private Params params(String session,
                           String channel,
                           String username,
-                          boolean needAdmin)
+                          boolean needAdmin,
+                          boolean userOnChan)
             throws ChatException {
 
-        return new Params(session, channel, username, needAdmin);
+        return new Params(session, channel, username, needAdmin, userOnChan);
     }
 
     // ---------------------------------------------------------------------------------------------------------------

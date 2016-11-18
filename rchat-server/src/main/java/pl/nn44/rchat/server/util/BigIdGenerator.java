@@ -22,6 +22,8 @@ public class BigIdGenerator implements Iterator<String> {
     private final int chars;
     private final int bits;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     private BigIdGenerator(Random random, int chars) {
         this.random = random;
         this.chars = chars;

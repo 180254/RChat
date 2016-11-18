@@ -5,6 +5,9 @@ import ch.qos.logback.core.pattern.CompositeConverter;
 
 import java.util.regex.Pattern;
 
+/**
+ * Converter to strip ansi control sequences (especially colors) from text in logback pattern.
+ */
 public class AnsiControlSeqRemover extends CompositeConverter<ILoggingEvent> {
 
     private static final Pattern ANSI_CONTROL_SEQ =
