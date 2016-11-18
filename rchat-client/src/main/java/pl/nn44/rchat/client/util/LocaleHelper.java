@@ -15,9 +15,13 @@ public class LocaleHelper {
 
     private ResourceBundle res;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public LocaleHelper() {
         this.res = null;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public String mapError(String map, Exception e) {
         if (e instanceof ChatException) {
@@ -47,6 +51,8 @@ public class LocaleHelper {
                 ? MessageFormat.format(resText, values)
                 : resText;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void setResources(ResourceBundle resources) {
         this.res = resources;

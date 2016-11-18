@@ -21,6 +21,8 @@ public class ClientChannel {
     private boolean join;
     private String currentMsg;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public ClientChannel(Channel channel) {
         this.name = channel.getName();
         this.password = channel.isPassword();

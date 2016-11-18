@@ -13,9 +13,10 @@ public class CsHandler {
     private static final Logger LOG = LoggerFactory.getLogger(CsHandler.class);
 
     private final ChatService[] chatServices = new ChatService[3];
-
     private String token = null;
     private int current = 0;
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public CsHandler() {
         LOG.debug("{} instance created.", getClass().getSimpleName());

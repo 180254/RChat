@@ -13,23 +13,26 @@ public class PrintInfo implements Printable {
     private final LocaleHelper i18n;
     private final LocalDateTime time;
     private final String resKey;
-    private final Object[] arguments;
+    private final Object[] resArgs;
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public PrintInfo(LocaleHelper locHelper,
                      LocalDateTime time,
-                     String resKey, Object... resArgs) {
+                     String resKey,
+                     Object[] resArgs) {
 
         this.i18n = locHelper;
         this.time = time;
         this.resKey = resKey;
-        this.arguments = resArgs.clone();
+        this.resArgs = resArgs.clone();
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public List<Text> toNodes() {
-        String info = i18n.get(resKey, arguments);
+        String info = i18n.get(resKey, resArgs);
         String info2 = MessageFormat.format("{0} {1}\n", PrintUtil.time(time), info);
 
         Text text = PrintUtil.txt(info2, "c-ct-message", "c-ct-message-info");

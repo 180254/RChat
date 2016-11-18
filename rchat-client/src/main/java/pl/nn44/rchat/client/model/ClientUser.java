@@ -12,6 +12,8 @@ public class ClientUser {
     private boolean admin;
     private boolean banned;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public ClientUser(User user) {
         this.username = user.getUsername();
         this.authorized = user.isAuthorized();

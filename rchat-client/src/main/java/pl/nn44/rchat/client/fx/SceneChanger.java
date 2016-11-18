@@ -21,6 +21,8 @@ public class SceneChanger implements Consumer<String> {
     private final Callback<Class<?>, Object> controllerFactory;
     private final ResourceBundle resources;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public SceneChanger(Stage primaryStage,
                         Callback<Class<?>, Object> controllerFactory,
                         ResourceBundle resources) {
@@ -29,6 +31,8 @@ public class SceneChanger implements Consumer<String> {
         this.controllerFactory = controllerFactory;
         this.resources = resources;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     @Override
     public void accept(String scene) {

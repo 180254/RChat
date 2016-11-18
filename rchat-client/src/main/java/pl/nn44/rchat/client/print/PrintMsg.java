@@ -12,6 +12,8 @@ public class PrintMsg implements Printable {
     private final LocalDateTime time;
     private final String message;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public PrintMsg(String user, LocalDateTime time, String message) {
         this.user = user;
         this.time = time;

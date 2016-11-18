@@ -31,6 +31,8 @@ public class Clients<T> {
     private final Class<T> serviceInterface;
     private final Function<String, String> url;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public Clients(Properties prop, Class<T> clazz) {
         this.serviceInterface = clazz;
 
