@@ -6,12 +6,13 @@
 
     <!-- @formatter:off -->
     <property name="ENCODER-PATTERN" value=
-            "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-30.30logger{29}){cyan} %clr(:){faint} %clr([us=%-10X{req.userAgent}, rh=%-15X{req.remoteHost}]){magenta} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+            "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-30.30logger{29}){cyan} %clr(:){faint} %clr([us=%-10.-10X{req.userAgent}, rh=%-15X{req.remoteHost}]){magenta} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
     />
     <!-- @formatter:on -->
 
     <!-- _________________________________________________________________________________________________________ -->
 
+    <property name="LOG-FILE" value="x-log-rchat-server.log"/>
     <property name="BUSINESS-EXCEPTIONS" value="pl.nn44.rchat.protocol.exception.ChatException"/>
     <conversionRule conversionWord="removeAnsi" converterClass="pl.nn44.rchat.server.logback.AnsiControlSeqRemover"/>
 
@@ -45,7 +46,7 @@
     <!-- _________________________________________________________________________________________________________ -->
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>log-rchat-server.log</file>
+        <file>${LOG-FILE}</file>
         <append>true</append>
 
         <encoder>
