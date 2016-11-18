@@ -13,6 +13,7 @@ public class CsHandler {
     private static final Logger LOG = LoggerFactory.getLogger(CsHandler.class);
 
     private final ChatService[] chatServices = new ChatService[3];
+    private String username = null;
     private String token = null;
     private int current = 0;
 
@@ -69,6 +70,16 @@ public class CsHandler {
 
     public ChatService cs() {
         return chatServices[current];
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     // ---------------------------------------------------------------------------------------------------------------

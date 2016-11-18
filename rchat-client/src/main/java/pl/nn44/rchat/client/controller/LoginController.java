@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.SceneChanger;
+import pl.nn44.rchat.client.fx.TitleChanger;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.util.LocaleHelper;
 
@@ -25,6 +26,7 @@ public class LoginController implements Initializable {
     private final CsHandler csh;
     private final LocaleHelper i18n;
     private final SceneChanger sc;
+    private final TitleChanger tc;
 
     @FXML public TextField username;
     @FXML public PasswordField password;
@@ -39,12 +41,14 @@ public class LoginController implements Initializable {
     public LoginController(ExecutorService executor,
                            CsHandler csHandler,
                            LocaleHelper locHelper,
-                           SceneChanger sceneChanger) {
+                           SceneChanger sceneChanger,
+                           TitleChanger titleChanger) {
 
         this.exs = executor;
         this.csh = csHandler;
         this.i18n = locHelper;
         this.sc = sceneChanger;
+        this.tc = titleChanger;
 
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
@@ -54,6 +58,7 @@ public class LoginController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         exs.submit(() -> {
             runLater(() -> {
+                tc.accept(null);
                 menuController.logout.setDisable(true);
                 status.setText(i18n.get("ctrl.login.initializing"));
                 enter.setDisable(true);
@@ -87,9 +92,13 @@ public class LoginController implements Initializable {
                                 Strings.emptyToNull(password.getText())
                         ).getPayload();
 
+                csh.setUsername(username.getText());
                 csh.setToken(token);
 
-                runLater(() -> sc.accept("main"));
+                runLater(() -> {
+                    sc.accept("main");
+                    tc.accept(csh.getUsername());
+                });
 
             } catch (Exception e) {
                 runLater(() -> {

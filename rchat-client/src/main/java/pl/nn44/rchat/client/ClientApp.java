@@ -11,6 +11,7 @@ import pl.nn44.rchat.client.controller.LoginController;
 import pl.nn44.rchat.client.controller.MainController;
 import pl.nn44.rchat.client.controller.MenuController;
 import pl.nn44.rchat.client.fx.SceneChanger;
+import pl.nn44.rchat.client.fx.TitleChanger;
 import pl.nn44.rchat.client.impl.CsHandler;
 import pl.nn44.rchat.client.util.LocaleHelper;
 
@@ -48,9 +49,12 @@ public class ClientApp extends Application {
                 clazz -> controllers.get(clazz).get(),
                 resources
         );
+        TitleChanger titleChanger = new TitleChanger(
+                primaryStage
+        );
 
         controllers.put(LoginController.class, () ->
-                new LoginController(executor, csHandler, locHelper, sceneChanger)
+                new LoginController(executor, csHandler, locHelper, sceneChanger, titleChanger)
         );
         controllers.put(MainController.class, () ->
                 new MainController(executor, csHandler, locHelper))
@@ -60,7 +64,6 @@ public class ClientApp extends Application {
         );
 
         sceneChanger.accept("login");
-        primaryStage.setTitle("RChat");
         primaryStage.show();
     }
 
