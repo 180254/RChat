@@ -1,6 +1,9 @@
 package pl.nn44.rchat.client.controller;
 
 import com.google.common.collect.ImmutableMap;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -129,6 +132,18 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private Property<String> topicModel;
+
+    private Property<String> topicSource =
+            new SimpleStringProperty();
+
+    private final ChangeListener<String> topicTake =
+            (observable, oldValue, newValue) -> {
+                runLater(() -> topicModel.setValue(newValue));
+            };
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     private ObservableList<Node> messagesModel;
 
     private ObservableList<Text> messagesSource =
@@ -169,6 +184,7 @@ public class MainController implements Initializable {
         channelsSkin = new RefreshableListViewSkin<>(channels);
         usersSkin = new RefreshableListViewSkin<>(users);
 
+        topicModel = topic.textProperty();
         usersModel = users.getItems();
         messagesModel = messages.getChildren();
 
@@ -372,12 +388,11 @@ public class MainController implements Initializable {
 
         infoAboutStatefulMsg(whatsUp, "ignore");
 
-        String channel = whatsUp.getParams()[0];
         String whoIgnored = whatsUp.getParams()[1];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getUsers().stream()
+        channelsMap.values().stream()
+                .flatMap(c -> c.getUsers().stream())
                 .filter(u -> u.getUsername().equals(whoIgnored))
                 .forEach(u -> u.setIgnored(state));
 
@@ -439,8 +454,12 @@ public class MainController implements Initializable {
     public void onSingleClickedChannels(ClientChannel channel) {
         send.setDisable(!fatalFail && !(channel.isJoin()));
 
-        message.setText(channel.getCurrentMsg());
-        topic.textProperty().bind(channel.getTopic());
+        if (topicSource != channel.getTopic()) {
+            topicSource.removeListener(topicTake);
+            topicSource = channel.getTopic();
+            topicModel.setValue(topicSource.getValue());
+            topicSource.addListener(topicTake);
+        }
 
         if (messagesSource != channel.getMessages()) {
             messagesSource.removeListener(messageTake);
@@ -461,6 +480,10 @@ public class MainController implements Initializable {
     }
 
     public void onDoubleClickedChannels(ClientChannel channel) {
+        if (fatalFail) {
+            return;
+        }
+
         if (!channel.isJoin()) {
             // join
             exs.submit(() -> {
@@ -471,6 +494,7 @@ public class MainController implements Initializable {
                     channel.setJoin(true);
 
                     runLater(() -> {
+                        channel.clear();
                         channel.update(rcChannel);
                         onSingleClickedChannels(channel);
                     });
@@ -489,7 +513,6 @@ public class MainController implements Initializable {
                     channel.setJoin(false);
 
                     runLater(() -> {
-                        channel.clear();
                         onSingleClickedChannels(channel);
                     });
 
