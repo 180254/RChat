@@ -16,7 +16,7 @@ public class ServerUser {
     private LocalDateTime lastSync;
 
     private final CopyOnWriteArrayList<ServerChannel> channels = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<ServerUser> ignored = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<String> ignored = new CopyOnWriteArrayList<>();
     private final BlockingQueue<WhatsUp> news = new LinkedBlockingQueue<>(); // offer(e), poll(), peek()
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ public class ServerUser {
         return channels;
     }
 
-    public CopyOnWriteArrayList<ServerUser> getIgnored() {
+    public CopyOnWriteArrayList<String> getIgnored() {
         return ignored;
     }
 
@@ -85,7 +85,7 @@ public class ServerUser {
                 .add("username", username)
                 .add("lastSync", lastSync)
                 .add("channels", channels.stream().map(ServerChannel::getName).toArray())
-                .add("ignored", ignored.stream().map(ServerUser::getUsername).toArray())
+                .add("ignored", ignored)
                 // .add("news", news)
                 .toString();
     }

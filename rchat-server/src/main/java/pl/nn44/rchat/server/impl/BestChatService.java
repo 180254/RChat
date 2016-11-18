@@ -200,7 +200,7 @@ public class BestChatService implements ChatService {
                             params.channel.getName(),
                             cUser.getUsername(),
                             accounts.containsKey(cUser.getUsername()),
-                            params.caller.getIgnored().contains(cUser),
+                            params.caller.getIgnored().contains(cUser.getUsername()),
                             params.channel.getAdmins().contains(cUser.getUsername()),
                             params.channel.getBanned().contains(cUser.getUsername())
                     ))
@@ -397,20 +397,26 @@ public class BestChatService implements ChatService {
             Params params = params(session, null, username, false, true);
 
             boolean change = state
-                    ? params.caller.getIgnored().addIfAbsent(params.affUser)
-                    : params.caller.getIgnored().remove(params.affUser);
+                    ? params.caller.getIgnored().addIfAbsent(username)
+                    : params.caller.getIgnored().remove(username);
 
             if (change) {
                 WhatsUp whatsUp = WhatsUp.create(
                         What.IGNORE,
                         unused,
-                        params.affUser.getUsername(),
+                        username,
                         params.caller.getUsername(),
                         state ? "ON" : "OFF"
                 );
 
                 params.caller.getNews().offer(whatsUp);
-                params.affUser.getNews().offer(whatsUp);
+
+                // notify affUser if he is on any chan
+                channelByName.values().stream()
+                        .flatMap(c -> c.getUsers().stream())
+                        .filter(u -> u.getUsername().equals(username))
+                        .findFirst()
+                        .ifPresent(serverUser -> serverUser.getNews().offer(whatsUp));
             }
 
             return Response.Ok();
@@ -427,7 +433,7 @@ public class BestChatService implements ChatService {
         try {
             Params params = params(session, null, username, false, true);
 
-            boolean ignore = params.affUser.getIgnored().contains(params.caller);
+            boolean ignore = params.affUser.getIgnored().contains(params.caller.getUsername());
 
             if (!ignore) {
                 WhatsUp whatsUp = WhatsUp.create(
@@ -464,7 +470,7 @@ public class BestChatService implements ChatService {
             );
 
             for (ServerUser su : params.channel.getUsers()) {
-                boolean ignore = su.getIgnored().contains(params.caller);
+                boolean ignore = su.getIgnored().contains(params.caller.getUsername());
 
                 if (!ignore) {
                     su.getNews().offer(whatsUp);
