@@ -16,6 +16,8 @@ public class User implements Serializable {
     private final boolean admin;
     private final boolean banned;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public User(String channel,
                 String username,
                 boolean authorized,

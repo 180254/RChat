@@ -15,6 +15,8 @@ public class WhatsUp implements Serializable {
     private final What what;
     private final String[] params;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public WhatsUp(What what, String[] params) {
 
         // LocalDateTime and long are not supported by xml-rpc

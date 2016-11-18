@@ -15,6 +15,8 @@ public class Channel implements Serializable {
     private final String topic;
     private final User[] users;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public Channel(String name,
                    boolean password,
                    String topic,

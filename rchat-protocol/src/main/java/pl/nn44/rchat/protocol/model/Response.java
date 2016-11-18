@@ -10,6 +10,8 @@ public class Response<T extends Serializable> implements Serializable {
 
     private final T payload;
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public Response() {
         this.payload = null;
     }
