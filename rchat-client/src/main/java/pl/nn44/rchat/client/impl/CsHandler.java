@@ -2,6 +2,7 @@ package pl.nn44.rchat.client.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.nn44.rchat.client.util.PropLoader;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.rchat.protocol.model.Response;
@@ -29,10 +30,11 @@ public class CsHandler {
     public void init() {
         Properties prop = PropLoader.get();
         Clients<ChatService> clients = new Clients<>(prop, ChatService.class);
+        FaultMapperRevImpl faultMapperRev = new FaultMapperRevImpl();
 
-        this.chatServices[Clients.Cs.Hessian.i()] = clients.hessian();
-        this.chatServices[Clients.Cs.Burlap.i()] = clients.burlap();
-        this.chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc(new FaultMapperRevImpl());
+        chatServices[Clients.Cs.Hessian.i()] = clients.hessian();
+        chatServices[Clients.Cs.Burlap.i()] = clients.burlap();
+        chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc(faultMapperRev);
     }
 
     // ---------------------------------------------------------------------------------------------------------------

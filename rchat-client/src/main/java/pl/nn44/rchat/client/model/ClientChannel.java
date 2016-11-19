@@ -40,18 +40,18 @@ public class ClientChannel {
     // ---------------------------------------------------------------------------------------------------------------
 
     public void update(Channel channel) {
-        this.topic.setValue(channel.getTopic());
+        topic.setValue(channel.getTopic());
 
-        this.users.clear();
+        users.clear();
         for (User user : channel.getUsers()) {
-            this.users.add(new ClientUser(user));
+            users.add(new ClientUser(user));
         }
     }
 
     public void clear() {
-        this.topic.setValue("");
-        this.users.clear();
-        this.messages.clear();
+        topic.setValue("");
+        users.clear();
+        messages.clear();
     }
 
     // ---------------------------------------------------------------------------------------------------------------

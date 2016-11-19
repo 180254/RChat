@@ -138,9 +138,8 @@ public class MainController implements Initializable {
             new SimpleStringProperty();
 
     private final ChangeListener<String> topicTake =
-            (observable, oldValue, newValue) -> {
-                runLater(() -> topicModel.setValue(newValue));
-            };
+            (observable, oldValue, newValue) ->
+                    runLater(() -> topicModel.setValue(newValue));
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -400,7 +399,7 @@ public class MainController implements Initializable {
         String whoIgnored = whatsUp.getParams()[1];
         boolean state = whatsUp.getParams()[3].equals("ON");
 
-        // if i ignored, not i am ignored set ignored flag
+        // if i ignored (not i am ignored) set ignored flag
         if (!whoIgnored.equals(csh.getUsername())) {
             channelsMap.values().stream()
                     .flatMap(c -> c.getUsers().stream())
@@ -524,9 +523,7 @@ public class MainController implements Initializable {
 
                     channel.setJoin(false);
 
-                    runLater(() -> {
-                        onSingleClickedChannels(channel);
-                    });
+                    runLater(() -> onSingleClickedChannels(channel));
 
                 } catch (Exception e) {
                     submitFleetingStatus(r(i18n.mapError("part", e)));
@@ -575,7 +572,7 @@ public class MainController implements Initializable {
         }
         this.message.setText("");
 
-        ClientChannel channel = this.channels.getSelectionModel().getSelectedItem();
+        ClientChannel channel = channels.getSelectionModel().getSelectedItem();
 
         if (message.startsWith("/")) {
             exs.submit(() -> onAnyCmd(channel.getName(), message));
@@ -682,7 +679,6 @@ public class MainController implements Initializable {
         ChatService cs = csh.cs();
         onSimpleCommand(channel, tokens, "topic", cs::topic);
     }
-
 
     // ---------------------------------------------------------------------------------------------------------------
 

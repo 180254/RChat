@@ -126,11 +126,10 @@ public class Clients<T> {
 
             XmlRpcClient rpcClient = new XmlRpcClient();
             rpcClient.setConfig(config);
+            rpcClient.setTypeFactory(new AnyTypeFactory(rpcClient)); // axe-180254
+            rpcClient.setTransportFactory(() -> new AnyXmlRpcTransport(rpcClient, errorMapper)); // axe-180254
 
-            rpcClient.setTypeFactory(new AnyTypeFactory(rpcClient)); // axe
-            rpcClient.setTransportFactory(() -> new AnyXmlRpcTransport(rpcClient, errorMapper)); // exe
-
-            Object proxy = ClientFactoryFix.newInstance( // axe
+            Object proxy = ClientFactoryFix.newInstance( // axe-180254
                     Thread.currentThread().getContextClassLoader(),
                     serviceInterface,
                     config.getServerURL().toString(),

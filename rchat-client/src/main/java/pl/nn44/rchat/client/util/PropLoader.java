@@ -1,4 +1,4 @@
-package pl.nn44.rchat.client.impl;
+package pl.nn44.rchat.client.util;
 
 import com.google.common.base.MoreObjects;
 import org.slf4j.Logger;
@@ -11,13 +11,14 @@ import java.util.Properties;
 public class PropLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(PropLoader.class);
+    public static String PROPERTIES_FILE = "app.properties";
 
     public static Properties get() {
         try {
             Properties prop = new Properties();
 
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            InputStream stream = loader.getResourceAsStream("app.properties");
+            InputStream stream = loader.getResourceAsStream(PROPERTIES_FILE);
             prop.load(stream);
 
             // may be overridden by system properties
