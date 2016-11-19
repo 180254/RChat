@@ -3,11 +3,8 @@ package pl.nn44.xmlrpc;
 import org.apache.xmlrpc.XmlRpcException;
 
 /**
- * <pre>
- * Functional interface for XmlRpcClient.execute(String, Object[]).
- * </pre>
- *
- * @see package doc
+ * Functional interface for XmlRpcClient.execute(String, Object[]).<br/>
+ * Please check {@link pl.nn44.xmlrpc} package doc.
  */
 @FunctionalInterface
 public interface ClientExecutor {

@@ -9,7 +9,7 @@ import org.apache.xmlrpc.common.XmlRpcStreamRequestConfig;
 import java.io.InputStream;
 
 /**
- * @see package doc
+ * Please check {@link pl.nn44.xmlrpc} package doc.
  */
 public class AnyXmlRpcTransport extends XmlRpcSun15HttpTransport {
 
@@ -36,7 +36,8 @@ public class AnyXmlRpcTransport extends XmlRpcSun15HttpTransport {
     // ---------------------------------------------------------------------------------------------------------------
 
     @Override
-    protected Object readResponse(XmlRpcStreamRequestConfig pConfig, InputStream pStream)
+    protected Object readResponse(XmlRpcStreamRequestConfig pConfig,
+                                  InputStream pStream)
             throws XmlRpcException {
 
         try {

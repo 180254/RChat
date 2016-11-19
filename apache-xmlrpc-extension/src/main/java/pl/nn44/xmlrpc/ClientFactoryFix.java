@@ -31,7 +31,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 
 /**
- * @see package doc
+ * Please check {@link pl.nn44.xmlrpc} package doc.
  */
 // proxy doc: https://docs.oracle.com/javase/8/docs/technotes/guides/reflection/proxy.html
 public class ClientFactoryFix {

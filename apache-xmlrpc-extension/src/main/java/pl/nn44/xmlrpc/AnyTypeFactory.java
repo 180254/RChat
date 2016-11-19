@@ -17,7 +17,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * @see package doc
+ * Please check {@link pl.nn44.xmlrpc} package doc.
  */
 public class AnyTypeFactory extends TypeFactoryImpl {
 

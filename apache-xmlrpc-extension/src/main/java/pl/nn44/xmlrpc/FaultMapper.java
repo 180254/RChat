@@ -5,7 +5,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import java.util.function.Function;
 
 /**
- * @see package doc
+ * Please check {@link pl.nn44.xmlrpc} package doc.
  */
 public interface FaultMapper
         extends Function<Throwable, XmlRpcException> {

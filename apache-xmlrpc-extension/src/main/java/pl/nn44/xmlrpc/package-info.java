@@ -1,5 +1,6 @@
 /**
  * <pre>
+ *               AXE-180254
  *  Apache XML-RPC EXTENSIONS by 180254.
  *
  *               WHAT IS IT?
@@ -8,7 +9,7 @@
  * This package is to provide support for:
  * - complex types,
  *   complex = without direct support in XML-RPC specification,
- * - transporting business exceptions,
+ * - transporting business exceptions.
  *
  * The following assumptions were taken into account:
  * - without any extension, only xml-rpc standard tags,
@@ -49,29 +50,38 @@
  * Class (server-side): AnyXmlRpcTransport
  *
  * How it is done?
- * Programmer must provide two XmlRpcErrorMappers:
+ * Programmer must provide two fault mappers:
  *
  * - FaultMapper (Function&lt;Throwable, XmlRpcException&gt;)
- *   It converts Throwable into XmlRpcException, or returns null conversion if not supported.
+ *   It converts Throwable into XmlRpcException,
+ *   or returns null conversion if not supported.
  *
  * - FaultMapperRev (Function&lt;XmlRpcException, Throwable&gt;)
- *   It converts XmlRpcException into Throwable, or returns null conversion if not supported.
+ *   It converts XmlRpcException into Throwable,
+ *   or returns null conversion if not supported.
  *
- * Throwable may be any exception, especially "business" exceptions declared by interface.
+ * Throwable may be any exception,
+ * especially "business" exceptions declared by interface.
+ *
  * XmlRpcException has two special fields which must be used:
- * - code (xml-rpc faultCode) - unique exception number,
- * - message (xml-rpc faultString) - additional data useful to recreate exception.
+ * - code (xml-rpc faultCode
+ *   unique exception number,
+ * - message (xml-rpc faultString)
+ *   additional data useful to recreate exception.
  *
  *               EXAMPLE USAGE
  *
  * Server: please check pl.nn44.rchat.server.impl.Endpoints
  * Client: please check pl.nn44.rchat.client.impl.Clients
  *
- *              BONUS - ClientFactoryFix
+ *              BONUS - ClientFactory fix
+ *
+ * Class: ClientFactoryFix
  *
  * Fixed org.apache.xmlrpc.client.util.ClientFactory class.
  * Changes:
- * - toString(), equals(), hashCode() are not handled properly by original ClientFactory.
+ * - fix toString(), equals(), hashCode()
+ *   These methods are not handled properly by original class.
  * </pre>
  */
 package pl.nn44.xmlrpc;
