@@ -37,7 +37,6 @@ public class ServerChannel {
         return topic;
     }
 
-
     public CopyOnWriteArrayList<ServerUser> getUsers() {
         return users;
     }

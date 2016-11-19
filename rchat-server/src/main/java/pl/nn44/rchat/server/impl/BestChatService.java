@@ -107,7 +107,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, null, null);
 
         try {
-            Params params = params(session, null, null, false, true);
+            Params params = params(session, null, null, false, false);
 
             for (ServerChannel channel : params.caller.getChannels()) {
                 // double lock is safe operation:
@@ -131,7 +131,7 @@ public class BestChatService implements ChatService {
 
         try {
             //  side-effect used: verify session
-            params(session, null, null, false, true);
+            params(session, null, null, false, false);
 
             Channel[] channels = channelByName.values().stream()
                     .map(chan -> new Channel(
@@ -225,7 +225,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, false, true);
+            Params params = params(session, channel, null, false, false);
 
             boolean removeC = params.channel.getUsers().remove(params.caller);
             boolean removeU = params.caller.getChannels().remove(params.channel);
@@ -258,7 +258,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, true, true);
+            Params params = params(session, channel, null, true, false);
 
             boolean change = !params.channel.getTopic().equals(text);
 
@@ -394,17 +394,17 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, null, username);
 
         try {
-            Params params = params(session, null, username, false, true);
+            Params params = params(session, null, username, false, false);
 
             boolean change = state
-                    ? params.caller.getIgnored().addIfAbsent(username)
-                    : params.caller.getIgnored().remove(username);
+                    ? params.caller.getIgnored().addIfAbsent(params.affUser.getUsername())
+                    : params.caller.getIgnored().remove(params.affUser.getUsername());
 
             if (change) {
                 WhatsUp whatsUp = WhatsUp.create(
                         What.IGNORE,
-                        unused,
-                        username,
+                        null,
+                        params.affUser.getUsername(),
                         params.caller.getUsername(),
                         state ? "ON" : "OFF"
                 );
@@ -414,7 +414,7 @@ public class BestChatService implements ChatService {
                 // notify affUser if he is on any chan
                 channelByName.values().stream()
                         .flatMap(c -> c.getUsers().stream())
-                        .filter(u -> u.getUsername().equals(username))
+                        .filter(u -> u.equals(params.affUser))
                         .findFirst()
                         .ifPresent(serverUser -> serverUser.getNews().offer(whatsUp));
             }
@@ -431,7 +431,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, null, username);
 
         try {
-            Params params = params(session, null, username, false, true);
+            Params params = params(session, null, username, false, false);
 
             boolean ignore = params.affUser.getIgnored().contains(params.caller.getUsername());
 
@@ -460,7 +460,7 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, false, true);
+            Params params = params(session, channel, null, false, false);
 
             WhatsUp whatsUp = WhatsUp.create(
                     What.MESSAGE,
@@ -579,6 +579,13 @@ public class BestChatService implements ChatService {
 
     private class Params {
 
+        private final String pSession;
+        private final String pChannel;
+        private final String pUsername;
+        private final boolean pCheckAdmin;
+        private final boolean pUserOnChan;
+
+
         public ServerUser caller;
         public ServerChannel channel;
         public ServerUser affUser;
@@ -586,81 +593,103 @@ public class BestChatService implements ChatService {
         Params(String session,
                String channel,
                String username,
-               boolean callerMustBeAdmin,
-               boolean affUserMustBeOnChan)
+               boolean checkAdmin,
+               boolean userOnChan)
                 throws ChatException {
 
-            if (session != null) {
-                this.caller = sessionToUser.get(session);
-                if (this.caller == null) {
+            this.pSession = session;
+            this.pChannel = channel;
+            this.pUsername = username;
+            this.pCheckAdmin = checkAdmin;
+            this.pUserOnChan = userOnChan;
+        }
+
+        public void process() throws ChatException {
+
+            if (pSession != null) {
+                this.caller = sessionToUser.get(pSession);
+                if (caller == null) {
                     throw new ChatException(Reason.GIVEN_BAD_SESSION);
                 }
             }
 
-            if (channel != null) {
-                this.channel = channelByName.get(channel);
-                if (this.channel == null) {
+            if (pChannel != null) {
+                this.channel = channelByName.get(pChannel);
+                if (channel == null) {
                     throw new ChatException(Reason.GIVEN_BAD_CHANNEL);
                 }
             }
 
-            if (this.caller != null && this.channel != null) {
-                if (!this.channel.getUsers().contains(this.caller)) {
+            if (caller != null && channel != null) {
+                if (!channel.getUsers().contains(caller)) {
                     throw new ChatException(Reason.NO_PERMISSION);
                 }
             }
 
-            if (username != null && this.channel != null && affUserMustBeOnChan) {
-                ServerUser dummyAffUser = ServerUser.dummyUser(username);
+            if (pUsername != null && channel == null) {
+                this.affUser = ServerUser.dummyUser(pUsername);
+            }
 
-                this.affUser = this.channel.getUsers().stream()
+            if (pUsername != null && channel != null) {
+                ServerUser dummyAffUser = ServerUser.dummyUser(pUsername);
+
+                this.affUser = channel.getUsers().stream()
                         .filter(u -> u.equals(dummyAffUser))
                         .findFirst().orElse(null);
-                if (this.affUser == null) {
+            }
+
+            if (pUsername != null && channel != null && pUserOnChan) {
+                if (affUser == null) {
                     throw new ChatException(Reason.GIVEN_BAD_USERNAME);
                 }
             }
 
-            if (callerMustBeAdmin && this.channel != null && this.caller != null) {
-                if (!this.channel.getAdmins().contains(this.caller.getUsername())) {
+            if (pCheckAdmin && channel != null && caller != null) {
+                if (!channel.getAdmins().contains(caller.getUsername())) {
                     throw new ChatException(Reason.NO_PERMISSION);
                 }
             }
 
-            if (this.caller != null) {
-                this.caller.updateLastSync();
+            if (caller != null) {
+                caller.updateLastSync();
             }
         }
     }
 
+    // session user is now -> caller
+    // channel is now -> channel
+    // param username is now -> affUser
+    //
     // checks if:
     // - caller(session) is proper (GIVEN_BAD_SESSION)           [ if session != null ]
     // - channel(channel) is proper (GIVEN_BAD_CHANNEL)          [ if channel != null ]
-    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)    [ if username,channel != null && affUserMustBeOnChan ]
+    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)    [ if username,channel != null && userOnChan ]
     // - caller is on channel (NO_PERMISSION)                    [ if session,channel != null ]
-    // - caller is admin on channel (NO_PERMISSION)              [ if session,channel != null && callerMustBeAdmin ]
+    // - caller is admin on channel (NO_PERMISSION)              [ if session,channel != null && checkAdmin ]
     // and:
     // - update caller last sync timestamp
     private Params params(String session,
                           String channel,
                           String username,
-                          boolean callerMustBeAdmin,
-                          boolean affUserMustBeOnChan)
+                          boolean checkAdmin,
+                          boolean userOnChan)
             throws ChatException {
 
-        return new Params(
+        Params params = new Params(
                 session, channel, username,
-                callerMustBeAdmin, affUserMustBeOnChan
+                checkAdmin, userOnChan
         );
+        params.process();
+        return params;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
     private class Locks {
 
-        Lock lockCaller;
-        Lock lockChannel;
-        Lock lockAffUser;
+        private final Lock lockCaller;
+        private final Lock lockChannel;
+        private final Lock lockAffUser;
 
         Locks(String session,
               String channel,
@@ -675,36 +704,41 @@ public class BestChatService implements ChatService {
                 }
 
                 this.lockCaller = stripedLocks.get("U$" + user.getUsername());
+            } else {
+                this.lockCaller = null;
             }
-            if (username != null) {
-                this.lockAffUser = stripedLocks.get("U$" + username);
-            }
-            if (channel != null) {
-                this.lockChannel = stripedLocks.get("C$" + channel);
-            }
+
+            this.lockAffUser = username != null
+                    ? stripedLocks.get("U$" + username)
+                    : null;
+
+            this.lockChannel = channel != null
+                    ? stripedLocks.get("C$" + channel)
+                    : null;
+
         }
 
         void lock() {
-            if (this.lockChannel != null) {
-                this.lockChannel.lock();
+            if (lockChannel != null) {
+                lockChannel.lock();
             }
-            if (this.lockAffUser != null) {
-                this.lockAffUser.lock();
+            if (lockAffUser != null) {
+                lockAffUser.lock();
             }
-            if (this.lockCaller != null) {
-                this.lockCaller.lock();
+            if (lockCaller != null) {
+                lockCaller.lock();
             }
         }
 
         void unlock() {
-            if (this.lockChannel != null) {
-                this.lockChannel.unlock();
+            if (lockChannel != null) {
+                lockChannel.unlock();
             }
-            if (this.lockAffUser != null) {
-                this.lockAffUser.unlock();
+            if (lockAffUser != null) {
+                lockAffUser.unlock();
             }
-            if (this.lockCaller != null) {
-                this.lockCaller.unlock();
+            if (lockCaller != null) {
+                lockCaller.unlock();
             }
         }
     }
