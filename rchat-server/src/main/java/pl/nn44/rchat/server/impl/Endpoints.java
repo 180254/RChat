@@ -5,13 +5,14 @@ import org.apache.xmlrpc.metadata.XmlRpcSystemImpl;
 import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcErrorLogger;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
-import org.apache.xmlrpc.webserver.XmlRpcServletServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
 import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.HttpRequestHandler;
+import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.xmlrpc.AnyTypeFactory;
+import pl.nn44.xmlrpc.AnyXmlRpcServer;
 
 public class Endpoints<T> {
 
@@ -47,8 +48,8 @@ public class Endpoints<T> {
     public HttpRequestHandler xmlRpc() throws XmlRpcException {
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
         config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
-        config.setEnabledForExceptions(true);
-        config.setEnabledForExtensions(true); // required by enabledForExceptions
+        config.setEnabledForExceptions(false);
+        config.setEnabledForExtensions(false);
         config.setKeepAliveEnabled(true);
 
         PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
@@ -56,11 +57,20 @@ public class Endpoints<T> {
         handlerMapping.addHandler(clazz.getSimpleName(), clazz);
         XmlRpcSystemImpl.addSystemHandler(handlerMapping);
 
-        XmlRpcServletServer server = new XmlRpcServletServer();
+        AnyXmlRpcServer server = new AnyXmlRpcServer(); // axe
         server.setConfig(config);
         server.setErrorLogger(new XmlRpcErrorLogger());
         server.setHandlerMapping(handlerMapping);
-        server.setTypeFactory(new AnyTypeFactory(server));
+        server.setTypeFactory(new AnyTypeFactory(server)); // axe
+
+        server.setErrorMapper((throwable -> {
+            if (throwable instanceof ChatException) {
+                ChatException ce = (ChatException) throwable;
+                return new XmlRpcException(101, ce.getReason().name());
+            } else {
+                return null;
+            }
+        }));
 
         LOG.info("xml-rpc endpoint created.");
         return server::execute;

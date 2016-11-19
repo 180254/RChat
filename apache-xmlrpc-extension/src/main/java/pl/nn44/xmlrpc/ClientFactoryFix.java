@@ -31,10 +31,7 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.UndeclaredThrowableException;
 
 /**
- * <pre>
- * org.apache.xmlrpc.client.util.ClientFactory fix.
- * - toString(), equals(), hashCode() are not handled properly by original ClientFactory.
- * </pre>
+ * @see package doc
  */
 // proxy doc: https://docs.oracle.com/javase/8/docs/technotes/guides/reflection/proxy.html
 public class ClientFactoryFix {

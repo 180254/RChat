@@ -6,6 +6,8 @@ import org.apache.xmlrpc.XmlRpcException;
  * <pre>
  * Functional interface for XmlRpcClient.execute(String, Object[]).
  * </pre>
+ *
+ * @see package doc
  */
 @FunctionalInterface
 public interface ClientExecutor {

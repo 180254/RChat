@@ -17,40 +17,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * <pre>
- * Extended Type Factory for apache-xml-rpc.
- *
- * Provided support for additional types:
- * - class with fields of supported types
- * - null
- * - enum
- *
- * Props
- * - without any extension, only xml-rpc standard tags
- * - there is no to-byte-serialization
- *
- * Cons:
- * - there is no sense to use it if exception is transported via "setEnabledForException": none of props is used
- *   It seems that it is no _so easy way_ to modify method of delivering exceptions :(
- *
- * Concept doc:
- * - classes are served as map:
- *   entry=("__class__", "some.java.class.full.name")
- *   for(f in object.fields): entry=(f.name, f.value)
- *
- * - nulls are served as map:
- *   entry=("__class__", "null")
- *
- * - enums are served as map:
- *   entry=("__class__", "enum")
- *   entry=("type", "some.java.class.full.name")
- *   entry=("name", enum_key.name())
- *
- * - arrays are served as map:
- *   entry=("__class__", "array")
- *   entry=("type", "some.java.class.full.name")
- *   entry=("values", struct_with_values)
- * </pre>
+ * @see package doc
  */
 public class AnyTypeFactory extends TypeFactoryImpl {
 
