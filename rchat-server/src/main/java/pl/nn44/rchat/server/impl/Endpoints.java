@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
 import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.HttpRequestHandler;
+import pl.nn44.rchat.protocol.xmlrpc.FaultMapperImpl;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 import pl.nn44.xmlrpc.AnyXmlRpcServer;
 
@@ -47,8 +48,8 @@ public class Endpoints<T> {
     public HttpRequestHandler xmlRpc() throws XmlRpcException {
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
         config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
-        config.setEnabledForExceptions(false);
-        config.setEnabledForExtensions(false);
+        config.setEnabledForExceptions(false); // !!
+        config.setEnabledForExtensions(false); // !!
         config.setKeepAliveEnabled(true);
 
         PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
@@ -61,10 +62,7 @@ public class Endpoints<T> {
         server.setErrorLogger(new XmlRpcErrorLogger());
         server.setHandlerMapping(handlerMapping);
         server.setTypeFactory(new AnyTypeFactory(server)); // axe
-
-        server.setFaultMapper((throwable -> {
-
-        }));
+        server.setFaultMapper(new FaultMapperImpl()); // axe
 
         LOG.info("xml-rpc endpoint created.");
         return server::execute;
