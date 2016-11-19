@@ -1,11 +1,12 @@
 package pl.nn44.rchat.protocol;
 
-import org.jetbrains.annotations.Nullable;
 import pl.nn44.rchat.protocol.exception.CeReasons;
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.rchat.protocol.model.Channel;
 import pl.nn44.rchat.protocol.model.Response;
 import pl.nn44.rchat.protocol.model.WhatsUp;
+
+import javax.annotation.Nullable;
 
 import static pl.nn44.rchat.protocol.exception.ChatException.Reason.*;
 

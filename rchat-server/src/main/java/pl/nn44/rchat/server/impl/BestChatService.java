@@ -2,7 +2,6 @@ package pl.nn44.rchat.server.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Striped;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,6 +18,7 @@ import pl.nn44.rchat.server.model.ServerChannel;
 import pl.nn44.rchat.server.model.ServerUser;
 import pl.nn44.rchat.server.util.BigIdGenerator;
 
+import javax.annotation.Nullable;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
