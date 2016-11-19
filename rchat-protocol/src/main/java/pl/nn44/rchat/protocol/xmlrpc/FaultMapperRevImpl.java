@@ -2,8 +2,13 @@ package pl.nn44.rchat.protocol.xmlrpc;
 
 import org.apache.xmlrpc.XmlRpcException;
 import pl.nn44.rchat.protocol.exception.ChatException;
+import pl.nn44.rchat.protocol.exception.ChatException.Reason;
 import pl.nn44.xmlrpc.FaultMapperRev;
 
+/**
+ * Fault rev mapper for xml-rpc protocol.<br/>
+ * Please check {@link pl.nn44.xmlrpc} package doc.
+ */
 public class FaultMapperRevImpl implements FaultMapperRev {
 
     @Override
@@ -11,7 +16,7 @@ public class FaultMapperRevImpl implements FaultMapperRev {
 
         if (e.code == 101) {
             String message = e.getMessage();
-            ChatException.Reason reason = ChatException.Reason.valueOf(message);
+            Reason reason = Reason.valueOf(message);
             return new ChatException(reason);
 
         } else {

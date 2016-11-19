@@ -6,10 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <pre>
- * Indicates if given method generates "accept confirmation"
- * and send to caller WhatsUp notification related to that action.
- * </pre>
+ * Indicates if given method generates "accept confirmation"<br/>
+ * and send to caller the WhatsUp notification related to that action.
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD})

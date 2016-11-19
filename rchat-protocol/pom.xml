@@ -15,14 +15,6 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- xml rpc -->
-        <dependency>
-            <groupId>pl.nn44</groupId>
-            <artifactId>apache-xmlrpc-extension</artifactId>
-            <version>${version.self}</version>
-            <optional>true</optional>
-        </dependency>
-
         <!-- other -->
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -34,6 +26,14 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>${version.jsr305}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- xml rpc -->
+        <dependency>
+            <groupId>pl.nn44</groupId>
+            <artifactId>apache-xmlrpc-extension</artifactId>
+            <version>${version.self}</version>
             <optional>true</optional>
         </dependency>
     </dependencies>

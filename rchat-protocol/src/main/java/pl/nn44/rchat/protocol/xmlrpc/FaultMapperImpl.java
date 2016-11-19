@@ -4,6 +4,10 @@ import org.apache.xmlrpc.XmlRpcException;
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.xmlrpc.FaultMapper;
 
+/**
+ * Fault mapper for xml-rpc protocol.<br/>
+ * Please check {@link pl.nn44.xmlrpc} package doc.
+ */
 public class FaultMapperImpl implements FaultMapper {
 
     @Override

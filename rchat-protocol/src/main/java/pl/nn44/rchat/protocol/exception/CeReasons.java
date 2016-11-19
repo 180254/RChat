@@ -6,9 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <pre>
- * Indicates which ChatException reasons (ChatException.Reason) may be returned for given method.
- * </pre>
+ * Indicates which ChatException.Reasons may be returned by given method.
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD})
