@@ -15,6 +15,15 @@
     <packaging>jar</packaging>
 
     <dependencies>
+        <!-- xml rpc -->
+        <dependency>
+            <groupId>pl.nn44</groupId>
+            <artifactId>apache-xmlrpc-extension</artifactId>
+            <version>${version.self}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- other -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
