@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
 import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.HttpRequestHandler;
-import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 import pl.nn44.xmlrpc.AnyXmlRpcServer;
 
@@ -63,13 +62,8 @@ public class Endpoints<T> {
         server.setHandlerMapping(handlerMapping);
         server.setTypeFactory(new AnyTypeFactory(server)); // axe
 
-        server.setErrorMapper((throwable -> {
-            if (throwable instanceof ChatException) {
-                ChatException ce = (ChatException) throwable;
-                return new XmlRpcException(101, ce.getReason().name());
-            } else {
-                return null;
-            }
+        server.setFaultMapper((throwable -> {
+
         }));
 
         LOG.info("xml-rpc endpoint created.");

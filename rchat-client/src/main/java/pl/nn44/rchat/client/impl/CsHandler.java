@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.rchat.protocol.model.Response;
+import pl.nn44.rchat.protocol.xmlrpc.FaultMapperRevImpl;
 
 import java.util.Properties;
 
@@ -31,7 +32,7 @@ public class CsHandler {
 
         this.chatServices[Clients.Cs.Hessian.i()] = clients.hessian();
         this.chatServices[Clients.Cs.Burlap.i()] = clients.burlap();
-        this.chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc();
+        this.chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc(new FaultMapperRevImpl());
     }
 
     // ---------------------------------------------------------------------------------------------------------------

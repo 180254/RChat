@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.xmlrpc.AnyTypeFactory;
+import pl.nn44.xmlrpc.AnyXmlRpcTransport;
 import pl.nn44.xmlrpc.ClientFactoryFix;
+import pl.nn44.xmlrpc.FaultMapperRev;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -111,22 +113,24 @@ public class Clients<T> {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public T xmlRpc() {
+    public T xmlRpc(FaultMapperRev errorMapper) {
         String serviceUrl = url.apply("rpc.xml-rpc");
 
         try {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
             config.setServerURL(new URL(serviceUrl));
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
-            config.setEnabledForExceptions(true);
-            config.setEnabledForExtensions(true); // required by enabledForExceptions
+            config.setEnabledForExceptions(false); // !!
+            config.setEnabledForExtensions(false); // !!
             config.setUserAgent("CT-XmlRpc");
 
             XmlRpcClient rpcClient = new XmlRpcClient();
             rpcClient.setConfig(config);
-            rpcClient.setTypeFactory(new AnyTypeFactory(rpcClient));
 
-            Object proxy = ClientFactoryFix.newInstance(
+            rpcClient.setTypeFactory(new AnyTypeFactory(rpcClient)); // axe
+            rpcClient.setTransportFactory(() -> new AnyXmlRpcTransport(rpcClient, errorMapper)); // exe
+
+            Object proxy = ClientFactoryFix.newInstance( // axe
                     Thread.currentThread().getContextClassLoader(),
                     serviceInterface,
                     config.getServerURL().toString(),
