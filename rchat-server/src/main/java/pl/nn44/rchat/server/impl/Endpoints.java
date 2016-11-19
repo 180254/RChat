@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
 import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.HttpRequestHandler;
-import pl.nn44.rchat.protocol.xmlrpc.FaultMapperImpl;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 import pl.nn44.xmlrpc.AnyXmlRpcServer;
+import pl.nn44.xmlrpc.FaultMapper;
 
 public class Endpoints<T> {
 
@@ -45,7 +45,7 @@ public class Endpoints<T> {
         return exporter;
     }
 
-    public HttpRequestHandler xmlRpc() throws XmlRpcException {
+    public HttpRequestHandler xmlRpc(FaultMapper faultMapper) throws XmlRpcException {
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
         config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
         config.setEnabledForExceptions(false); // !!
@@ -57,12 +57,12 @@ public class Endpoints<T> {
         handlerMapping.addHandler(clazz.getSimpleName(), clazz);
         XmlRpcSystemImpl.addSystemHandler(handlerMapping);
 
-        AnyXmlRpcServer server = new AnyXmlRpcServer(); // axe
+        AnyXmlRpcServer server = new AnyXmlRpcServer(); // axe-180254
         server.setConfig(config);
         server.setErrorLogger(new XmlRpcErrorLogger());
         server.setHandlerMapping(handlerMapping);
-        server.setTypeFactory(new AnyTypeFactory(server)); // axe
-        server.setFaultMapper(new FaultMapperImpl()); // axe
+        server.setTypeFactory(new AnyTypeFactory(server)); // axe-180254
+        server.setFaultMapper(faultMapper); // axe-180254
 
         LOG.info("xml-rpc endpoint created.");
         return server::execute;

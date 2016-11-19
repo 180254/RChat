@@ -10,11 +10,13 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.HttpRequestHandler;
 import pl.nn44.rchat.protocol.ChatService;
+import pl.nn44.rchat.protocol.xmlrpc.FaultMapperImpl;
 import pl.nn44.rchat.server.aspect.AsLogger;
 import pl.nn44.rchat.server.impl.BestChatService;
 import pl.nn44.rchat.server.impl.Endpoints;
 import pl.nn44.rchat.server.page.PlainErrorController;
 import pl.nn44.rchat.server.page.PlainPageController;
+import pl.nn44.xmlrpc.FaultMapper;
 
 import javax.servlet.Filter;
 
@@ -41,6 +43,14 @@ public class ServerApp {
         return new Endpoints<>(cs, ChatService.class);
     }
 
+
+    @Bean
+    public FaultMapper faultMapper() {
+        return new FaultMapperImpl();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     @Bean(name = "/hessian")
     public HttpRequestHandler hessianRpc(Endpoints<?> ep) {
         return ep.hessian();
@@ -52,8 +62,8 @@ public class ServerApp {
     }
 
     @Bean(name = "/xml-rpc")
-    public HttpRequestHandler xmlRpcRpc(Endpoints<?> ep) throws XmlRpcException {
-        return ep.xmlRpc();
+    public HttpRequestHandler xmlRpcRpc(Endpoints<?> ep, FaultMapper fm) throws XmlRpcException {
+        return ep.xmlRpc(fm);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
