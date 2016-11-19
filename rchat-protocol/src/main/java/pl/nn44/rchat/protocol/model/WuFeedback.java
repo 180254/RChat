@@ -1,4 +1,4 @@
-package pl.nn44.rchat.protocol.exception;
+package pl.nn44.rchat.protocol.model;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,12 +7,13 @@ import java.lang.annotation.Target;
 
 /**
  * <pre>
- * Indicates which ChatException reasons (ChatException.Reason) may be returned for given method.
+ * Indicates if given method generates "accept confirmation"
+ * and send to caller WhatsUp notification related to that action.
  * </pre>
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD})
-public @interface CeReasons {
+public @interface WuFeedback {
 
-    ChatException.Reason[] value();
+    boolean value();
 }

@@ -1,4 +1,4 @@
-package pl.nn44.rchat.protocol;
+package pl.nn44.rchat.protocol.command;
 
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.rchat.protocol.model.Response;

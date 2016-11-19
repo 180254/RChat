@@ -38,7 +38,7 @@ public class WhatsUp implements Serializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     public LocalDateTime getTime() {
-        return LocalDateTime.parse(this.isoTime, DTF);
+        return LocalDateTime.parse(isoTime, DTF);
     }
 
     public What getWhat() {
