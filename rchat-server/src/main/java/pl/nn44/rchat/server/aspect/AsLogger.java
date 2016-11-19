@@ -1,6 +1,5 @@
 package pl.nn44.rchat.server.aspect;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -13,6 +12,7 @@ import org.slf4j.event.Level;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 @Aspect
@@ -74,7 +74,7 @@ public class AsLogger {
                 "#{}({}): {} ({}ms)",
                 MethodSignature.class.cast(point.getSignature()).getMethod().getName(),
                 annotation.params() ? arrayToString(point.getArgs()) : "_",
-                annotation.result() ? MoreObjects.firstNonNull(throwable, result) : "_",
+                annotation.result() ? firstNonNull(throwable, result) : "_",
                 timeMs
         );
 
@@ -84,8 +84,18 @@ public class AsLogger {
         return result;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------
+
     public String arrayToString(Object[] array) {
         String s = Arrays.deepToString(array);
         return s.substring(1, s.length() - 1);
+    }
+
+    @SafeVarargs
+    public static <T> T firstNonNull(T... items) {
+        return Arrays.stream(items)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 }
