@@ -250,10 +250,11 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public void infoAboutSimpleMsg(WhatsUp whatsUp, String locMap) {
+    public void infoAboutSimpleMsg(WhatsUp whatsUp) {
         LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
 
+        String locMap = whatsUp.getWhat().name().toLowerCase();
         PrintInfo ctMsgInfo = new PrintInfo(
                 i18n, time, "whats-up." + locMap, whatsUp.getParams()
         );
@@ -262,12 +263,13 @@ public class MainController implements Initializable {
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
-    public void infoAboutStatefulMsg(WhatsUp whatsUp, String locMap) {
+    public void infoAboutStatefulMsg(WhatsUp whatsUp) {
         LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
         boolean state = whatsUp.getParams()[3].equals("ON");
         String code = state ? "1" : "0";
 
+        String locMap = whatsUp.getWhat().name().toLowerCase();
         PrintInfo ctMsgInfo = new PrintInfo(
                 i18n, time, "whats-up." + locMap + "." + code, whatsUp.getParams()
         );
@@ -308,7 +310,7 @@ public class MainController implements Initializable {
     public void onSomeJoin(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeJoin", whatsUp);
 
-        infoAboutSimpleMsg(whatsUp, "join");
+        infoAboutSimpleMsg(whatsUp);
 
         String channel = whatsUp.getParams()[0];
         String whoJoined = whatsUp.getParams()[1];
@@ -325,7 +327,7 @@ public class MainController implements Initializable {
     public void onSomePart(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePart", whatsUp);
 
-        infoAboutSimpleMsg(whatsUp, "part");
+        infoAboutSimpleMsg(whatsUp);
 
         String channel = whatsUp.getParams()[0];
         String whoPart = whatsUp.getParams()[1];
@@ -337,9 +339,9 @@ public class MainController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeKick(WhatsUp whatsUp) {
-        LOG.info("{} {}", "onSomePart", whatsUp);
+        LOG.info("{} {}", "onSomeKick", whatsUp);
 
-        infoAboutSimpleMsg(whatsUp, "kick");
+        infoAboutSimpleMsg(whatsUp);
 
         String channel = whatsUp.getParams()[0];
         String whoKicked = whatsUp.getParams()[1];
@@ -351,7 +353,7 @@ public class MainController implements Initializable {
     public void onSomeBan(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeBan", whatsUp);
 
-        infoAboutStatefulMsg(whatsUp, "ban");
+        infoAboutStatefulMsg(whatsUp);
 
         String channel = whatsUp.getParams()[0];
         String whoBanned = whatsUp.getParams()[1];
@@ -366,9 +368,9 @@ public class MainController implements Initializable {
     }
 
     public void onSomeAdmin(WhatsUp whatsUp) {
-        LOG.info("{} {}", "onSomeBan", whatsUp);
+        LOG.info("{} {}", "onSomeAdmin", whatsUp);
 
-        infoAboutStatefulMsg(whatsUp, "admin");
+        infoAboutStatefulMsg(whatsUp);
 
         String channel = whatsUp.getParams()[0];
         String whoAdmin = whatsUp.getParams()[1];
@@ -393,7 +395,7 @@ public class MainController implements Initializable {
             newParams[0] = channel.getName();
 
             WhatsUp whatsUp2 = WhatsUp.create(whatsUp.getWhat(), newParams);
-            infoAboutStatefulMsg(whatsUp2, "ignore");
+            infoAboutStatefulMsg(whatsUp2);
         }
 
         String whoIgnored = whatsUp.getParams()[1];
@@ -413,7 +415,7 @@ public class MainController implements Initializable {
     public void onSomeTopic(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeTopic", whatsUp);
 
-        infoAboutSimpleMsg(whatsUp, "topic");
+        infoAboutSimpleMsg(whatsUp);
 
         String channel = whatsUp.getParams()[0];
         String someText = whatsUp.getParams()[2];
@@ -497,17 +499,19 @@ public class MainController implements Initializable {
 
         if (!channel.isJoin()) {
             // join
+            channel.setJoin(true);
+
             exs.submit(() -> {
                 try {
-                    Channel rcChannel =
-                            csh.cs().join(csh.token(), channel.getName(), null).getPayload();
-
-                    channel.setJoin(true);
+                    Channel rcChannel = csh.cs().join(csh.token(), channel.getName(), null).getPayload();
 
                     runLater(() -> {
                         channel.clear();
                         channel.update(rcChannel);
                         onSingleClickedChannels(channel);
+
+                        WhatsUp dummyWhatsUp = WhatsUp.create(What.JOIN, channel.getName(), csh.getUsername());
+                        infoAboutSimpleMsg(dummyWhatsUp);
                     });
 
                 } catch (Exception e) {
@@ -517,13 +521,18 @@ public class MainController implements Initializable {
 
         } else {
             // part
+            channel.setJoin(false);
+
             exs.submit(() -> {
                 try {
                     csh.cs().part(csh.token(), channel.getName(), "unused");
 
-                    channel.setJoin(false);
+                    runLater(() -> {
+                        onSingleClickedChannels(channel);
 
-                    runLater(() -> onSingleClickedChannels(channel));
+                        WhatsUp dummyWhatsUp = WhatsUp.create(What.PART, channel.getName(), csh.getUsername());
+                        infoAboutSimpleMsg(dummyWhatsUp);
+                    });
 
                 } catch (Exception e) {
                     submitFleetingStatus(r(i18n.mapError("part", e)));

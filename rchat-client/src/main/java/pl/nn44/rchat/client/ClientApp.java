@@ -32,7 +32,11 @@ public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    // 2 should be enough. 1 for gathering news and 1 for other actions.
+    // "4 ought to be enough for anybody"
+    private static final int N_THREADS = 4;
+
+    private final ExecutorService executor = Executors.newFixedThreadPool(N_THREADS);
     private final CsHandler csHandler = new CsHandler();
     private final LocaleHelper locHelper = new LocaleHelper();
     private final Map<Class<?>, Supplier<Object>> controllers = new HashMap<>();
