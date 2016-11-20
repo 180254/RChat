@@ -61,8 +61,10 @@ public class WhatsUp implements Serializable {
     }
 
     public enum What {
+        NOTHING,
+
         MESSAGE, // MESSAGE channel who-msg some-text
-        PRIVY, // MESSAGE unused who-msg-to who-msg-by some-text
+        PRIVY, // PRIVY unused who-msg-to who-msg-by some-text
 
         JOIN, // JOIN channel who-join is-auth is-admin
         PART, // PART channel who-part

@@ -78,6 +78,7 @@ public class MainController implements Initializable {
 
     private final Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
+                    .put(What.NOTHING, this::onSomeNothing)
                     .put(What.MESSAGE, this::onSomeMessage)
                     .put(What.PRIVY, this::onSomePrivy)
                     .put(What.JOIN, this::onSomeJoin)
@@ -306,6 +307,10 @@ public class MainController implements Initializable {
     }
 
     // ---------------------------------------------------------------------------------------------------------------
+
+    public void onSomeNothing(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeNothing", whatsUp);
+    }
 
     public void onSomeMessage(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeMessage", whatsUp);

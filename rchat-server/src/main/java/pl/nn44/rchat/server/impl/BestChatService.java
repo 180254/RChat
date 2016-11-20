@@ -95,6 +95,9 @@ public class BestChatService implements ChatService {
             ServerUser user = new ServerUser(session, username);
             sessionToUser.put(session, user);
 
+            WhatsUp nothing = WhatsUp.create(What.NOTHING);
+            user.getNews().offer(nothing);
+
             return Response.Ok(user.getSession());
 
         } finally {
@@ -115,6 +118,9 @@ public class BestChatService implements ChatService {
                 // then the hold count is incremented by one and the method returns immediately."
                 part(session, channel.getName(), "unused");
             }
+
+            WhatsUp nothing = WhatsUp.create(What.NOTHING);
+            params.caller.getNews().offer(nothing);
 
             sessionToUser.remove(session);
 
@@ -488,7 +494,14 @@ public class BestChatService implements ChatService {
 
     @Override
     public Response<WhatsUp[]> whatsUp(String session, int longPoolingTimeoutMs) throws ChatException {
-        Params params = params(session, null, null, false, true);
+        Params params;
+
+        Locks locks = locks(session, null, null);
+        try {
+            params = params(session, null, null, false, true);
+        } finally {
+            locks.unlock();
+        }
 
         ArrayList<WhatsUp> news = new ArrayList<>(MAX_NEWS_PER_REQUEST / 2);
 

@@ -14,11 +14,11 @@ import static pl.nn44.rchat.protocol.exception.ChatException.Reason.*;
 public interface ChatService {
 
     @CeReasons({ALREADY_LOGGED_IN, GIVEN_BAD_USERNAME, GIVEN_BAD_PASSWORD})
-    @WuFeedback(false)
+    @WuFeedback(true /*NOTHING*/)
     Response<String> login(String username, @Nullable String password) throws ChatException;
 
     @CeReasons({GIVEN_BAD_SESSION})
-    @WuFeedback(false)
+    @WuFeedback(true /*NOTHING*/)
     Response<?> logout(String session) throws ChatException;
 
     // ---------------------------------------------------------------------------------------------------------------
