@@ -1,5 +1,6 @@
 package pl.nn44.rchat.client.controller;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,6 +18,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.nn44.rchat.client.fx.RefreshableListViewSkin;
@@ -37,10 +39,7 @@ import pl.nn44.rchat.protocol.model.WhatsUp.What;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -60,6 +59,7 @@ public class MainController implements Initializable {
     private final ScheduledExecutorService exs;
     private final CsHandler csh;
     private final LocaleHelper i18n;
+    private final Stage stage;
 
     @FXML public Label status;
     @FXML public TextFlow messages;
@@ -181,11 +181,14 @@ public class MainController implements Initializable {
 
     public MainController(ScheduledExecutorService executor,
                           CsHandler csHandler,
-                          LocaleHelper localeHelper) {
+                          LocaleHelper localeHelper,
+                          Stage primaryStage) {
 
         this.csh = csHandler;
         this.exs = executor;
         this.i18n = localeHelper;
+        this.stage = primaryStage;
+
 
         LOG.debug("{} instance created.", getClass().getSimpleName());
     }
@@ -555,10 +558,26 @@ public class MainController implements Initializable {
 
         if (!channel.isJoin()) {
             // join
+            Optional<String> oPassword = Optional.empty();
+            if (channel.isPassword()) {
+                TextInputDialog dlg = new TextInputDialog();
+                dlg.initOwner(stage);
+                dlg.setTitle(i18n.get("join-pass.title"));
+                dlg.setHeaderText(i18n.get("join-pass.header", channel.getName()));
+                dlg.getDialogPane().setContentText(i18n.get("join-pass.label"));
+                dlg.setGraphic(null);
+                oPassword = dlg.showAndWait();
+            }
+
+            String password = Strings.emptyToNull(oPassword.orElse(null));
             exs.submit(() -> {
                 try {
+                    if (channel.isPassword() && password == null) {
+                        return;
+                    }
+
                     Channel pChannel = csh.cs()
-                            .join(csh.token(), channel.getName(), null)
+                            .join(csh.token(), channel.getName(), password)
                             .getPayload();
 
                     channel.setJoin(true);
