@@ -405,7 +405,7 @@ public class BestChatService implements ChatService {
             if (change) {
                 WhatsUp whatsUp = WhatsUp.create(
                         What.IGNORE,
-                        null,
+                        "unused",
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
                         state ? "ON" : "OFF"
@@ -440,7 +440,7 @@ public class BestChatService implements ChatService {
             if (!ignore) {
                 WhatsUp whatsUp = WhatsUp.create(
                         What.PRIVY,
-                        null,
+                        "unused",
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
                         text

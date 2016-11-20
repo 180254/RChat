@@ -62,7 +62,7 @@ public class WhatsUp implements Serializable {
 
     public enum What {
         MESSAGE, // MESSAGE channel who-msg some-text
-        PRIVY, // MESSAGE null who-msg-to who-msg-by some-text
+        PRIVY, // MESSAGE unused who-msg-to who-msg-by some-text
 
         JOIN, // JOIN channel who-join is-auth is-admin
         PART, // PART channel who-part
@@ -70,7 +70,7 @@ public class WhatsUp implements Serializable {
         BAN, // BAN channel who-banned who-banned-by ON/OFF
 
         ADMIN, // ADMIN channel who-admin username-admin-by ON/OFF
-        IGNORE, // IGNORE null who-ignored username-who-ignored-by ON/OFF
+        IGNORE, // IGNORE unused who-ignored username-who-ignored-by ON/OFF
 
         TOPIC, // TOPIC channel who-changed some-text
     }
