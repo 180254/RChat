@@ -7,7 +7,7 @@
 <VBox prefHeight="600.0" prefWidth="900.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/8.0.60"
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.nn44.rchat.client.controller.MainController">
 
-    <fx:include source="menu.fxml"/>
+    <fx:include fx:id="menu" source="menu.fxml"/>
 
     <HBox VBox.vgrow="NEVER">
         <padding>

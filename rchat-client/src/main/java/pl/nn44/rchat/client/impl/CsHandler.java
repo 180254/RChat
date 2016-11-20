@@ -15,6 +15,7 @@ public class CsHandler {
     private static final Logger LOG = LoggerFactory.getLogger(CsHandler.class);
 
     private final ChatService[] chatServices = new ChatService[3];
+    private boolean init = false;
     private String username = null;
     private String token = null;
     private int current = 0;
@@ -28,13 +29,17 @@ public class CsHandler {
     // ---------------------------------------------------------------------------------------------------------------
 
     public void init() {
-        Properties prop = PropLoader.get();
-        Clients<ChatService> clients = new Clients<>(prop, ChatService.class);
-        FaultMapperRevImpl faultMapperRev = new FaultMapperRevImpl();
+        if (!init) {
+            init = true;
 
-        chatServices[Clients.Cs.Hessian.i()] = clients.hessian();
-        chatServices[Clients.Cs.Burlap.i()] = clients.burlap();
-        chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc(faultMapperRev);
+            Properties prop = PropLoader.get();
+            Clients<ChatService> clients = new Clients<>(prop, ChatService.class);
+            FaultMapperRevImpl faultMapperRev = new FaultMapperRevImpl();
+
+            chatServices[Clients.Cs.Hessian.i()] = clients.hessian();
+            chatServices[Clients.Cs.Burlap.i()] = clients.burlap();
+            chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc(faultMapperRev);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------

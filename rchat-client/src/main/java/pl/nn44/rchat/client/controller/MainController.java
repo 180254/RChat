@@ -70,6 +70,9 @@ public class MainController implements Initializable {
     @FXML public ListView<ClientChannel> channels;
     @FXML public ListView<ClientUser> users;
 
+    @FXML public MenuBar menu;
+    @FXML public MenuController menuController;
+
     public RefreshableListViewSkin<ClientChannel> channelsSkin;
     public RefreshableListViewSkin<ClientUser> usersSkin;
 
@@ -173,6 +176,7 @@ public class MainController implements Initializable {
 
     private boolean fatalFail = false;
     private final Semaphore joinPartSem = new Semaphore(1);
+    private Future<?> newsFuture = new FutureTask<>(Object::new);
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -196,6 +200,8 @@ public class MainController implements Initializable {
         topicModel = topic.textProperty();
         usersModel = FXCollections.synchronizedObservableList(users.getItems());
         messagesModel = FXCollections.synchronizedObservableList(messages.getChildren());
+
+        menuController.beforeLogout.add(() -> newsFuture.cancel(true));
 
         exs.submit(() -> {
             initChannelChangeListener();
@@ -223,7 +229,7 @@ public class MainController implements Initializable {
                     status.setText("");
                 });
 
-                exs.submit(this::listenWhatHappens);
+                newsFuture = exs.submit(this::listenWhatHappens);
 
             } catch (Exception e) {
                 fatalFail = true;
@@ -242,14 +248,21 @@ public class MainController implements Initializable {
                     .whatsUp(csh.token(), WHATS_UP_LONG_POOLING)
                     .getPayload();
 
+            if (Thread.currentThread().isInterrupted()) {
+                throw new InterruptedException();
+            }
+
             for (WhatsUp whatsUp : whatsUps) {
                 whatsUpMap.get(whatsUp.getWhat()).accept(whatsUp);
             }
 
-            exs.submit(this::listenWhatHappens);
+            newsFuture = exs.submit(this::listenWhatHappens);
 
         } catch (RejectedExecutionException e) {
             LOG.debug("listenWhatHappens: RejectedExecutionException.");
+
+        } catch (InterruptedException e) {
+            LOG.debug("listenWhatHappens: InterruptedException.");
 
         } catch (Exception e) {
             fatalFail = true;

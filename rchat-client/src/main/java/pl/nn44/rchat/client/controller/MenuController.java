@@ -15,6 +15,7 @@ import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class MenuController implements Initializable {
@@ -30,6 +31,8 @@ public class MenuController implements Initializable {
     @FXML public MenuItem exit;
     @FXML public MenuItem test;
     @FXML public ToggleGroup protocol;
+
+    public final CopyOnWriteArrayList<Runnable> beforeLogout = new CopyOnWriteArrayList<>();
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -60,6 +63,9 @@ public class MenuController implements Initializable {
 
     @FXML
     public void onLogoutCLicked(ActionEvent ev) {
+        beforeLogout.forEach(exs::submit);
+        beforeLogout.clear();
+
         exs.submit(csh::logout);
         sc.accept("login");
     }
