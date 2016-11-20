@@ -324,6 +324,9 @@ public class BestChatService implements ChatService {
                     su.getNews().offer(wuKick);
                     su.getNews().offer(wuPart);
                 }
+
+                params.affUser.getNews().offer(wuKick);
+                params.affUser.getNews().offer(wuPart);
             }
 
             return Response.Ok();
