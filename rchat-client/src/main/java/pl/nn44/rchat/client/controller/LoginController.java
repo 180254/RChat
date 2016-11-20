@@ -57,7 +57,6 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         exs.submit(() -> {
-
             String initializingStatus = i18n.get("ctrl.login.initializing");
             runLater(() -> {
                 tc.accept(null);
@@ -80,7 +79,6 @@ public class LoginController implements Initializable {
     @FXML
     public void onEnterClicked(ActionEvent ev) {
         exs.submit(() -> {
-
             String processingStatus = i18n.get("ctrl.login.processing");
             runLater(() -> {
                 status.setText(processingStatus);

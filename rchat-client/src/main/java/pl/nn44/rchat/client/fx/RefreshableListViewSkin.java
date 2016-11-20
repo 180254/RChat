@@ -4,12 +4,10 @@ import com.sun.javafx.scene.control.skin.ListViewSkin;
 import javafx.scene.control.ListView;
 
 /**
- * <pre>
- *     ListViewSkin with refresh method to update JavaFx ListView without changing collection.
- *     http://stackoverflow.com/a/25962110
- * </pre>
+ * ListViewSkin with refresh method to update JavaFx ListView without changing collection.<br/>
+ * http://stackoverflow.com/a/25962110
  *
- * @param <T>
+ * @param <T> T
  */
 public class RefreshableListViewSkin<T> extends ListViewSkin<T> {
 

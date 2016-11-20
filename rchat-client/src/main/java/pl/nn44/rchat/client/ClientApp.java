@@ -32,9 +32,9 @@ public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
-    // "3 ought to be enough for anybody"
-    // 1 for gathering news; 1 for other actions; 1 to speed up app
-    private static final int N_THREADS = 3;
+    // "4 ought to be enough for anybody"
+    // 1 for gathering news; 1 for other actions; 1 to speed up app; 4th because 4 is nicer than 3
+    private static final int N_THREADS = 4;
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(N_THREADS);
     private final CsHandler csHandler = new CsHandler();

@@ -3,13 +3,13 @@ package pl.nn44.rchat.protocol.xmlrpc;
 import org.apache.xmlrpc.XmlRpcException;
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.rchat.protocol.exception.ChatException.Reason;
-import pl.nn44.xmlrpc.FaultMapperRev;
+import pl.nn44.xmlrpc.FaultRevMapper;
 
 /**
  * Fault rev mapper for xml-rpc protocol.<br/>
  * Please check {@link pl.nn44.xmlrpc} package doc.
  */
-public class FaultMapperRevImpl implements FaultMapperRev {
+public class FaultRevMapperImpl implements FaultRevMapper {
 
     @Override
     public Throwable apply(XmlRpcException e) {

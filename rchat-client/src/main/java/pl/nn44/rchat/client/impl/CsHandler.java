@@ -6,7 +6,7 @@ import pl.nn44.rchat.client.util.PropLoader;
 import pl.nn44.rchat.protocol.ChatService;
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.rchat.protocol.model.Response;
-import pl.nn44.rchat.protocol.xmlrpc.FaultMapperRevImpl;
+import pl.nn44.rchat.protocol.xmlrpc.FaultRevMapperImpl;
 
 import java.util.Properties;
 
@@ -34,11 +34,11 @@ public class CsHandler {
 
             Properties prop = PropLoader.get();
             Clients<ChatService> clients = new Clients<>(prop, ChatService.class);
-            FaultMapperRevImpl faultMapperRev = new FaultMapperRevImpl();
+            FaultRevMapperImpl faultRevMapper = new FaultRevMapperImpl();
 
             chatServices[Clients.Cs.Hessian.i()] = clients.hessian();
             chatServices[Clients.Cs.Burlap.i()] = clients.burlap();
-            chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc(faultMapperRev);
+            chatServices[Clients.Cs.XmlRpc.i()] = clients.xmlRpc(faultRevMapper);
         }
     }
 

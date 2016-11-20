@@ -56,7 +56,7 @@
  *   It converts Throwable into XmlRpcException,
  *   or returns null conversion if not supported.
  *
- * - FaultMapperRev (Function&lt;XmlRpcException, Throwable&gt;)
+ * - FaultRevMapper (Function&lt;XmlRpcException, Throwable&gt;)
  *   It converts XmlRpcException into Throwable,
  *   or returns null conversion if not supported.
  *

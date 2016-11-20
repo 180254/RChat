@@ -79,26 +79,26 @@ public class MainController implements Initializable {
     private final Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
                     .put(What.NOTHING, this::onSomeNothing)
-                    .put(What.MESSAGE, this::onSomeMessage)
-                    .put(What.PRIVY, this::onSomePrivy)
                     .put(What.JOIN, this::onSomeJoin)
                     .put(What.PART, this::onSomePart)
+                    .put(What.TOPIC, this::onSomeTopic)
                     .put(What.KICK, this::onSomeKick)
                     .put(What.BAN, this::onSomeBan)
                     .put(What.ADMIN, this::onSomeAdmin)
                     .put(What.IGNORE, this::onSomeIgnore)
-                    .put(What.TOPIC, this::onSomeTopic)
+                    .put(What.MESSAGE, this::onSomeMessage)
+                    .put(What.PRIVY, this::onSomePrivy)
                     .build();
 
     private final Map<String, BiConsumer<String, String[]>> commandsMap =
             ImmutableMap.<String, BiConsumer<String, String[]>>builder()
                     .put("/join", this::onCmdJoin)
                     .put("/part", this::onCmdPart)
+                    .put("/topic", this::onCmdTopic)
                     .put("/kick", this::onCmdKick)
                     .put("/ban", this::onCmdBan)
                     .put("/admin", this::onCmdAdmin)
                     .put("/ignore", this::onCmdIgnore)
-                    .put("/topic", this::onCmdTopic)
                     .build();
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -176,7 +176,7 @@ public class MainController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     private boolean fatalFail = false;
-    private final Semaphore joinPartSem = new Semaphore(1);
+    private final Semaphore joinPartSemaphore = new Semaphore(1);
     private Future<?> newsFuture = new FutureTask<>(Object::new);
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -312,31 +312,6 @@ public class MainController implements Initializable {
         LOG.info("{} {}", "onSomeNothing", whatsUp);
     }
 
-    public void onSomeMessage(WhatsUp whatsUp) {
-        LOG.info("{} {}", "onSomeMessage", whatsUp);
-
-        LocalDateTime time = whatsUp.getTime();
-        String channel = whatsUp.getParams()[0];
-        String whoMsg = whatsUp.getParams()[1];
-        String someText = whatsUp.getParams()[2];
-
-        PrintMsg printMsg = new PrintMsg(whoMsg, time, someText);
-
-        ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getMessages().addAll(printMsg.toNodes());
-    }
-
-    public void onSomePrivy(WhatsUp whatsUp) {
-        LOG.info("{} {}", "onSomePrivy", whatsUp);
-
-        LocalDateTime time = whatsUp.getTime();
-        String whoMsgTo = whatsUp.getParams()[0];
-        String whoMsgBy = whatsUp.getParams()[0];
-        String someText = whatsUp.getParams()[2];
-
-        LOG.info("?", time, whoMsgTo, whoMsgBy, someText);
-    }
-
     // ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeJoin(WhatsUp whatsUp) {
@@ -366,6 +341,18 @@ public class MainController implements Initializable {
 
         ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoPart));
+    }
+
+    public void onSomeTopic(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeTopic", whatsUp);
+
+        infoAboutSimpleMsg(whatsUp);
+
+        String channel = whatsUp.getParams()[0];
+        String someText = whatsUp.getParams()[2];
+
+        ClientChannel ctChannel = channelsMap.get(channel);
+        ctChannel.setTopic(someText);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -443,17 +430,31 @@ public class MainController implements Initializable {
             runLater(() -> usersSkin.refresh());
         }
     }
+    // ---------------------------------------------------------------------------------------------------------------
 
-    public void onSomeTopic(WhatsUp whatsUp) {
-        LOG.info("{} {}", "onSomeTopic", whatsUp);
+    public void onSomeMessage(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomeMessage", whatsUp);
 
-        infoAboutSimpleMsg(whatsUp);
-
+        LocalDateTime time = whatsUp.getTime();
         String channel = whatsUp.getParams()[0];
+        String whoMsg = whatsUp.getParams()[1];
         String someText = whatsUp.getParams()[2];
 
+        PrintMsg printMsg = new PrintMsg(whoMsg, time, someText);
+
         ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.setTopic(someText);
+        ctChannel.getMessages().addAll(printMsg.toNodes());
+    }
+
+    public void onSomePrivy(WhatsUp whatsUp) {
+        LOG.info("{} {}", "onSomePrivy", whatsUp);
+
+        LocalDateTime time = whatsUp.getTime();
+        String whoMsgTo = whatsUp.getParams()[0];
+        String whoMsgBy = whatsUp.getParams()[0];
+        String someText = whatsUp.getParams()[2];
+
+        LOG.info("?", time, whoMsgTo, whoMsgBy, someText);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -542,9 +543,9 @@ public class MainController implements Initializable {
         }
 
         try {
-            joinPartSem.acquire();
+            joinPartSemaphore.acquire();
         } catch (InterruptedException e) {
-            LOG.warn("joinPartSem acquire interrupted", e);
+            LOG.warn("joinPartSemaphore acquire interrupted", e);
             return;
         }
 
@@ -552,7 +553,9 @@ public class MainController implements Initializable {
             // join
             exs.submit(() -> {
                 try {
-                    Channel pChannel = csh.cs().join(csh.token(), channel.getName(), null).getPayload();
+                    Channel pChannel = csh.cs()
+                            .join(csh.token(), channel.getName(), null)
+                            .getPayload();
 
                     channel.setJoin(true);
                     channel.clear();
@@ -568,7 +571,7 @@ public class MainController implements Initializable {
                     fleetingStatusAsync(failStatus);
 
                 } finally {
-                    joinPartSem.release();
+                    joinPartSemaphore.release();
                 }
             });
 
@@ -590,7 +593,7 @@ public class MainController implements Initializable {
                     fleetingStatusAsync(failStatus);
 
                 } finally {
-                    joinPartSem.release();
+                    joinPartSemaphore.release();
                 }
             });
         }
@@ -658,14 +661,14 @@ public class MainController implements Initializable {
 
     public void onAnyCmd(String channel, String message) {
         String[] tokens = SPACE_PATTERN.split(message);
-
         BiConsumer<String, String[]> cmdConsumer = commandsMap.get(tokens[0]);
 
-        if (cmdConsumer == null) {
+        if (cmdConsumer != null) {
+            cmdConsumer.accept(channel, tokens);
+
+        } else {
             String failStatus = r(i18n.get("cmd.unknown"));
             fleetingStatusAsync(failStatus);
-        } else {
-            cmdConsumer.accept(channel, tokens);
         }
     }
 
@@ -710,47 +713,47 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public void onCmdJoin(String channel, String tokens[]) {
+    public void onCmdJoin(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdJoin", channel, tokens);
     }
 
-    public void onCmdPart(String channel, String tokens[]) {
+    public void onCmdPart(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdPart", channel, tokens);
     }
 
-    public void onCmdKick(String channel, String tokens[]) {
+    public void onCmdTopic(String channel, String[] tokens) {
+        LOG.info("{} {} {}", "onCmdTopic", channel, tokens);
+
+        ChatService cs = csh.cs();
+        onSimpleCommand(channel, tokens, "topic", cs::topic);
+    }
+
+    public void onCmdKick(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdKick", channel, tokens);
 
         ChatService cs = csh.cs();
         onSimpleCommand(channel, tokens, "kick", cs::kick);
     }
 
-    public void onCmdBan(String channel, String tokens[]) {
+    public void onCmdBan(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdBan", channel, tokens);
 
         ChatService cs = csh.cs();
         onStateCommand(channel, tokens, "ban", cs::ban);
     }
 
-    public void onCmdAdmin(String channel, String tokens[]) {
+    public void onCmdAdmin(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdAdmin", channel, tokens);
 
         ChatService cs = csh.cs();
         onStateCommand(channel, tokens, "admin", cs::admin);
     }
 
-    public void onCmdIgnore(String channel, String tokens[]) {
+    public void onCmdIgnore(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdIgnore", channel, tokens);
 
         ChatService cs = csh.cs();
         onStateCommand(channel, tokens, "ignore", cs::ignore);
-    }
-
-    public void onCmdTopic(String channel, String tokens[]) {
-        LOG.info("{} {} {}", "onCmdTopic", channel, tokens);
-
-        ChatService cs = csh.cs();
-        onSimpleCommand(channel, tokens, "topic", cs::topic);
     }
 
     // ---------------------------------------------------------------------------------------------------------------

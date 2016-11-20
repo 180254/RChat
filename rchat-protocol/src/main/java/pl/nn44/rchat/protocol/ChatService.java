@@ -61,13 +61,13 @@ public interface ChatService {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    @CeReasons({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
-    @WuFeedback(true)
-    Response<?> privy(String session, String username, String text) throws ChatException;
-
     @CeReasons({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, NO_PERMISSION})
     @WuFeedback(true)
     Response<?> message(String session, String channel, String text) throws ChatException;
+
+    @CeReasons({GIVEN_BAD_SESSION, GIVEN_BAD_CHANNEL, GIVEN_BAD_USERNAME, NO_PERMISSION})
+    @WuFeedback(true)
+    Response<?> privy(String session, String username, String text) throws ChatException;
 
     // ---------------------------------------------------------------------------------------------------------------
 

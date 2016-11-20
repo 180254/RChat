@@ -13,7 +13,7 @@ import java.io.InputStream;
  */
 public class AnyXmlRpcTransport extends XmlRpcSun15HttpTransport {
 
-    protected FaultMapperRev faultMapperRev;
+    protected FaultRevMapper faultRevMapper;
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -22,15 +22,15 @@ public class AnyXmlRpcTransport extends XmlRpcSun15HttpTransport {
     }
 
     public AnyXmlRpcTransport(XmlRpcClient pClient,
-                              FaultMapperRev faultMapperRev) {
+                              FaultRevMapper faultRevMapper) {
         super(pClient);
-        this.faultMapperRev = faultMapperRev;
+        this.faultRevMapper = faultRevMapper;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public void setFaultMapperRev(FaultMapperRev faultMapperRev) {
-        this.faultMapperRev = faultMapperRev;
+    public void setFaultRevMapper(FaultRevMapper faultRevMapper) {
+        this.faultRevMapper = faultRevMapper;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -44,10 +44,10 @@ public class AnyXmlRpcTransport extends XmlRpcSun15HttpTransport {
             return super.readResponse(pConfig, pStream);
 
         } catch (Throwable t) {
-            if (faultMapperRev != null && t instanceof XmlRpcException) {
+            if (faultRevMapper != null && t instanceof XmlRpcException) {
                 XmlRpcException xre = (XmlRpcException) t;
 
-                Throwable mappedError = faultMapperRev.apply(xre);
+                Throwable mappedError = faultRevMapper.apply(xre);
                 if (mappedError != null) {
                     throw new XmlRpcInvocationException(xre.code, xre.getMessage(), mappedError);
                 }

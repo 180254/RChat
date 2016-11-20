@@ -16,7 +16,7 @@ import org.springframework.remoting.caucho.HessianProxyFactoryBean;
 import pl.nn44.xmlrpc.AnyTypeFactory;
 import pl.nn44.xmlrpc.AnyXmlRpcTransport;
 import pl.nn44.xmlrpc.ClientFactoryFix;
-import pl.nn44.xmlrpc.FaultMapperRev;
+import pl.nn44.xmlrpc.FaultRevMapper;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -113,7 +113,7 @@ public class Clients<T> {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public T xmlRpc(FaultMapperRev errorMapper) {
+    public T xmlRpc(FaultRevMapper errorMapper) {
         String serviceUrl = url.apply("rpc.xml-rpc");
 
         try {

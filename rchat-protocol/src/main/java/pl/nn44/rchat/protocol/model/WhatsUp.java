@@ -61,19 +61,21 @@ public class WhatsUp implements Serializable {
     }
 
     public enum What {
+        // NOTHING is send on LOGIN & LOGOUT actions
+        // It helps speed up start(?)/stop(!) retrieving news.
         NOTHING,
-
-        MESSAGE, // MESSAGE channel who-msg some-text
-        PRIVY, // PRIVY unused who-msg-to who-msg-by some-text
 
         JOIN, // JOIN channel who-join is-auth is-admin
         PART, // PART channel who-part
+
+        TOPIC, // TOPIC channel who-changed some-text
+
         KICK, // KICK channel who-kicked who-kicked-by
         BAN, // BAN channel who-banned who-banned-by ON/OFF
-
         ADMIN, // ADMIN channel who-admin username-admin-by ON/OFF
         IGNORE, // IGNORE unused who-ignored username-who-ignored-by ON/OFF
 
-        TOPIC, // TOPIC channel who-changed some-text
+        MESSAGE, // MESSAGE channel who-msg some-text
+        PRIVY, // PRIVY unused who-msg-to who-msg-by some-text
     }
 }

@@ -7,7 +7,7 @@ import java.util.function.Function;
 /**
  * Please check {@link pl.nn44.xmlrpc} package doc.
  */
-public interface FaultMapperRev
+public interface FaultRevMapper
         extends Function<XmlRpcException, Throwable> {
 
 }

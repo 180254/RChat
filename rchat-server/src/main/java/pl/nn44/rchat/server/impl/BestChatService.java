@@ -232,7 +232,7 @@ public class BestChatService implements ChatService {
 
         try {
             Params params = params(session, null, null, false, false);
-            // without verification if caller is on channel, NO_PERMISSION will be not thrown
+            // without verification if caller is on channel, NO_PERMISSION will not be thrown
             params.channel = params(null, channel, null, false, false).channel;
 
             boolean removeC = params.channel.getUsers().remove(params.caller);
@@ -435,35 +435,6 @@ public class BestChatService implements ChatService {
     }
 
     @Override
-    public Response<?> privy(String session, String username, String text) throws ChatException {
-        Locks locks = locks(session, null, username);
-
-        try {
-            Params params = params(session, null, username, false, false);
-
-            boolean ignore = params.affUser.getIgnored().contains(params.caller.getUsername());
-
-            if (!ignore) {
-                WhatsUp whatsUp = WhatsUp.create(
-                        What.PRIVY,
-                        "unused",
-                        params.affUser.getUsername(),
-                        params.caller.getUsername(),
-                        text
-                );
-
-                params.caller.getNews().offer(whatsUp);
-                params.affUser.getNews().offer(whatsUp);
-            }
-
-            return Response.Ok();
-
-        } finally {
-            locks.unlock();
-        }
-    }
-
-    @Override
     public Response<?> message(String session, String channel, String text) throws ChatException {
         Locks locks = locks(session, channel, null);
 
@@ -483,6 +454,35 @@ public class BestChatService implements ChatService {
                 if (!ignore) {
                     su.getNews().offer(whatsUp);
                 }
+            }
+
+            return Response.Ok();
+
+        } finally {
+            locks.unlock();
+        }
+    }
+
+    @Override
+    public Response<?> privy(String session, String username, String text) throws ChatException {
+        Locks locks = locks(session, null, username);
+
+        try {
+            Params params = params(session, null, username, false, false);
+
+            boolean ignore = params.affUser.getIgnored().contains(params.caller.getUsername());
+
+            if (!ignore) {
+                WhatsUp whatsUp = WhatsUp.create(
+                        What.PRIVY,
+                        "unused",
+                        params.affUser.getUsername(),
+                        params.caller.getUsername(),
+                        text
+                );
+
+                params.caller.getNews().offer(whatsUp);
+                params.affUser.getNews().offer(whatsUp);
             }
 
             return Response.Ok();
@@ -599,7 +599,6 @@ public class BestChatService implements ChatService {
         private final String pUsername;
         private final boolean pCheckAdmin;
         private final boolean pAffUserOnChan;
-
 
         public ServerUser caller;
         public ServerChannel channel;
@@ -723,14 +722,17 @@ public class BestChatService implements ChatService {
                 this.lockCaller = null;
             }
 
-            this.lockAffUser = username != null
-                    ? stripedLocks.get("U$" + username)
-                    : null;
+            if (username != null) {
+                this.lockAffUser = stripedLocks.get("U$" + username);
+            } else {
+                this.lockAffUser = null;
+            }
 
-            this.lockChannel = channel != null
-                    ? stripedLocks.get("C$" + channel)
-                    : null;
-
+            if (channel != null) {
+                this.lockChannel = stripedLocks.get("C$" + channel);
+            } else {
+                this.lockChannel = null;
+            }
         }
 
         void lock() {
