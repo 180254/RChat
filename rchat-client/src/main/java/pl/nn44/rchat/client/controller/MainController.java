@@ -37,12 +37,11 @@ import pl.nn44.rchat.protocol.model.WhatsUp.What;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -58,7 +57,7 @@ public class MainController implements Initializable {
     private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
     private static final int WHATS_UP_LONG_POOLING = (int) TimeUnit.MINUTES.toMillis(1);
 
-    private final ExecutorService exs;
+    private final ScheduledExecutorService exs;
     private final CsHandler csh;
     private final LocaleHelper i18n;
 
@@ -74,8 +73,8 @@ public class MainController implements Initializable {
     public RefreshableListViewSkin<ClientChannel> channelsSkin;
     public RefreshableListViewSkin<ClientUser> usersSkin;
 
-    private boolean fatalFail =
-            false;
+    private boolean fatalFail = false;
+    private final Semaphore joinPartSem = new Semaphore(1);
 
     private final Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
@@ -104,35 +103,11 @@ public class MainController implements Initializable {
     // ---------------------------------------------------------------------------------------------------------------
 
     private Map<String, ClientChannel> channelsMap =
-            new HashMap<>();
+            new ConcurrentHashMap<>();
 
     // ---------------------------------------------------------------------------------------------------------------
 
-
-    private ObservableList<ClientUser> usersModel;
-
-    private ObservableList<ClientUser> usersSource =
-            FXCollections.emptyObservableList();
-
-    private final ListChangeListener<ClientUser> usersTake =
-            new ListChangeListener<ClientUser>() {
-                @Override
-                public void onChanged(Change<? extends ClientUser> c) {
-                    while (c.next()) {
-                        if (c.wasAdded()) {
-                            runLater(() -> usersModel.addAll(c.getAddedSubList()));
-                        } else if (c.wasRemoved()) {
-                            runLater(() -> usersModel.removeAll(c.getRemoved()));
-                        } else {
-                            throw new AssertionError("usersTake #0: " + c.toString());
-                        }
-                    }
-                }
-            };
-
-    // ---------------------------------------------------------------------------------------------------------------
-
-    private Property<String> topicModel;
+    private Property<String> topicModel; // initialize-final
 
     private Property<String> topicSource =
             new SimpleStringProperty();
@@ -143,7 +118,35 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private ObservableList<Node> messagesModel;
+    private ObservableList<ClientUser> usersModel; // initialize-final
+
+    private ObservableList<ClientUser> usersSource =
+            FXCollections.emptyObservableList();
+
+    private final ListChangeListener<ClientUser> usersTake =
+            new ListChangeListener<ClientUser>() {
+                @Override
+                public void onChanged(Change<? extends ClientUser> c) {
+                    while (c.next()) {
+                        if (c.wasAdded()) {
+                            List<ClientUser> snapshot = new ArrayList<>(c.getAddedSubList());
+                            runLater(() -> usersModel.addAll(snapshot));
+
+                        } else if (c.wasRemoved()) {
+                            List<ClientUser> snapshot = new ArrayList<>(c.getRemoved());
+                            runLater(() -> usersModel.removeAll(snapshot));
+
+                        } else {
+                            LOG.error("usersTake unexpected condition");
+                            throw new AssertionError("usersTake #0: " + c.toString());
+                        }
+                    }
+                }
+            };
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private ObservableList<Node> messagesModel; // initialize-final
 
     private ObservableList<Text> messagesSource =
             FXCollections.emptyObservableList();
@@ -154,10 +157,15 @@ public class MainController implements Initializable {
                 public void onChanged(Change<? extends Text> c) {
                     while (c.next()) {
                         if (c.wasAdded()) {
-                            runLater(() -> messagesModel.addAll(c.getAddedSubList()));
+                            List<Text> snapshot = new ArrayList<>(c.getAddedSubList());
+                            runLater(() -> messagesModel.addAll(snapshot));
+
                         } else if (c.wasRemoved()) {
-                            runLater(() -> messagesModel.removeAll(c.getRemoved()));
+                            List<Text> snapshot = new ArrayList<>(c.getRemoved());
+                            runLater(() -> messagesModel.removeAll(snapshot));
+
                         } else {
+                            LOG.error("messageTake unexpected condition");
                             throw new AssertionError("messageTake #0: " + c.toString());
                         }
                     }
@@ -166,7 +174,7 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MainController(ExecutorService executor,
+    public MainController(ScheduledExecutorService executor,
                           CsHandler csHandler,
                           LocaleHelper localeHelper) {
 
@@ -184,16 +192,17 @@ public class MainController implements Initializable {
         usersSkin = new RefreshableListViewSkin<>(users);
 
         topicModel = topic.textProperty();
-        usersModel = users.getItems();
-        messagesModel = messages.getChildren();
-
-        initChannelChangeListener();
-        initMessagesScrollListener();
+        usersModel = FXCollections.synchronizedObservableList(users.getItems());
+        messagesModel = FXCollections.synchronizedObservableList(messages.getChildren());
 
         exs.submit(() -> {
+            initChannelChangeListener();
+            initMessagesScrollListener();
+
+            String initializingStatus = r(i18n.get("ctrl.main.initializing"));
             runLater(() -> {
                 message.requestFocus();
-                status.setText(r(i18n.get("ctrl.main.initializing")));
+                status.setText(initializingStatus);
                 send.setDisable(true);
             });
 
@@ -204,19 +213,18 @@ public class MainController implements Initializable {
 
                 for (Channel channel : channels) {
                     ClientChannel ctChannel = new ClientChannel(channel);
-                    this.channels.getItems().add(ctChannel);
+                    runLater(() -> this.channels.getItems().add(ctChannel));
                     channelsMap.put(channel.getName(), ctChannel);
                 }
-
-                // channel cannot be removed or added dynamically
-                // channelsMap = Collections.unmodifiableMap(channelsMap);
 
                 runLater(() -> status.setText(""));
                 exs.submit(this::listenWhatHappens);
 
             } catch (Exception e) {
                 fatalFail = true;
-                runLater(() -> status.setText(r(i18n.mapError("channels", e))));
+
+                String failStatus = r(i18n.mapError("channels", e));
+                runLater(() -> status.setText(failStatus));
             }
         });
     }
@@ -241,8 +249,9 @@ public class MainController implements Initializable {
         } catch (Exception e) {
             fatalFail = true;
 
+            String failStatus = r(i18n.mapError("whats-up", e));
             runLater(() -> {
-                status.setText(r(i18n.mapError("whats-up", e)));
+                status.setText(failStatus);
                 send.setDisable(true);
             });
         }
@@ -390,7 +399,7 @@ public class MainController implements Initializable {
         ClientChannel channel = channels.getSelectionModel().getSelectedItem();
         if (channel != null) {
             // replace param-channel with current channel
-            // in protocol, for this WhatsUp, channel field is unused
+            // in protocol, for this WhatsUp, channel pos is unused
             String[] newParams = whatsUp.getParams();
             newParams[0] = channel.getName();
 
@@ -465,77 +474,96 @@ public class MainController implements Initializable {
     }
 
     public void onSingleClickedChannels(ClientChannel channel) {
-        send.setDisable(!fatalFail && !(channel.isJoin()));
+        runLater(() -> send.setDisable(!fatalFail && !(channel.isJoin())));
 
         if (topicSource != channel.getTopic()) {
             topicSource.removeListener(topicTake);
             topicSource = channel.getTopic();
-            topicModel.setValue(topicSource.getValue());
+            String snapshot = topicSource.getValue();
+            runLater(() -> topicModel.setValue(snapshot));
             topicSource.addListener(topicTake);
         }
 
         if (messagesSource != channel.getMessages()) {
             messagesSource.removeListener(messageTake);
             messagesSource = channel.getMessages();
-            messagesModel.setAll(messagesSource);
+            ArrayList<Text> snapshot = new ArrayList<>(messagesSource);
+            runLater(() -> messagesModel.setAll(snapshot));
             messagesSource.addListener(messageTake);
         }
 
         if (usersSource != channel.getUsers()) {
+            messages.getChildren();
             usersSource.removeListener(usersTake);
             usersSource = channel.getUsers();
-            usersModel.setAll(usersSource);
+            ArrayList<ClientUser> snapshot = new ArrayList<>(usersSource);
+            runLater(() -> usersModel.setAll(snapshot));
             usersSource.addListener(usersTake);
         }
 
-        usersSkin.refresh();
-        channelsSkin.refresh();
+        runLater(() -> {
+            usersSkin.refresh();
+            channelsSkin.refresh();
+        });
     }
+
 
     public void onDoubleClickedChannels(ClientChannel channel) {
         if (fatalFail) {
             return;
         }
 
+        try {
+            joinPartSem.acquire();
+        } catch (InterruptedException e) {
+            LOG.warn("joinPartSem acquire interrupted", e);
+            return;
+        }
+
         if (!channel.isJoin()) {
             // join
-            channel.setJoin(true);
-
             exs.submit(() -> {
                 try {
-                    Channel rcChannel = csh.cs().join(csh.token(), channel.getName(), null).getPayload();
+                    Channel rcChannel =
+                            csh.cs().join(csh.token(), channel.getName(), null).getPayload();
 
-                    runLater(() -> {
-                        channel.clear();
-                        channel.update(rcChannel);
-                        onSingleClickedChannels(channel);
+                    channel.setJoin(true);
+                    channel.clear();
+                    channel.update(rcChannel);
+                    onSingleClickedChannels(channel);
 
-                        WhatsUp dummyWhatsUp = WhatsUp.create(What.JOIN, channel.getName(), csh.getUsername());
-                        infoAboutSimpleMsg(dummyWhatsUp);
-                    });
+                    infoAboutSimpleMsg(
+                            WhatsUp.create(What.JOIN, channel.getName(), csh.getUsername())
+                    );
 
                 } catch (Exception e) {
-                    submitFleetingStatus(r(i18n.mapError("join", e)));
+                    String failStatus = r(i18n.mapError("join", e));
+                    fleetingStatusAsync(failStatus);
+
+                } finally {
+                    joinPartSem.release();
                 }
             });
 
         } else {
             // part
-            channel.setJoin(false);
-
             exs.submit(() -> {
                 try {
                     csh.cs().part(csh.token(), channel.getName(), "unused");
 
-                    runLater(() -> {
-                        onSingleClickedChannels(channel);
+                    channel.setJoin(false);
+                    onSingleClickedChannels(channel);
 
-                        WhatsUp dummyWhatsUp = WhatsUp.create(What.PART, channel.getName(), csh.getUsername());
-                        infoAboutSimpleMsg(dummyWhatsUp);
-                    });
+                    infoAboutSimpleMsg(
+                            WhatsUp.create(What.PART, channel.getName(), csh.getUsername())
+                    );
 
                 } catch (Exception e) {
-                    submitFleetingStatus(r(i18n.mapError("part", e)));
+                    String failStatus = r(i18n.mapError("part", e));
+                    fleetingStatusAsync(failStatus);
+
+                } finally {
+                    joinPartSem.release();
                 }
             });
         }
@@ -549,7 +577,7 @@ public class MainController implements Initializable {
             boolean topScroll = scroll.getVvalue() < 0.1;
 
             if (oneLineAdded || topScroll) {
-                scroll.setVvalue(1.0);
+                runLater(() -> scroll.setVvalue(1.0));
             }
         });
     }
@@ -590,8 +618,10 @@ public class MainController implements Initializable {
             exs.submit(() -> {
                 try {
                     csh.cs().message(csh.token(), channel.getName(), message);
+
                 } catch (ChatException e) {
-                    submitFleetingStatus(r(i18n.mapError("message", e)));
+                    String failStatus = r(i18n.mapError("message", e));
+                    fleetingStatusAsync(failStatus);
                 }
             });
         }
@@ -605,7 +635,8 @@ public class MainController implements Initializable {
         BiConsumer<String, String[]> cmdConsumer = commandsMap.get(tokens[0]);
 
         if (cmdConsumer == null) {
-            submitFleetingStatus(r(i18n.get("cmd.unknown")));
+            String failStatus = r(i18n.get("cmd.unknown"));
+            fleetingStatusAsync(failStatus);
         } else {
             cmdConsumer.accept(channel, tokens);
         }
@@ -613,7 +644,8 @@ public class MainController implements Initializable {
 
     public void onSimpleCommand(String channel, String[] tokens, String locMap, SimpleCommand sc) {
         if (tokens.length < 2) {
-            submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
+            String failStatus = r(i18n.get("cmd." + locMap + ".syntax"));
+            fleetingStatusAsync(failStatus);
             return;
         }
 
@@ -622,25 +654,30 @@ public class MainController implements Initializable {
             sc.accept(csh.token(), channel, param);
 
         } catch (Exception e) {
-            submitFleetingStatus(r(i18n.mapError(locMap, e)));
+            String failStatus = r(i18n.mapError(locMap, e));
+            fleetingStatusAsync(failStatus);
         }
     }
 
     public void onStateCommand(String channel, String[] tokens, String locMap, StatefulCommand sc) {
+        String failStatus = r(i18n.get("cmd." + locMap + ".syntax"));
+
         if (tokens.length < 3) {
-            submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
+            fleetingStatusAsync(failStatus);
             return;
         }
 
         if (!(tokens[2].equals("on") || tokens[2].equals("off"))) {
-            submitFleetingStatus(r(i18n.get("cmd." + locMap + ".syntax")));
+            fleetingStatusAsync(failStatus);
             return;
         }
 
         try {
             sc.accept(csh.token(), channel, tokens[1], tokens[2].equals("on"));
+
         } catch (Exception e) {
-            submitFleetingStatus(r(i18n.mapError(locMap, e)));
+            failStatus = r(i18n.mapError(locMap, e));
+            fleetingStatusAsync(failStatus);
         }
     }
 
@@ -695,17 +732,14 @@ public class MainController implements Initializable {
         return NL_PATTERN.matcher(text).replaceAll(" ");
     }
 
-    private void submitFleetingStatus(String text) {
+    private void fleetingStatusAsync(String text) {
         exs.submit(() -> {
             runLater(() -> status.setText(text));
 
-            try {
-                Thread.sleep(3500);
-            } catch (InterruptedException e) {
-                LOG.debug("submitFleetingStatus: InterruptedException");
-            }
-
-            runLater(() -> status.setText(""));
+            exs.schedule(
+                    () -> runLater(() -> status.setText("")),
+                    3500, TimeUnit.MILLISECONDS
+            );
         });
     }
 }

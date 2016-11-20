@@ -25,7 +25,7 @@ public class LocaleHelper {
 
     public String mapError(String map, Exception e) {
         if (e instanceof ChatException) {
-            LOG.warn("Exception {}: {}", map, e);
+            LOG.warn("Exception [{}] {}", map.toUpperCase(), e.toString());
 
             ChatException ce = (ChatException) e;
             String resKey = MessageFormat.format("error.{0}.{1}", map, ce.getReason().name());
@@ -35,7 +35,7 @@ public class LocaleHelper {
                     : res.getString("any.default-err-reason");
 
         } else {
-            LOG.error("Exception", e);
+            LOG.error("Exception [{}] {}", map.toUpperCase(), e);
 
             if (e instanceof RemoteAccessException || e instanceof XmlRpcException) {
                 return res.getString("any.remote-conn-error");

@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static java.util.concurrent.CompletableFuture.runAsync;
 
@@ -32,11 +32,11 @@ public class ClientApp extends Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientApp.class);
 
-    // 2 should be enough. 1 for gathering news and 1 for other actions.
-    // "4 ought to be enough for anybody"
-    private static final int N_THREADS = 4;
+    // "3 ought to be enough for anybody"
+    // 1 for gathering news; 1 for other actions; 1 to speed up app
+    private static final int N_THREADS = 3;
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(N_THREADS);
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(N_THREADS);
     private final CsHandler csHandler = new CsHandler();
     private final LocaleHelper locHelper = new LocaleHelper();
     private final Map<Class<?>, Supplier<Object>> controllers = new HashMap<>();

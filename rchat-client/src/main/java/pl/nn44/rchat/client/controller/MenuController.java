@@ -15,13 +15,13 @@ import pl.nn44.rchat.client.impl.CsHandler;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class MenuController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MenuController.class);
 
-    private final ExecutorService exs;
+    private final ScheduledExecutorService exs;
     private final CsHandler csh;
     private final Stage stage;
     private final SceneChanger sc;
@@ -33,7 +33,7 @@ public class MenuController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public MenuController(ExecutorService executor,
+    public MenuController(ScheduledExecutorService executor,
                           CsHandler csHandler,
                           Stage appStage,
                           SceneChanger sceneChanger) {

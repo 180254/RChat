@@ -14,7 +14,7 @@ import pl.nn44.rchat.client.util.LocaleHelper;
 
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static javafx.application.Platform.runLater;
 
@@ -22,7 +22,7 @@ public class LoginController implements Initializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
-    private final ExecutorService exs;
+    private final ScheduledExecutorService exs;
     private final CsHandler csh;
     private final LocaleHelper i18n;
     private final SceneChanger sc;
@@ -38,7 +38,7 @@ public class LoginController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public LoginController(ExecutorService executor,
+    public LoginController(ScheduledExecutorService executor,
                            CsHandler csHandler,
                            LocaleHelper locHelper,
                            SceneChanger sceneChanger,
@@ -57,10 +57,12 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         exs.submit(() -> {
+
+            String initializingStatus = i18n.get("ctrl.login.initializing");
             runLater(() -> {
                 tc.accept(null);
                 menuController.logout.setDisable(true);
-                status.setText(i18n.get("ctrl.login.initializing"));
+                status.setText(initializingStatus);
                 enter.setDisable(true);
             });
 
@@ -78,8 +80,10 @@ public class LoginController implements Initializable {
     @FXML
     public void onEnterClicked(ActionEvent ev) {
         exs.submit(() -> {
+
+            String processingStatus = i18n.get("ctrl.login.processing");
             runLater(() -> {
-                status.setText(i18n.get("ctrl.login.processing"));
+                status.setText(processingStatus);
                 username.setDisable(true);
                 password.setDisable(true);
                 enter.setDisable(true);
@@ -101,9 +105,9 @@ public class LoginController implements Initializable {
                 });
 
             } catch (Exception e) {
+                String errorStatus = i18n.mapError("login", e);
                 runLater(() -> {
-                    status.setText(i18n.mapError("login", e));
-
+                    status.setText(errorStatus);
                     username.setDisable(false);
                     password.setDisable(false);
                     enter.setDisable(false);
