@@ -314,19 +314,11 @@ public class BestChatService implements ChatService {
                         params.caller.getUsername()
                 );
 
-                WhatsUp wuPart = WhatsUp.create(
-                        What.PART,
-                        params.channel.getName(),
-                        params.affUser.getUsername()
-                );
-
                 for (ServerUser su : params.channel.getUsers()) {
                     su.getNews().offer(wuKick);
-                    su.getNews().offer(wuPart);
                 }
 
                 params.affUser.getNews().offer(wuKick);
-                params.affUser.getNews().offer(wuPart);
             }
 
             return Response.Ok();
