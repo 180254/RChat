@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.RemoteAccessException;
 import pl.nn44.rchat.protocol.exception.ChatException;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -24,10 +25,20 @@ public class LocaleHelper {
     // ---------------------------------------------------------------------------------------------------------------
 
     public String mapError(String map, Exception e) {
-        if (e instanceof ChatException) {
-            LOG.warn("Exception [{}] {}", map.toUpperCase(), e.toString());
+        Throwable t = e;
 
-            ChatException ce = (ChatException) e;
+        // unpack UndeclaredThrowableException caused by using proxy
+        if (t instanceof UndeclaredThrowableException) {
+            UndeclaredThrowableException ue = (UndeclaredThrowableException) t;
+            if (ue.getUndeclaredThrowable() != null) {
+                t = ue.getUndeclaredThrowable();
+            }
+        }
+
+        if (t instanceof ChatException) {
+            LOG.warn("Exception [{}] {}", map.toUpperCase(), t.toString());
+
+            ChatException ce = (ChatException) t;
             String resKey = MessageFormat.format("error.{0}.{1}", map, ce.getReason().name());
 
             return res.containsKey(resKey)
@@ -35,9 +46,9 @@ public class LocaleHelper {
                     : res.getString("any.default-err-reason");
 
         } else {
-            LOG.error("Exception [{}] {}", map.toUpperCase(), e);
+            LOG.error("Exception [{}] {}", map.toUpperCase(), t);
 
-            if (e instanceof RemoteAccessException || e instanceof XmlRpcException) {
+            if (t instanceof RemoteAccessException || t instanceof XmlRpcException) {
                 return res.getString("any.remote-conn-error");
             } else {
                 return res.getString("any.server-impl-failure");
