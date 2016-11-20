@@ -73,9 +73,6 @@ public class MainController implements Initializable {
     public RefreshableListViewSkin<ClientChannel> channelsSkin;
     public RefreshableListViewSkin<ClientUser> usersSkin;
 
-    private boolean fatalFail = false;
-    private final Semaphore joinPartSem = new Semaphore(1);
-
     private final Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
                     .put(What.MESSAGE, this::onSomeMessage)
@@ -102,7 +99,7 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    private Map<String, ClientChannel> channelsMap =
+    private final ConcurrentHashMap<String, ClientChannel> channelsMap =
             new ConcurrentHashMap<>();
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -174,6 +171,11 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private boolean fatalFail = false;
+    private final Semaphore joinPartSem = new Semaphore(1);
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     public MainController(ScheduledExecutorService executor,
                           CsHandler csHandler,
                           LocaleHelper localeHelper) {
@@ -207,17 +209,20 @@ public class MainController implements Initializable {
             });
 
             try {
-                Channel[] channels = csh.cs()
+                Channel[] pChannels = csh.cs()
                         .channels(csh.token())
                         .getPayload();
 
-                for (Channel channel : channels) {
+                for (Channel channel : pChannels) {
                     ClientChannel ctChannel = new ClientChannel(channel);
-                    runLater(() -> this.channels.getItems().add(ctChannel));
                     channelsMap.put(channel.getName(), ctChannel);
                 }
 
-                runLater(() -> status.setText(""));
+                runLater(() -> {
+                    channels.getItems().addAll(channelsMap.values());
+                    status.setText("");
+                });
+
                 exs.submit(this::listenWhatHappens);
 
             } catch (Exception e) {
@@ -474,7 +479,12 @@ public class MainController implements Initializable {
     }
 
     public void onSingleClickedChannels(ClientChannel channel) {
-        runLater(() -> send.setDisable(!fatalFail && !(channel.isJoin())));
+        boolean sendDisable = !fatalFail && !(channel.isJoin());
+        String sendCurrentMsg = channel.getCurrentMsg();
+        runLater(() -> {
+            send.setDisable(sendDisable);
+            message.setText(sendCurrentMsg);
+        });
 
         if (topicSource != channel.getTopic()) {
             topicSource.removeListener(topicTake);
@@ -524,12 +534,11 @@ public class MainController implements Initializable {
             // join
             exs.submit(() -> {
                 try {
-                    Channel rcChannel =
-                            csh.cs().join(csh.token(), channel.getName(), null).getPayload();
+                    Channel pChannel = csh.cs().join(csh.token(), channel.getName(), null).getPayload();
 
                     channel.setJoin(true);
                     channel.clear();
-                    channel.update(rcChannel);
+                    channel.update(pChannel);
                     onSingleClickedChannels(channel);
 
                     infoAboutSimpleMsg(
