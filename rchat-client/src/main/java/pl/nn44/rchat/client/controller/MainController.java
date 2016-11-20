@@ -498,7 +498,7 @@ public class MainController implements Initializable {
     }
 
     public void onSingleClickedChannels(ClientChannel channel) {
-        boolean sendDisable = !fatalFail && !(channel.isJoin());
+        boolean sendDisable = fatalFail || !channel.isJoin();
         String sendCurrentMsg = channel.getCurrentMsg();
         runLater(() -> {
             send.setDisable(sendDisable);
