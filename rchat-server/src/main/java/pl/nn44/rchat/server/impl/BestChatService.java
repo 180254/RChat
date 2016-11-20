@@ -225,7 +225,9 @@ public class BestChatService implements ChatService {
         Locks locks = locks(session, channel, null);
 
         try {
-            Params params = params(session, channel, null, false, false);
+            Params params = params(session, null, null, false, false);
+            // without verification if caller is on channel, NO_PERMISSION will be not thrown
+            params.channel = params(null, channel, null, false, false).channel;
 
             boolean removeC = params.channel.getUsers().remove(params.caller);
             boolean removeU = params.caller.getChannels().remove(params.channel);
@@ -583,7 +585,7 @@ public class BestChatService implements ChatService {
         private final String pChannel;
         private final String pUsername;
         private final boolean pCheckAdmin;
-        private final boolean pUserOnChan;
+        private final boolean pAffUserOnChan;
 
 
         public ServerUser caller;
@@ -594,14 +596,14 @@ public class BestChatService implements ChatService {
                String channel,
                String username,
                boolean checkAdmin,
-               boolean userOnChan)
+               boolean affUserOnChan)
                 throws ChatException {
 
             this.pSession = session;
             this.pChannel = channel;
             this.pUsername = username;
             this.pCheckAdmin = checkAdmin;
-            this.pUserOnChan = userOnChan;
+            this.pAffUserOnChan = affUserOnChan;
         }
 
         public void process() throws ChatException {
@@ -638,7 +640,7 @@ public class BestChatService implements ChatService {
                         .findFirst().orElse(null);
             }
 
-            if (pUsername != null && channel != null && pUserOnChan) {
+            if (pUsername != null && channel != null && pAffUserOnChan) {
                 if (affUser == null) {
                     throw new ChatException(Reason.GIVEN_BAD_USERNAME);
                 }
@@ -663,7 +665,7 @@ public class BestChatService implements ChatService {
     // checks if:
     // - caller(session) is proper (GIVEN_BAD_SESSION)           [ if session != null ]
     // - channel(channel) is proper (GIVEN_BAD_CHANNEL)          [ if channel != null ]
-    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)    [ if username,channel != null && userOnChan ]
+    // - affUser(username) is on channel (GIVEN_BAD_USERNAME)    [ if username,channel != null && affUserOnChan ]
     // - caller is on channel (NO_PERMISSION)                    [ if session,channel != null ]
     // - caller is admin on channel (NO_PERMISSION)              [ if session,channel != null && checkAdmin ]
     // and:
@@ -672,12 +674,12 @@ public class BestChatService implements ChatService {
                           String channel,
                           String username,
                           boolean checkAdmin,
-                          boolean userOnChan)
+                          boolean affUserOnChan)
             throws ChatException {
 
         Params params = new Params(
                 session, channel, username,
-                checkAdmin, userOnChan
+                checkAdmin, affUserOnChan
         );
         params.process();
         return params;

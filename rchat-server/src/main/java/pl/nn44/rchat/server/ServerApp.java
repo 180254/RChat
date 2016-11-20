@@ -43,7 +43,6 @@ public class ServerApp {
         return new Endpoints<>(cs, ChatService.class);
     }
 
-
     @Bean
     public FaultMapper faultMapper() {
         return new FaultMapperImpl();
