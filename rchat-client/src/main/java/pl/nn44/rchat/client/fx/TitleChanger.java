@@ -2,25 +2,26 @@ package pl.nn44.rchat.client.fx;
 
 import com.google.common.base.Strings;
 import javafx.stage.Stage;
+import pl.nn44.rchat.client.util.LocaleHelper;
 
 import java.util.function.Consumer;
 
 public class TitleChanger implements Consumer<String> {
 
-    public static final String PREFIX = "RChat";
+    private final Stage stage;
+    private LocaleHelper i18n;
 
-    private final Stage primaryStage;
-
-    public TitleChanger(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public TitleChanger(Stage primaryStage, LocaleHelper locHelper) {
+        this.stage = primaryStage;
+        this.i18n = locHelper;
     }
 
     @Override
     public void accept(String s) {
         String title = Strings.isNullOrEmpty(s)
-                ? PREFIX
-                : PREFIX + " - " + s;
+                ? i18n.get("title.alone")
+                : i18n.get("title.string", s);
 
-        primaryStage.setTitle(title);
+        stage.setTitle(title);
     }
 }

@@ -54,7 +54,7 @@ public class ClientApp extends Application {
                 resources
         );
         TitleChanger titleChanger = new TitleChanger(
-                primaryStage
+                primaryStage, locHelper
         );
 
         controllers.put(LoginController.class, () ->
