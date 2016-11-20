@@ -20,11 +20,11 @@ public class Response<T extends Serializable> implements Serializable {
         this.payload = payload;
     }
 
-    public static Response<?> Ok() {
+    public static Response<?> ok() {
         return new Response();
     }
 
-    public static <T extends Serializable> Response<T> Ok(T payload) {
+    public static <T extends Serializable> Response<T> ok(T payload) {
         return new Response<>(payload);
     }
 

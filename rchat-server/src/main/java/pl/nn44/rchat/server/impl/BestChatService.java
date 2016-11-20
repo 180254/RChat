@@ -96,9 +96,9 @@ public class BestChatService implements ChatService {
             sessionToUser.put(session, user);
 
             WhatsUp nothing = WhatsUp.create(What.NOTHING);
-            user.getNews().offer(nothing);
+            offer(nothing, user);
 
-            return Response.Ok(user.getSession());
+            return Response.ok(user.getSession());
 
         } finally {
             locks.unlock();
@@ -120,11 +120,11 @@ public class BestChatService implements ChatService {
             }
 
             WhatsUp nothing = WhatsUp.create(What.NOTHING);
-            params.caller.getNews().offer(nothing);
+            offer(nothing, params.caller);
 
             sessionToUser.remove(session);
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -146,7 +146,7 @@ public class BestChatService implements ChatService {
                     ))
                     .toArray(Channel[]::new);
 
-            return Response.Ok(channels);
+            return Response.ok(channels);
 
         } finally {
             locks.unlock();
@@ -197,7 +197,7 @@ public class BestChatService implements ChatService {
 
                 params.channel.getUsers().stream()
                         .filter(cu -> !cu.equals(params.caller))
-                        .forEach(cu -> cu.getNews().offer(whatsUp));
+                        .forEach(cu -> offer(whatsUp, cu));
             }
 
             User[] users = params.channel.getUsers()
@@ -219,7 +219,7 @@ public class BestChatService implements ChatService {
                     users
             );
 
-            return Response.Ok(pChannel);
+            return Response.ok(pChannel);
 
         } finally {
             locks.unlock();
@@ -250,11 +250,11 @@ public class BestChatService implements ChatService {
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
-                    su.getNews().offer(whatsUp);
+                    offer(whatsUp, su);
                 }
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -281,11 +281,11 @@ public class BestChatService implements ChatService {
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
-                    su.getNews().offer(whatsUp);
+                    offer(whatsUp, su);
                 }
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -315,13 +315,13 @@ public class BestChatService implements ChatService {
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
-                    su.getNews().offer(wuKick);
+                    offer(wuKick, su);
                 }
 
-                params.affUser.getNews().offer(wuKick);
+                offer(wuKick, params.affUser);
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -349,11 +349,11 @@ public class BestChatService implements ChatService {
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
-                    su.getNews().offer(whatsUp);
+                    offer(whatsUp, su);
                 }
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -381,11 +381,11 @@ public class BestChatService implements ChatService {
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
-                    su.getNews().offer(whatsUp);
+                    offer(whatsUp, su);
                 }
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -412,17 +412,17 @@ public class BestChatService implements ChatService {
                         state ? "ON" : "OFF"
                 );
 
-                params.caller.getNews().offer(whatsUp);
+                offer(whatsUp, params.caller);
 
                 // notify affUser if he is on any chan
                 channelByName.values().stream()
                         .flatMap(c -> c.getUsers().stream())
                         .filter(u -> u.equals(params.affUser))
                         .findFirst()
-                        .ifPresent(serverUser -> serverUser.getNews().offer(whatsUp));
+                        .ifPresent(su -> offer(whatsUp, su));
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -447,11 +447,11 @@ public class BestChatService implements ChatService {
                 boolean ignore = su.getIgnored().contains(params.caller.getUsername());
 
                 if (!ignore) {
-                    su.getNews().offer(whatsUp);
+                    offer(whatsUp, su);
                 }
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -476,11 +476,11 @@ public class BestChatService implements ChatService {
                         text
                 );
 
-                params.caller.getNews().offer(whatsUp);
-                params.affUser.getNews().offer(whatsUp);
+                offer(whatsUp, params.caller);
+                offer(whatsUp, params.affUser);
             }
 
-            return Response.Ok();
+            return Response.ok();
 
         } finally {
             locks.unlock();
@@ -528,7 +528,7 @@ public class BestChatService implements ChatService {
 
         WhatsUp[] newsArray = new WhatsUp[news.size()];
         newsArray = news.toArray(newsArray);
-        return Response.Ok(newsArray);
+        return Response.ok(newsArray);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -566,13 +566,13 @@ public class BestChatService implements ChatService {
             throw new ChatException(Reason.NO_PERMISSION);
         }
 
-        return Response.Ok(
-                Response.Ok(
+        return Response.ok(
+                Response.ok(
                         new ImmutableMap.Builder<>()
                                 .put("string", "xxx")
                                 .put("number", 999)
-                                .put("response", Response.Ok(10))
-                                .put("response-null", Response.Ok())
+                                .put("response", Response.ok(10))
+                                .put("response-null", Response.ok())
                                 .put("array-object", new Object[]{1, "2", What.BAN})
                                 .put("list", Arrays.asList(2, "3", What.JOIN))
                                 .put("map", ImmutableMap.<Object, Object>of("key", "value"))
@@ -769,5 +769,15 @@ public class BestChatService implements ChatService {
         Locks locks = new Locks(session, channel, username);
         locks.lock();
         return locks;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    private void offer(WhatsUp wu, ServerUser su) {
+        boolean offer = su.getNews().offer(wu);
+
+        if (!offer) {
+            LOG.warn("Unable to offer: {}, {}", wu, su);
+        }
     }
 }

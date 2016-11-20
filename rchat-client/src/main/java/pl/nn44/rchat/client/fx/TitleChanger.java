@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 public class TitleChanger implements Consumer<String> {
 
-    public static String PREFIX = "RChat";
+    public static final String PREFIX = "RChat";
 
     private final Stage primaryStage;
 

@@ -38,12 +38,12 @@ public class MenuController implements Initializable {
 
     public MenuController(ScheduledExecutorService executor,
                           CsHandler csHandler,
-                          Stage appStage,
+                          Stage primaryStage,
                           SceneChanger sceneChanger) {
 
         this.exs = executor;
         this.csh = csHandler;
-        this.stage = appStage;
+        this.stage = primaryStage;
         this.sc = sceneChanger;
 
         LOG.debug("{} instance created.", getClass().getSimpleName());

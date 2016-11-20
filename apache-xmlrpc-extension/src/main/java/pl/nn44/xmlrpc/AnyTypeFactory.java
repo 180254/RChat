@@ -21,40 +21,39 @@ import java.util.*;
  */
 public class AnyTypeFactory extends TypeFactoryImpl {
 
-    protected static final Set<Class<?>> BASIC_CLASSES = new HashSet<>(12);
+    protected static final Set<Class<?>> BASIC_CLASSES =
+            Collections.unmodifiableSet(new HashSet<Class<?>>(11) {{
+                // Integer
+                add(Integer.class);
+                add(int.class);
 
-    static {
-        // Integer
-        BASIC_CLASSES.add(Integer.class);
-        BASIC_CLASSES.add(int.class);
+                // Boolean
+                add(Boolean.class);
+                add(boolean.class);
 
-        // Boolean
-        BASIC_CLASSES.add(Boolean.class);
-        BASIC_CLASSES.add(boolean.class);
+                // String
+                add(String.class);
 
-        // String
-        BASIC_CLASSES.add(String.class);
+                // Double
+                add(Double.class);
+                add(double.class);
 
-        // Double
-        BASIC_CLASSES.add(Double.class);
-        BASIC_CLASSES.add(double.class);
+                // java.util.Date
+                add(Date.class);
 
-        // java.util.Date
-        BASIC_CLASSES.add(Date.class);
+                // byte[]
+                add(byte[].class);
 
-        // byte[]
-        BASIC_CLASSES.add(byte[].class);
+                // java.util.Map
+                add(Map.class);
 
-        // java.util.Map
-        BASIC_CLASSES.add(Map.class);
+                // Object[]
+                // Arrays are manually handled to keep types.
+                // add(Object[].class);
 
-        // Object[]
-        // Arrays are manually handled to keep types.
-        // BASIC_CLASSES.add(Object[].class);
-
-        //  java.util.List
-        BASIC_CLASSES.add(List.class);
-    }
+                //  java.util.List
+                add(List.class);
+            }});
 
     protected static boolean isBasicClass(Class<?> clazz) {
         return BASIC_CLASSES.stream().anyMatch(bs -> bs.isAssignableFrom(clazz));

@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 public class PrintUtil {
 
-    public static DateTimeFormatter DTF = DateTimeFormatter.ofPattern("HH:MM:SS");
+    public static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("HH:MM:SS");
 
     public static Text txt(String value, String... classes) {
         Text text = new Text(value);

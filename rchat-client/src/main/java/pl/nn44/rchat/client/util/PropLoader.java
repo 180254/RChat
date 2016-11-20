@@ -11,7 +11,8 @@ import java.util.Properties;
 public class PropLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(PropLoader.class);
-    public static String PROPERTIES_FILE = "app.properties";
+
+    public static final String PROPERTIES_FILE = "app.properties";
 
     public static Properties get() {
         try {

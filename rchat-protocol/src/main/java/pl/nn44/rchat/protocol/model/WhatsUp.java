@@ -61,7 +61,7 @@ public class WhatsUp implements Serializable {
     }
 
     public enum What {
-        // NOTHING is send on LOGIN & LOGOUT actions
+        // NOTHING is send on LOGIN & LOGOUT actions.
         // It helps speed up start(?)/stop(!) retrieving news.
         NOTHING,
 
