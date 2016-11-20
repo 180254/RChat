@@ -658,7 +658,13 @@ public class BestChatService implements ChatService {
                 }
             }
 
-            if (pCheckAdmin && channel != null && caller != null) {
+            if (pUsername != null && channel != null && !pAffUserOnChan) {
+                if (affUser == null) {
+                    this.affUser = ServerUser.dummyUser(pUsername);
+                }
+            }
+
+            if (channel != null && caller != null && pCheckAdmin) {
                 if (!channel.getAdmins().contains(caller.getUsername())) {
                     throw new ChatException(Reason.NO_PERMISSION);
                 }
