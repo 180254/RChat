@@ -667,8 +667,10 @@ public class MainController implements Initializable {
             cmdConsumer.accept(channel, tokens);
 
         } else {
-            String failStatus = r(i18n.get("cmd.unknown"));
-            fleetingStatusAsync(failStatus);
+            String status = message.equals("/")
+                    ? r(i18n.get("cmd.list"))
+                    : r(i18n.get("cmd.unknown"));
+            fleetingStatusAsync(status);
         }
     }
 
