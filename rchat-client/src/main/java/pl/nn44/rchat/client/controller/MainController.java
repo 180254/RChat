@@ -365,6 +365,12 @@ public class MainController implements Initializable {
 
         ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoKicked));
+
+        // special case: info about my part
+        // kicked by admin - server removed mi from channel
+        if (whoKicked.equals(csh.getUsername())) {
+            onDoubleClickedChannels(ctChannel);
+        }
     }
 
     public void onSomeBan(WhatsUp whatsUp) {
