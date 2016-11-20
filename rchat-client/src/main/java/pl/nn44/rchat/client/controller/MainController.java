@@ -92,8 +92,6 @@ public class MainController implements Initializable {
 
     private final Map<String, BiConsumer<String, String[]>> commandsMap =
             ImmutableMap.<String, BiConsumer<String, String[]>>builder()
-                    .put("/join", this::onCmdJoin)
-                    .put("/part", this::onCmdPart)
                     .put("/topic", this::onCmdTopic)
                     .put("/kick", this::onCmdKick)
                     .put("/ban", this::onCmdBan)
@@ -714,14 +712,6 @@ public class MainController implements Initializable {
     }
 
     // ---------------------------------------------------------------------------------------------------------------
-
-    public void onCmdJoin(String channel, String[] tokens) {
-        LOG.info("{} {} {}", "onCmdJoin", channel, tokens);
-    }
-
-    public void onCmdPart(String channel, String[] tokens) {
-        LOG.info("{} {} {}", "onCmdPart", channel, tokens);
-    }
 
     public void onCmdTopic(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdTopic", channel, tokens);
