@@ -13,4 +13,3 @@ public class PlainPageController {
         return new ResponseEntity<>("", HttpStatus.OK);
     }
 }
-
