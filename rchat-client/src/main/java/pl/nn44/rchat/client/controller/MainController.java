@@ -209,6 +209,7 @@ public class MainController implements Initializable {
         menuController.beforeLogout.add(() -> newsFuture.cancel(true));
 
         exs.submit(() -> {
+            initChannelCellFactory();
             initChannelChangeListener();
             initMessagesScrollListener();
 
@@ -245,7 +246,34 @@ public class MainController implements Initializable {
         });
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+
+    public void initChannelCellFactory() {
+        channels.setCellFactory(lv -> new ListCell<ClientChannel>() {
+            @Override
+            protected void updateItem(ClientChannel item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty) {
+                    return;
+                }
+
+                setText(item.toString());
+
+                ObservableList<String> styleClass = getStyleClass();
+
+                if (item.isNewMsg() && !styleClass.contains("ch-has-new-msg")) {
+                    styleClass.add("ch-has-new-msg");
+                }
+
+                if (!item.isNewMsg() && styleClass.contains("ch-has-new-msg")) {
+                    styleClass.remove("ch-has-new-msg");
+                }
+            }
+        });
+    }
+
+// ---------------------------------------------------------------------------------------------------------------
 
     public void listenWhatHappens() {
         try {
@@ -280,7 +308,7 @@ public class MainController implements Initializable {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void infoAboutSimpleMsg(WhatsUp whatsUp) {
         LocalDateTime time = whatsUp.getTime();
@@ -312,13 +340,13 @@ public class MainController implements Initializable {
         ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeNothing(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeNothing", whatsUp);
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeJoin(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeJoin", whatsUp);
@@ -364,7 +392,7 @@ public class MainController implements Initializable {
         ctChannel.setTopic(someText);
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeKick(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeKick", whatsUp);
@@ -450,7 +478,7 @@ public class MainController implements Initializable {
             runLater(() -> usersSkin.refresh());
         }
     }
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeMessage(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeMessage", whatsUp);
@@ -465,6 +493,15 @@ public class MainController implements Initializable {
 
         ClientChannel ctChannel = channelsMap.get(channel);
         ctChannel.getMessages().addAll(printMsg.toNodes());
+
+        ClientChannel current = channels.getSelectionModel().getSelectedItem();
+        if (!current.equals(ctChannel)) {
+            ctChannel.setNewMsg(true);
+
+            runLater(() -> {
+                channelsSkin.refresh();
+            });
+        }
     }
 
     public void onSomePrivy(WhatsUp whatsUp) {
@@ -479,7 +516,7 @@ public class MainController implements Initializable {
         LOG.info("?", time, whoMsgTo, whoMsgBy, someText);
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void initChannelChangeListener() {
         channels.getSelectionModel().selectedItemProperty().addListener(
@@ -520,6 +557,8 @@ public class MainController implements Initializable {
     }
 
     public void onSingleClickedChannels(ClientChannel channel) {
+        channel.setNewMsg(false);
+
         boolean sendDisable = fatalFail || !channel.isJoin();
         String sendCurrentMsg = channel.getCurrentMsg();
         runLater(() -> {
@@ -638,7 +677,7 @@ public class MainController implements Initializable {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     private void initMessagesScrollListener() {
         messages.heightProperty().addListener((observable, oldValue, newValue) -> {
@@ -651,7 +690,7 @@ public class MainController implements Initializable {
         });
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     @FXML
     public void onKeyMessagePressed(KeyEvent ev) {
@@ -696,7 +735,7 @@ public class MainController implements Initializable {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void onAnyCmd(String channel, String message) {
         String[] tokens = SPACE_PATTERN.split(message);
@@ -748,7 +787,7 @@ public class MainController implements Initializable {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     public void onCmdTopic(String channel, String[] tokens) {
         LOG.info("{} {} {}", "onCmdTopic", channel, tokens);
@@ -785,7 +824,7 @@ public class MainController implements Initializable {
         onStateCommand(channel, tokens, "ignore", cs::ignore);
     }
 
-    // ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
 
     private String r(String text) {
         return NL_PATTERN.matcher(text).replaceAll(" ");

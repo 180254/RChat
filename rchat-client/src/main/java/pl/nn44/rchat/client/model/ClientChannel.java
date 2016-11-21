@@ -20,6 +20,7 @@ public class ClientChannel {
 
     private boolean join;
     private String currentMsg;
+    private boolean newMsg = false;
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -98,6 +99,14 @@ public class ClientChannel {
 
     public void setCurrentMsg(String currentMsg) {
         this.currentMsg = currentMsg;
+    }
+
+    public boolean isNewMsg() {
+        return newMsg;
+    }
+
+    public void setNewMsg(boolean newMsg) {
+        this.newMsg = newMsg;
     }
 
     // ---------------------------------------------------------------------------------------------------------------

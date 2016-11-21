@@ -15,3 +15,7 @@
 .c-ct-message-info {
     -fx-fill: darkgray;
 }
+
+.ch-has-new-msg {
+    -fx-text-fill: orangered;
+}
