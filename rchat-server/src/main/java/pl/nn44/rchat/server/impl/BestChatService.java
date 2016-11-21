@@ -540,9 +540,10 @@ public class BestChatService implements ChatService {
         List<Map.Entry<String, ServerUser>> ghosts =
                 sessionToUser
                         .entrySet().stream()
-                        .filter(se ->
-                                ChronoUnit.SECONDS.between(se.getValue().getLastSync(), now) >= SESSION_TIMEOUT_SECONDS
-                        )
+                        .filter(se -> {
+                            LocalDateTime lastSync = se.getValue().getLastSync();
+                            return ChronoUnit.SECONDS.between(lastSync, now) >= SESSION_TIMEOUT_SECONDS;
+                        })
                         .collect(Collectors.toList());
 
         ghosts.forEach(se -> {
@@ -550,8 +551,7 @@ public class BestChatService implements ChatService {
                 logout(se.getKey());
 
             } catch (ChatException e) {
-                LOG.warn("sessionCleanup assertion error", e);
-                throw new AssertionError(e);
+                LOG.warn("sessionCleanup ChatException: {} {}", se.getValue(), e.toString());
             }
         });
 
