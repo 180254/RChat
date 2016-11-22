@@ -50,7 +50,7 @@ public class CsHandler {
 
             try {
                 Response<?> response = chatServices[i].test(false);
-                LOG.info("ChatService({}).test(false): OK={}", csName, response);
+                LOG.info("ChatService({}).test(false): OK  ={}", csName, response);
             } catch (Exception e) {
                 LOG.warn("ChatService({}).test(false): FAIL={}", csName, e.toString());
             }
@@ -59,7 +59,7 @@ public class CsHandler {
                 Response<?> response = chatServices[i].test(true);
                 LOG.warn("ChatService({}).test(true): FAIL={}", csName, response);
             } catch (ChatException e) {
-                LOG.info("ChatService({}).test(true): OK={}", csName, e.toString());
+                LOG.info("ChatService({}).test(true): OK  ={}", csName, e.toString());
             } catch (Exception e) {
                 LOG.warn("ChatService({}).test(true): FAIL={}", csName, e.toString());
             }

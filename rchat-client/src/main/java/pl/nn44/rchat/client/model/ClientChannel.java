@@ -19,8 +19,8 @@ public class ClientChannel {
     private final ObservableList<Text> messages;
 
     private boolean join;
-    private String currentMsg;
-    private boolean newMsg = false;
+    private String sendCache;
+    private boolean unread;
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -33,7 +33,8 @@ public class ClientChannel {
         this.messages = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 
         this.join = false;
-        this.currentMsg = "";
+        this.sendCache = "";
+        this.unread = false;
 
         update(channel);
     }
@@ -93,20 +94,20 @@ public class ClientChannel {
         this.join = join;
     }
 
-    public String getCurrentMsg() {
-        return currentMsg;
+    public String getSendCache() {
+        return sendCache;
     }
 
-    public void setCurrentMsg(String currentMsg) {
-        this.currentMsg = currentMsg;
+    public void setSendCache(String sendCache) {
+        this.sendCache = sendCache;
     }
 
-    public boolean isNewMsg() {
-        return newMsg;
+    public boolean isUnread() {
+        return unread;
     }
 
-    public void setNewMsg(boolean newMsg) {
-        this.newMsg = newMsg;
+    public void setUnread(boolean unread) {
+        this.unread = unread;
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -115,11 +116,12 @@ public class ClientChannel {
     public String toString() {
         String join = this.join ? "[+]" : "[-]";
 
-        String modes = "(";
+        String modes = "";
         modes += password ? "p" : "";
-        modes += ")";
 
-        modes = modes.length() > 2 ? modes : "";
+        if (modes.length() > 0) {
+            modes = "(" + modes + ")";
+        }
 
         return MessageFormat.format(
                 "{0} {1} {2}",

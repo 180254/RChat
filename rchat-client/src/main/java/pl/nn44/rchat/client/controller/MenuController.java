@@ -90,7 +90,7 @@ public class MenuController implements Initializable {
     }
 
     @FXML
-    public void onTextClicked(ActionEvent ev) {
+    public void onTestClicked(ActionEvent ev) {
         exs.submit(csh::test);
     }
 }

@@ -24,6 +24,12 @@ public class LocaleHelper {
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    public void setResources(ResourceBundle resources) {
+        this.res = resources;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     public String mapError(String map, Exception e) {
         Throwable t = e;
 
@@ -61,11 +67,5 @@ public class LocaleHelper {
         return values.length > 0
                 ? MessageFormat.format(resText, values)
                 : resText;
-    }
-
-    // ---------------------------------------------------------------------------------------------------------------
-
-    public void setResources(ResourceBundle resources) {
-        this.res = resources;
     }
 }

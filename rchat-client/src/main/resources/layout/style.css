@@ -16,6 +16,6 @@
     -fx-fill: darkgray;
 }
 
-.ch-has-new-msg {
+.ch-has-unread-msg {
     -fx-text-fill: orangered;
 }

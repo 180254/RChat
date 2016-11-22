@@ -54,7 +54,8 @@ public class MainController implements Initializable {
     private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
     private static final Pattern NL_PATTERN = Pattern.compile("\r?\n");
     private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
-    private static final int WHATS_UP_LONG_POOLING = (int) TimeUnit.MINUTES.toMillis(1);
+
+    public static final int WHATS_UP_LONG_POOLING = (int) TimeUnit.MINUTES.toMillis(1);
 
     private final ScheduledExecutorService exs;
     private final CsHandler csh;
@@ -90,8 +91,8 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public RefreshableListViewSkin<ClientChannel> channelsSkin;
-    public RefreshableListViewSkin<ClientUser> usersSkin;
+    public RefreshableListViewSkin<ClientChannel> channelsSkin; // initialize-final
+    public RefreshableListViewSkin<ClientUser> usersSkin; // initialize-final
 
     private final Map<What, Consumer<WhatsUp>> whatsUpMap =
             ImmutableMap.<What, Consumer<WhatsUp>>builder()
@@ -246,7 +247,7 @@ public class MainController implements Initializable {
         });
     }
 
-// ---------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void initChannelCellFactory() {
         channels.setCellFactory(lv -> new ListCell<ClientChannel>() {
@@ -262,18 +263,18 @@ public class MainController implements Initializable {
 
                 ObservableList<String> styleClass = getStyleClass();
 
-                if (item.isNewMsg() && !styleClass.contains("ch-has-new-msg")) {
-                    styleClass.add("ch-has-new-msg");
+                if (item.isUnread() && !styleClass.contains("ch-has-unread-msg")) {
+                    styleClass.add("ch-has-unread-msg");
                 }
 
-                if (!item.isNewMsg() && styleClass.contains("ch-has-new-msg")) {
-                    styleClass.remove("ch-has-new-msg");
+                if (!item.isUnread() && styleClass.contains("ch-has-unread-msg")) {
+                    styleClass.remove("ch-has-unread-msg");
                 }
             }
         });
     }
 
-// ---------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void listenWhatHappens() {
         try {
@@ -308,82 +309,69 @@ public class MainController implements Initializable {
         }
     }
 
-// ---------------------------------------------------------------------------------------------------------------
-
-    public void infoAboutSimpleMsg(WhatsUp whatsUp) {
-        LocalDateTime time = whatsUp.getTime();
-        String[] params = whatsUp.getParams();
-        String channel = params[0];
-
-        String locMap = whatsUp.getWhat().name().toLowerCase();
-        PrintInfo ctMsgInfo = new PrintInfo(
-                i18n, time, "whats-up." + locMap, params
-        );
-
-        ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
-    }
-
-    public void infoAboutStatefulMsg(WhatsUp whatsUp) {
-        LocalDateTime time = whatsUp.getTime();
-        String[] params = whatsUp.getParams();
-        String channel = params[0];
-        boolean state = params[3].equals("ON");
-        String code = state ? "1" : "0";
-
-        String locMap = whatsUp.getWhat().name().toLowerCase();
-        PrintInfo ctMsgInfo = new PrintInfo(
-                i18n, time, "whats-up." + locMap + "." + code, params
-        );
-
-        ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
-    }
-
-// ---------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeNothing(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeNothing", whatsUp);
     }
 
-// ---------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public void infoAboutMessage(WhatsUp whatsUp, boolean stateful) {
+        LocalDateTime time = whatsUp.getTime();
+        String[] params = whatsUp.getParams();
+        String channel = params[0];
+
+        String resKey = "whats-up." + whatsUp.getWhat().name().toLowerCase();
+        if (stateful) {
+            String pState = params[3];
+            resKey += "." + pState;
+        }
+
+        PrintInfo ctMsgInfo = new PrintInfo(i18n, time, resKey, params);
+
+        ClientChannel ctChannel = channelsMap.get(channel);
+        ctChannel.getMessages().addAll(ctMsgInfo.toNodes());
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeJoin(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeJoin", whatsUp);
+        infoAboutMessage(whatsUp, false);
 
-        infoAboutSimpleMsg(whatsUp);
-
+        // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
-        String channel = params[0];
-        String whoJoined = params[1];
-        boolean auth = Boolean.parseBoolean(params[2]);
-        boolean admin = Boolean.parseBoolean(params[3]);
+        String pChannel = params[0];
+        String pWhoJoined = params[1];
+        boolean pAuth = Boolean.parseBoolean(params[2]);
+        boolean pAdmin = Boolean.parseBoolean(params[3]);
 
-        User user = new User(channel, whoJoined, auth, false, admin, false);
+        User user = new User(pChannel, pWhoJoined, pAuth, false, pAdmin, false);
         ClientUser clientUser = new ClientUser(user);
 
-        ClientChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(pChannel);
         ctChannel.getUsers().add(clientUser);
     }
 
     public void onSomePart(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomePart", whatsUp);
+        infoAboutMessage(whatsUp, false);
 
-        infoAboutSimpleMsg(whatsUp);
-
+        // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
-        String channel = params[0];
-        String whoPart = params[1];
+        String pChannel = params[0];
+        String pWhoPart = params[1];
 
-        ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoPart));
+        ClientChannel ctChannel = channelsMap.get(pChannel);
+        ctChannel.getUsers().removeIf(u -> u.getUsername().equals(pWhoPart));
     }
 
     public void onSomeTopic(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeTopic", whatsUp);
+        infoAboutMessage(whatsUp, false);
 
-        infoAboutSimpleMsg(whatsUp);
-
+        // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
         String channel = params[0];
         String someText = params[2];
@@ -396,36 +384,39 @@ public class MainController implements Initializable {
 
     public void onSomeKick(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeKick", whatsUp);
+        infoAboutMessage(whatsUp, false);
 
-        infoAboutSimpleMsg(whatsUp);
-
+        // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
-        String channel = params[0];
-        String whoKicked = params[1];
+        String pChannel = params[0];
+        String pWhoKicked = params[1];
+        // String pWhoKickedBy = params[2];
 
-        ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getUsers().removeIf(u -> u.getUsername().equals(whoKicked));
+        ClientChannel ctChannel = channelsMap.get(pChannel);
+        ctChannel.getUsers().removeIf(u -> u.getUsername().equals(pWhoKicked));
 
         // special case: i was kicked
-        // kicked by admin - server removed me from channel
-        if (whoKicked.equals(csh.getUsername())) {
+        // kicked by admin - server removed me from pChannel
+        if (pWhoKicked.equals(csh.getUsername())) {
             onDoubleClickedChannels(ctChannel);
         }
     }
 
     public void onSomeBan(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeBan", whatsUp);
+        infoAboutMessage(whatsUp, true);
 
-        infoAboutStatefulMsg(whatsUp);
-
+        // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
-        String channel = params[0];
-        String whoBanned = params[1];
-        boolean state = params[3].equals("ON");
+        String pChannel = params[0];
+        String pWhoBanned = params[1];
+        // String pWhoBannedBy = params[2];
+        String pState = params[3];
+        boolean state = pState.equals("on");
 
-        ClientChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(pChannel);
         ctChannel.getUsers().stream()
-                .filter(u -> u.getUsername().equals(whoBanned))
+                .filter(u -> u.getUsername().equals(pWhoBanned))
                 .forEach(u -> u.setBanned(state));
 
         runLater(() -> usersSkin.refresh());
@@ -433,17 +424,19 @@ public class MainController implements Initializable {
 
     public void onSomeAdmin(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeAdmin", whatsUp);
+        infoAboutMessage(whatsUp, true);
 
-        infoAboutStatefulMsg(whatsUp);
-
+        // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
-        String channel = params[0];
-        String whoAdmin = params[1];
-        boolean state = params[3].equals("ON");
+        String pChannel = params[0];
+        String pWhoAdmin = params[1];
+        // String pWhoAdminBy = params[2];
+        String pState = params[3];
+        boolean state = pState.equals("on");
 
-        ClientChannel ctChannel = channelsMap.get(channel);
+        ClientChannel ctChannel = channelsMap.get(pChannel);
         ctChannel.getUsers().stream()
-                .filter(u -> u.getUsername().equals(whoAdmin))
+                .filter(u -> u.getUsername().equals(pWhoAdmin))
                 .forEach(u -> u.setAdmin(state));
 
         runLater(() -> usersSkin.refresh());
@@ -451,33 +444,38 @@ public class MainController implements Initializable {
 
     public void onSomeIgnore(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeIgnore", whatsUp);
+        infoAboutMessage(whatsUp, true);
 
+        // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
+        // String pChannel = params[0];
+        String pWhoIgnored = params[1];
+        // String pWhoIgnoredBy = params[2];
+        String pState = params[3];
+        boolean state = pState.equals("on");
 
-        ClientChannel channel = channels.getSelectionModel().getSelectedItem();
-        if (channel != null) {
+        ClientChannel ctChannel = channels.getSelectionModel().getSelectedItem();
+        if (ctChannel != null) {
             // replace param-channel with current channel
             // in protocol, for this WhatsUp, channel pos is unused
             String[] newParams = params.clone();
-            newParams[0] = channel.getName();
+            newParams[0] = ctChannel.getName();
 
             WhatsUp wuFix = WhatsUp.create(whatsUp.getWhat(), newParams);
-            infoAboutStatefulMsg(wuFix);
+            infoAboutMessage(wuFix, true);
         }
 
-        String whoIgnored = params[1];
-        boolean state = params[3].equals("ON");
-
         // if i ignored (not i am ignored) set ignored flag
-        if (!whoIgnored.equals(csh.getUsername())) {
+        if (!pWhoIgnored.equals(csh.getUsername())) {
             channelsMap.values().stream()
                     .flatMap(c -> c.getUsers().stream())
-                    .filter(u -> u.getUsername().equals(whoIgnored))
+                    .filter(u -> u.getUsername().equals(pWhoIgnored))
                     .forEach(u -> u.setIgnored(state));
 
             runLater(() -> usersSkin.refresh());
         }
     }
+
 // ---------------------------------------------------------------------------------------------------------------
 
     public void onSomeMessage(WhatsUp whatsUp) {
@@ -485,23 +483,20 @@ public class MainController implements Initializable {
 
         LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
-        String channel = params[0];
-        String whoMsg = params[1];
-        String someText = params[2];
+        String pChannel = params[0];
+        String pWhoMsg = params[1];
+        String pSomeText = params[2];
 
-        PrintMsg printMsg = new PrintMsg(whoMsg, time, someText);
+        ClientChannel ctChannel = channelsMap.get(pChannel);
+        ClientChannel ctCurrent = channels.getSelectionModel().getSelectedItem();
 
-        ClientChannel ctChannel = channelsMap.get(channel);
-        ctChannel.getMessages().addAll(printMsg.toNodes());
-
-        ClientChannel current = channels.getSelectionModel().getSelectedItem();
-        if (!current.equals(ctChannel)) {
-            ctChannel.setNewMsg(true);
-
-            runLater(() -> {
-                channelsSkin.refresh();
-            });
+        if (!ctCurrent.equals(ctChannel)) {
+            ctChannel.setUnread(true);
+            runLater(() -> channelsSkin.refresh());
         }
+
+        PrintMsg printMsg = new PrintMsg(time, pWhoMsg, pSomeText);
+        ctChannel.getMessages().addAll(printMsg.toNodes());
     }
 
     public void onSomePrivy(WhatsUp whatsUp) {
@@ -509,14 +504,14 @@ public class MainController implements Initializable {
 
         LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
-        String whoMsgTo = params[0];
-        String whoMsgBy = params[0];
-        String someText = params[2];
+        String pWhoMsgTo = params[0];
+        String pWhoMsgBy = params[0];
+        String pSomeText = params[2];
 
-        LOG.info("?", time, whoMsgTo, whoMsgBy, someText);
+        LOG.info("?", time, pWhoMsgTo, pWhoMsgBy, pSomeText);
     }
 
-// ---------------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------
 
     public void initChannelChangeListener() {
         channels.getSelectionModel().selectedItemProperty().addListener(
@@ -557,13 +552,13 @@ public class MainController implements Initializable {
     }
 
     public void onSingleClickedChannels(ClientChannel channel) {
-        channel.setNewMsg(false);
+        channel.setUnread(false);
 
         boolean sendDisable = fatalFail || !channel.isJoin();
-        String sendCurrentMsg = channel.getCurrentMsg();
+        String sendCache = channel.getSendCache();
         runLater(() -> {
             send.setDisable(sendDisable);
-            message.setText(sendCurrentMsg);
+            message.setText(sendCache);
         });
 
         if (topicSource != channel.getTopic()) {
@@ -640,8 +635,9 @@ public class MainController implements Initializable {
                     channel.update(pChannel);
                     onSingleClickedChannels(channel);
 
-                    infoAboutSimpleMsg(
-                            WhatsUp.create(What.JOIN, channel.getName(), csh.getUsername())
+                    infoAboutMessage(
+                            WhatsUp.create(What.JOIN, channel.getName(), csh.getUsername()),
+                            false
                     );
 
                 } catch (Exception e) {
@@ -662,8 +658,9 @@ public class MainController implements Initializable {
                     channel.setJoin(false);
                     onSingleClickedChannels(channel);
 
-                    infoAboutSimpleMsg(
-                            WhatsUp.create(What.PART, channel.getName(), csh.getUsername())
+                    infoAboutMessage(
+                            WhatsUp.create(What.PART, channel.getName(), csh.getUsername()),
+                            false
                     );
 
                 } catch (Exception e) {
@@ -701,7 +698,7 @@ public class MainController implements Initializable {
         }
 
         if (channel != null) {
-            channel.setCurrentMsg(message.getText());
+            channel.setSendCache(message.getText());
         }
     }
 
@@ -752,9 +749,9 @@ public class MainController implements Initializable {
         }
     }
 
-    public void onSimpleCommand(String channel, String[] tokens, String locMap, SimpleCommand sc) {
+    public void onSimpleCommand(String channel, String[] tokens, String resMap, SimpleCommand sc) {
         if (tokens.length < 2) {
-            String failStatus = r(i18n.get("cmd." + locMap + ".syntax"));
+            String failStatus = r(i18n.get("cmd." + resMap + ".syntax"));
             fleetingStatusAsync(failStatus);
             return;
         }
@@ -764,16 +761,16 @@ public class MainController implements Initializable {
             sc.accept(csh.token(), channel, param);
 
         } catch (Exception e) {
-            String failStatus = r(i18n.mapError(locMap, e));
+            String failStatus = r(i18n.mapError(resMap, e));
             fleetingStatusAsync(failStatus);
         }
     }
 
-    public void onStateCommand(String channel, String[] tokens, String locMap, StatefulCommand sc) {
+    public void onStateCommand(String channel, String[] tokens, String resMap, StatefulCommand sc) {
         if (tokens.length < 3
                 || !(tokens[2].equals("on") || tokens[2].equals("off"))) {
 
-            String failStatus = r(i18n.get("cmd." + locMap + ".syntax"));
+            String failStatus = r(i18n.get("cmd." + resMap + ".syntax"));
             fleetingStatusAsync(failStatus);
             return;
         }
@@ -782,7 +779,7 @@ public class MainController implements Initializable {
             sc.accept(csh.token(), channel, tokens[1], tokens[2].equals("on"));
 
         } catch (Exception e) {
-            String failStatus = r(i18n.mapError(locMap, e));
+            String failStatus = r(i18n.mapError(resMap, e));
             fleetingStatusAsync(failStatus);
         }
     }

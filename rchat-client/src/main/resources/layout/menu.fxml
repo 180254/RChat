@@ -23,6 +23,6 @@
                        toggleGroup="$protocol"/>
 
         <SeparatorMenuItem mnemonicParsing="false"/>
-        <MenuItem fx:id="test" mnemonicParsing="false" onAction="#onTextClicked" text="%fxml.menu.test"/>
+        <MenuItem fx:id="test" mnemonicParsing="false" onAction="#onTestClicked" text="%fxml.menu.test"/>
     </Menu>
 </MenuBar>

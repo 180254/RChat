@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 public class TitleChanger implements Consumer<String> {
 
     private final Stage stage;
-    private LocaleHelper i18n;
+    private final LocaleHelper i18n;
 
     public TitleChanger(Stage primaryStage, LocaleHelper locHelper) {
         this.stage = primaryStage;

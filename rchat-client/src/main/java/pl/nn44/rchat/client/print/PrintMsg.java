@@ -8,15 +8,15 @@ import java.util.List;
 
 public class PrintMsg implements Printable {
 
-    private final String user;
     private final LocalDateTime time;
+    private final String user;
     private final String message;
 
     // ---------------------------------------------------------------------------------------------------------------
 
-    public PrintMsg(String user, LocalDateTime time, String message) {
-        this.user = user;
+    public PrintMsg(LocalDateTime time, String user, String message) {
         this.time = time;
+        this.user = user;
         this.message = message;
     }
 

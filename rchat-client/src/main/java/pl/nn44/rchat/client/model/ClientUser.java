@@ -64,13 +64,14 @@ public class ClientUser {
 
     @Override
     public String toString() {
-        String modes = "(";
+        String modes = "";
         modes += authorized ? "a" : "";
         modes += admin ? "o" : "";
         modes += ignored ? "i" : "";
-        modes += ")";
 
-        modes = modes.length() > 2 ? modes : "";
+        if (modes.length() > 0) {
+            modes = "(" + modes + ")";
+        }
 
         return MessageFormat.format(
                 "{0} {1}",

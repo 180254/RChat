@@ -345,7 +345,7 @@ public class BestChatService implements ChatService {
                         params.channel.getName(),
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
-                        state ? "ON" : "OFF"
+                        state ? "on" : "off"
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
@@ -377,7 +377,7 @@ public class BestChatService implements ChatService {
                         params.channel.getName(),
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
-                        state ? "ON" : "OFF"
+                        state ? "on" : "off"
                 );
 
                 for (ServerUser su : params.channel.getUsers()) {
@@ -409,7 +409,7 @@ public class BestChatService implements ChatService {
                         "unused",
                         params.affUser.getUsername(),
                         params.caller.getUsername(),
-                        state ? "ON" : "OFF"
+                        state ? "on" : "off"
                 );
 
                 offer(whatsUp, params.caller);
