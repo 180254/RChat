@@ -233,7 +233,7 @@ public class MainController implements Initializable {
 
                 runLater(() -> {
                     channels.getItems().addAll(channelsMap.values());
-                    status.setText("");
+                    fleetingStatusAsync(r(i18n.get("hello.motd")));
                 });
 
                 newsFuture = exs.submit(this::listenWhatHappens);
@@ -317,6 +317,7 @@ public class MainController implements Initializable {
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    // stateful = has on/off af 4th para
     public void infoAboutMessage(WhatsUp whatsUp, boolean stateful) {
         LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
@@ -833,7 +834,7 @@ public class MainController implements Initializable {
 
             exs.schedule(
                     () -> runLater(() -> status.setText("")),
-                    3500, TimeUnit.MILLISECONDS
+                    5000, TimeUnit.MILLISECONDS
             );
         });
     }
