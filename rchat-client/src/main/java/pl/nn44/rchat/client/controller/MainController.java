@@ -445,7 +445,6 @@ public class MainController implements Initializable {
 
     public void onSomeIgnore(WhatsUp whatsUp) {
         LOG.info("{} {}", "onSomeIgnore", whatsUp);
-        infoAboutMessage(whatsUp, true);
 
         // LocalDateTime time = whatsUp.getTime();
         String[] params = whatsUp.getParams();
