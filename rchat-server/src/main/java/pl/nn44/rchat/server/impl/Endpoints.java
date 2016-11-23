@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapServiceExporter;
 import org.springframework.remoting.caucho.HessianServiceExporter;
 import org.springframework.web.HttpRequestHandler;
-import pl.nn44.xmlrpc.AnyTypeFactory;
-import pl.nn44.xmlrpc.AnyXmlRpcServer;
-import pl.nn44.xmlrpc.FaultMapper;
+import pl.nn44.xmlrpc.common.AnyTypeFactory;
+import pl.nn44.xmlrpc.server.AnyXmlRpcServer;
+import pl.nn44.xmlrpc.server.FaultMapper;
 
 public class Endpoints<T> {
 

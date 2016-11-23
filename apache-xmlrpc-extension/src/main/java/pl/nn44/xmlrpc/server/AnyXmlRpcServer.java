@@ -1,4 +1,4 @@
-package pl.nn44.xmlrpc;
+package pl.nn44.xmlrpc.server;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.common.XmlRpcStreamRequestConfig;

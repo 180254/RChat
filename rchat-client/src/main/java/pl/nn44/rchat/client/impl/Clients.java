@@ -13,10 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.remoting.caucho.BurlapProxyFactoryBean;
 import org.springframework.remoting.caucho.HessianProxyFactoryBean;
-import pl.nn44.xmlrpc.AnyTypeFactory;
-import pl.nn44.xmlrpc.AnyXmlRpcTransport;
-import pl.nn44.xmlrpc.ClientFactoryFix;
-import pl.nn44.xmlrpc.FaultRevMapper;
+import pl.nn44.xmlrpc.client.AnyXmlRpcTransport;
+import pl.nn44.xmlrpc.client.ClientFactoryFix;
+import pl.nn44.xmlrpc.client.FaultRevMapper;
+import pl.nn44.xmlrpc.common.AnyTypeFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

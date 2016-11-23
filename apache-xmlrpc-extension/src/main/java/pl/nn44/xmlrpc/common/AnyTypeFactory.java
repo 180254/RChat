@@ -1,4 +1,4 @@
-package pl.nn44.xmlrpc;
+package pl.nn44.xmlrpc.common;
 
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.apache.xmlrpc.XmlRpcException;

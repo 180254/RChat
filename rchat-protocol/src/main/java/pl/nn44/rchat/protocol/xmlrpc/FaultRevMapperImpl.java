@@ -3,7 +3,7 @@ package pl.nn44.rchat.protocol.xmlrpc;
 import org.apache.xmlrpc.XmlRpcException;
 import pl.nn44.rchat.protocol.exception.ChatException;
 import pl.nn44.rchat.protocol.exception.ChatException.Reason;
-import pl.nn44.xmlrpc.FaultRevMapper;
+import pl.nn44.xmlrpc.client.FaultRevMapper;
 
 /**
  * Fault rev mapper for xml-rpc protocol.<br/>

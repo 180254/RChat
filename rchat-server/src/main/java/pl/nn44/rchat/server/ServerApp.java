@@ -16,7 +16,7 @@ import pl.nn44.rchat.server.impl.BestChatService;
 import pl.nn44.rchat.server.impl.Endpoints;
 import pl.nn44.rchat.server.page.PlainErrorController;
 import pl.nn44.rchat.server.page.PlainPageController;
-import pl.nn44.xmlrpc.FaultMapper;
+import pl.nn44.xmlrpc.server.FaultMapper;
 
 import javax.servlet.Filter;
 

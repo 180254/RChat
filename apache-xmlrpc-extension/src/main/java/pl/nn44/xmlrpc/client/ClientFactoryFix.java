@@ -21,7 +21,7 @@
  * Modification by 180254 under Apache License 2.0.
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package pl.nn44.xmlrpc;
+package pl.nn44.xmlrpc.client;
 
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
