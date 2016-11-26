@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Loggable
 public class BestChatService implements ChatService {
@@ -188,24 +187,22 @@ public class BestChatService implements ChatService {
                 boolean auth = accounts.containsKey(params.caller.getUsername());
                 boolean admin = params.channel.getAdmins().contains(params.caller.getUsername());
 
-                Stream<ServerUser> usersWithoutMe =
-                        params.channel.getUsers().stream()
-                                .filter(su -> !su.equals(params.caller));
+                params.channel.getUsers().stream()
+                        .filter(su -> !su.equals(params.caller))
+                        .forEach(su -> {
+                            boolean ignored = su.getIgnored().contains(params.caller.getUsername());
 
-                usersWithoutMe.forEach(su -> {
-                    boolean ignored = su.getIgnored().contains(params.caller.getUsername());
+                            WhatsUp whatsUp = WhatsUp.create(
+                                    What.JOIN,
+                                    params.channel.getName(),
+                                    params.caller.getUsername(),
+                                    Boolean.toString(auth),
+                                    Boolean.toString(ignored),
+                                    Boolean.toString(admin)
+                            );
 
-                    WhatsUp whatsUp = WhatsUp.create(
-                            What.JOIN,
-                            params.channel.getName(),
-                            params.caller.getUsername(),
-                            Boolean.toString(auth),
-                            Boolean.toString(ignored),
-                            Boolean.toString(admin)
-                    );
-
-                    offer(whatsUp, su);
-                });
+                            offer(whatsUp, su);
+                        });
             }
 
             User[] users = params.channel.getUsers()
