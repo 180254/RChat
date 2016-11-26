@@ -4,12 +4,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.text.Text;
+import pl.nn44.rchat.client.util.ListUtil;
 import pl.nn44.rchat.protocol.model.Channel;
 import pl.nn44.rchat.protocol.model.User;
 
 import java.text.MessageFormat;
 
 public class ClientChannel {
+
+    private final Object sync = new Object();
 
     private final String name;
     private final boolean password;
@@ -46,7 +49,7 @@ public class ClientChannel {
 
         users.clear();
         for (User user : channel.getUsers()) {
-            users.add(new ClientUser(user));
+            addUser(new ClientUser(user));
         }
     }
 
@@ -82,6 +85,14 @@ public class ClientChannel {
 
     public ObservableList<Text> getMessages() {
         return messages;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
+    public void addUser(ClientUser cu) {
+        synchronized (sync) {
+            ListUtil.sortedAdd(users, cu, ClientUser.COMPARATOR);
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------

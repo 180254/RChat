@@ -3,8 +3,11 @@ package pl.nn44.rchat.client.model;
 import pl.nn44.rchat.protocol.model.User;
 
 import java.text.MessageFormat;
+import java.util.Comparator;
 
 public class ClientUser {
+
+    public static final Comparator<ClientUser> COMPARATOR = Comparator.comparing(ClientUser::getUsername);
 
     private final String username;
     private boolean authorized;

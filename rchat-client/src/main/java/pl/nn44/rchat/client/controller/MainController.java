@@ -147,7 +147,7 @@ public class MainController implements Initializable {
                     while (c.next()) {
                         if (c.wasAdded()) {
                             List<ClientUser> snapshot = new ArrayList<>(c.getAddedSubList());
-                            runLater(() -> usersModel.addAll(snapshot));
+                            runLater(() -> usersModel.addAll(c.getFrom(), snapshot));
 
                         } else if (c.wasRemoved()) {
                             List<ClientUser> snapshot = new ArrayList<>(c.getRemoved());
@@ -353,7 +353,7 @@ public class MainController implements Initializable {
         ClientUser clientUser = new ClientUser(user);
 
         ClientChannel ctChannel = channelsMap.get(pChannel);
-        ctChannel.getUsers().add(clientUser);
+        ctChannel.addUser(clientUser);
     }
 
     public void onSomePart(WhatsUp whatsUp) {
