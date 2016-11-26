@@ -65,7 +65,7 @@ public class WhatsUp implements Serializable {
         // It helps speed up start(?)/stop(!) retrieving news.
         NOTHING,
 
-        JOIN, // JOIN channel who-join is-auth is-admin
+        JOIN, // JOIN channel who-join is-auth is-ignored is-admin
         PART, // PART channel who-part
 
         TOPIC, // TOPIC channel who-changed some-text

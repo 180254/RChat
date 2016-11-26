@@ -346,9 +346,10 @@ public class MainController implements Initializable {
         String pChannel = params[0];
         String pWhoJoined = params[1];
         boolean pAuth = Boolean.parseBoolean(params[2]);
-        boolean pAdmin = Boolean.parseBoolean(params[3]);
+        boolean pIgnored = Boolean.parseBoolean(params[3]);
+        boolean pAdmin = Boolean.parseBoolean(params[4]);
 
-        User user = new User(pChannel, pWhoJoined, pAuth, false, pAdmin, false);
+        User user = new User(pChannel, pWhoJoined, pAuth, pIgnored, pAdmin, false);
         ClientUser clientUser = new ClientUser(user);
 
         ClientChannel ctChannel = channelsMap.get(pChannel);
