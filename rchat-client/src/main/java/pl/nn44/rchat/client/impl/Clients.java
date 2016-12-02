@@ -114,20 +114,25 @@ public class Clients<T> {
     // ---------------------------------------------------------------------------------------------------------------
 
     public T xmlRpc(FaultRevMapper errorMapper) {
+        // axe-180254 (rchat/apache-xmlrpc-extension) is used.
+        // Comments contains alternative action to get rid of the extensions.
+
         String serviceUrl = url.apply("rpc.xml-rpc");
 
         try {
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
             config.setServerURL(new URL(serviceUrl));
             config.setEncoding(XmlRpcClientConfigImpl.UTF8_ENCODING);
-            config.setEnabledForExceptions(false); // !!
-            config.setEnabledForExtensions(false); // !!
+            config.setEnabledForExceptions(false); // !! [axe-180254 or [set true]]
+            config.setEnabledForExtensions(false); // !! [axe-180254 or [set true]]
             config.setUserAgent("CT-XmlRpc");
 
             XmlRpcClient rpcClient = new XmlRpcClient();
             rpcClient.setConfig(config);
-            rpcClient.setTypeFactory(new AnyTypeFactory(rpcClient)); // axe-180254
-            rpcClient.setTransportFactory(() -> new AnyXmlRpcTransport(rpcClient, errorMapper)); // axe-180254
+            rpcClient.setTypeFactory(new AnyTypeFactory(rpcClient)); // !! [axe-180254 or [remove statement]]
+            rpcClient.setTransportFactory(
+                    () -> new AnyXmlRpcTransport(rpcClient, errorMapper)
+            ); // !! [axe-180254 or [remove statement]]
 
             Object proxy = ClientFactoryFix.newInstance( // axe-180254
                     Thread.currentThread().getContextClassLoader(),

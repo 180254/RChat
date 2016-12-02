@@ -46,10 +46,13 @@ public class Endpoints<T> {
     }
 
     public HttpRequestHandler xmlRpc(FaultMapper faultMapper) throws XmlRpcException {
+        // axe-180254 (rchat/apache-xmlrpc-extension) is used.
+        // Comments contains alternative action to get rid of the extensions.
+
         XmlRpcServerConfigImpl config = new XmlRpcServerConfigImpl();
         config.setEncoding(XmlRpcServerConfigImpl.UTF8_ENCODING);
-        config.setEnabledForExceptions(false); // !!
-        config.setEnabledForExtensions(false); // !!
+        config.setEnabledForExceptions(false); // !! [axe-180254 or [set true]]
+        config.setEnabledForExtensions(false); // !! [axe-180254 or [set true]]
         config.setKeepAliveEnabled(true);
 
         PropertyHandlerMapping handlerMapping = new PropertyHandlerMapping();
@@ -57,12 +60,12 @@ public class Endpoints<T> {
         handlerMapping.addHandler(clazz.getSimpleName(), clazz);
         XmlRpcSystemImpl.addSystemHandler(handlerMapping);
 
-        AnyXmlRpcServer server = new AnyXmlRpcServer(); // axe-180254
+        AnyXmlRpcServer server = new AnyXmlRpcServer(); // [axe-180254 or [use XmlRpcServletServer]]
         server.setConfig(config);
         server.setErrorLogger(new XmlRpcErrorLogger());
         server.setHandlerMapping(handlerMapping);
-        server.setTypeFactory(new AnyTypeFactory(server)); // axe-180254
-        server.setFaultMapper(faultMapper); // axe-180254
+        server.setTypeFactory(new AnyTypeFactory(server)); // [axe-180254 or [remove statement]]
+        server.setFaultMapper(faultMapper); // [axe-180254 or [remove statement]]
 
         LOG.info("xml-rpc endpoint created.");
         return server::execute;
