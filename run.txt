@@ -1,0 +1,7 @@
+RChat - Hessian+Burlap+XmlRpc chat
+
+It uses Maven (mvn) as dependency manager.
+Maven wrapper is provided (mvnw).
+
+Project may be build to jar with dependencies.
+Just run 'mvn clean package', two standalone jars (client, server) will be prepared.
