@@ -4,4 +4,7 @@ It uses Maven (mvn) as dependency manager.
 Maven wrapper is provided (mvnw).
 
 Project may be build to jar with dependencies.
-Just run 'mvn clean package', two standalone jars (client, server) will be prepared.
+
+Just run 'mvn clean package'.
+client .jar: rchat-client/target/rchat-client-1.0.jar
+server .jar: rchat-server/target/rchat-server-1.0.jar
