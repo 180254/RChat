@@ -16,3 +16,5 @@ RChat
   
 <img src="screenshots/screenshot1.png" alt="" width="420"/>
 <img src="screenshots/screenshot2.png" alt="" width="420"/>  
+  
+Configure/Compile/Run/Etc manual: run.txt
